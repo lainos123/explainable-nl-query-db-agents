@@ -121,9 +121,11 @@
 ---
 
 ## Next Steps Needed
-- [ ] Send out When2meet link to Teams chat with a reminder on WhatsApp
+- [X] Send out When2meet link to Teams chat with a reminder on WhatsApp
 - [ ] Confirm team and client availability for meetings. Organise reoccuring meetings for both
-- [ ] Await SPIDR dataset from Sirui
+- [X] Await Spider dataset from Sirui  
+    - Paper: https://aclanthology.org/D18-1425.pdf  
+    - Dataset: https://yale-lily.github.io/spider
 - [ ] Begin background reading on multi-agent systems: What they are and how they are trained
 - [ ] Familiarise team with relational database concepts and structures
 
