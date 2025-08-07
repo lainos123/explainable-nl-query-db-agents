@@ -1,0 +1,112 @@
+# <span style="color: lightblue;">Franco Individual Proposal</span>
+
+## <span style="color: lightblue;">Explainable Natural Language Query Interface for Relational Databases Using a Multi-Agent System</span>
+ 
+ 
+
+## <span style="color: lightblue;">AIM</span>
+ Build intelligent database exploration tools that are both powerful and explainable across diverse database schemas, allow users input natural language queires and receive relevant tables with highlighted records. 
+
+## <span style="color: lightblue;">Reflection on skill auditing</span>
+
+In my years of working experiences, I have taken on many projects where I need to deligate between different clients, stakeholders, and working groups. My strong soft skills to communicate with various parites assisted me achieved many success. Be able to understand what client needs, and be able to deliver a fit-for-purpose product has alwasy been my strong capability. Therefore, I have volunteered to help lead and manage the team throught the semester. 
+
+However I treat this 'leadership' role less hierarcical, but more adminstrative and supportive. Being someone who has the most working experience in the team, instead of giving instruction to the team members like usual manager role, my plan is to ensure the communication is transparent across the whole team, that everyone is clear on what we are doing and what we will be doing. This is a huge factor which may lead many project to a unpleasant result. 
+
+
+
+## <span style="color: lightblue;">Individual tasks and timeline</span>
+
+This project is to build an intelligent database exploration tool that is both powerful and explainable across diverse database schemas, allow user to input natual language queries (ask questions), and the question will be translate into SQL to query the correct databases and schemas. 
+
+The main focus of this project is not just to return a query result, it is to make the process explanable. By utilise the multi agent system, the user should be able to see the reasoning and thinking process, from a natural language query to the final result. The tool need to able to show the user what the table or schema look like, highlighted the relavant records, in order to proof the reason behind the process. 
+
+
+
+### <span style="color: lightblue;">Understanding the data & the current data interpretation practice</span>
+
+Consist of 200 database with multiple tables, 10,181 questions, and 5,693 corresponding complex SQL queries. 
+On average, each database in Spider has 28 columns and 9 foreign keys. The average question lenghth and SQL length are about 13 and 21 respectively.
+
+Spider contains both databases with multiple tables in different domains and complex SQL queries. It tests the ability of a system to generalise to not only new SQL queries and database schemas, but also new domains. 
+
+The task DO NOT evaluate model performance on generating values, predicting correct SQL structures and columns is more realistic and critical. 
+Evaluation include Componenet Matching (Using SET to compare, order do not matter e.g. in SELECT statement), Exact Matching, and Execution Accuracy (False Positive like produce NULLs).
+
+SQL query has 4 level of difficulties. Select From Where ---> JOIN + Group By --> + Having --> + Sub Query
+
+Model : Semantic Parsing || Seq2Seq ==> + Attention == > Copy (attention based copying operation)
+
+Example Split -- Question for the same database can appear in both train and test
+Database Split -- All question for the same database are in the same split. 
+
+<br>
+
+Some other leader baord work done by PROMPT ENGINEERING. 
+E.g. First open AI Text to SQL, all info commented by a Pound/Hash sign '#' 
+
+### <span style="color: lightblue;">What is bottleneck(s)/challenge(s) in client's data interpretation</span>
+
+
+### <span style="color: lightblue;">What is the value proposition for applying data science techniques</span>
+
+In order to help the user see the data, concrete the reasoning part, increase ability to trust.
+
+## <span style="color: lightblue;">DELIVERABLES & TIMELINE & COSTS (3 marks)</span>
+
+
+### <span style="color: lightblue;">Expected outcomes of the project</span>
+Utlising multi agent system to 
+E.g.
+ - a Schema Intelligence Agent that automatically maps database tables and relationships into structured formats (such as knowledge graphs), 
+ - a Query Understanding Agent that processes natural language queries, 
+ - a Table Relevance Agent that identifies relevant tables, 
+ - a Record Discovery Agent that finds relevant records within those tables.
+
+
+### <span style="color: lightblue;">Data analytics & visualisation outputs</span>
+You'll build a web dashboard or other visualization tools where users input natural language queries and receive relevant tables with highlighted records. If possible, accompanied by clear explanations of why each component was selected.
+
+### <span style="color: lightblue;">Presentation, reports and codes</span>
+
+
+### <span style="color: lightblue;">Timeline of their completion</span>
+
+
+## <span style="color: lightblue;">METHODS (5 marks)</span>
+
+### <span style="color: lightblue;">Preliminary interrogation of the data</span>
+
+- Task 1 2 3 4 5 ?
+
+
+### <span style="color: lightblue;">Choice of different data exploration/analytical techniques to test</span>
+
+
+### <span style="color: lightblue;">How to make the process understandable and the output usable</span>
+
+
+### <span style="color: lightblue;">Visualisation to communicate the processes/results</span>
+
+
+### <span style="color: lightblue;">How to use collaborative tools to ensure data and code version controls</span>
+
+
+
+- Experiment A: Local LLM with Ollama using C++ or Python (fast, quantized, lower accuracy).
+- Experiment B: Top-tier hosted LLMs via API (e.g., Gemini, ChatGPT).
+- Experiment C: Small LMs with high-instruction prompts (low compute, fast response).
+
+- Modular, use LLM agent to control logic. ReAct Reason - Act - Access Memory 
+
+
+- Basically the frame work is : User NL input --> LLM with Rag understand the question and provide schema exploration
+instruction (Schema discovery Agent)--> LLM with Rag again to explore schema to generate SQL instruction (SQL planning
+Agent) --> LLM to generate SQL (Generating SQL agent) ---> Display query with reasoning steps in GUI for supervision
+--->Execute in Snowflake DB   
+Plus some user / self evaluation steps and prompt engineering etc.
+
+- Do we use version 1 or 2 
+- should we download data doing locally or use snowflake currently host both version 
+- Can you give us an example what the user input query would be. and what the system should return. 
+- SQL can be highly complex across different tables. joins. etc 
