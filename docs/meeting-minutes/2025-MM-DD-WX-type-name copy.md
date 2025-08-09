@@ -67,7 +67,7 @@
 **Next Meeting Name:**
 - **Date & Time:**  
 - **Location / Platform:**  
-- **Next Meeting's Minutes to be prepared by:**  
+- **Next Meeting's Minutes to be prepared by:**  Laine Mulvay
 
-**This Meetings Minutes prepared by:**  
+**This Meetings Minutes prepared by:**  Laine Mulvay
 
