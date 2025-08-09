@@ -80,14 +80,7 @@
 4. The following tasks were assigned for the project proposal:
     - **Aim, Background and Deliverables**: Franco has already completed these sections.
     - **Timeline**: Nirma and Laine will work on this section.
-    - **Methodology**: Aswathy and Cedrus will focus on this section, as confirmed by Franco.
-        - Aswathy outlined a plan based on research into similar multi-agent systems.
-        - The team discussed an initial plan to use **four distinct agents** for the project workflow, aligning with the client's recent suggestions:
-            - **Agent A (Database Selector):** Takes the user's query and pre-existing **database schema embeddings** to identify the most relevant databases from a set of 200. The team discussed using **OpenAI embeddings** and **BERT** for creating these embeddings. Aswathy and Cedrus agreed that a simple similarity search would not suffice, and a **semantic search approach** is required. Cedrus raised whether similarity should be based on the **full database context** or just the **schema**, suggesting schema-based similarity might be more effective for a smaller-scale project. The team agreed to test both approaches to determine which yields better results.
-            - **Agent B (Table/Column Selector):** Selects the relevant tables and columns within the chosen database. Franco noted that Agent B must also understand the **database schema** to correctly perform joins and other operations.
-            - **Agent C (SQL Generator):** Uses the query, tables, and columns to generate the final SQL code.
-            - **Agent D (Query Executor):** Fetches records from the database using the generated SQL query.
-        - The team agreed this structure is a solid starting point and should be documented in the methodology section, with the understanding that it may be revised as they test different approaches.
+    - **Methodology**: Aswathy and Cedrus will focus on this section.
     - **General Support**: RuiZhe will provide assistance with any other sections Franco needs help with.
 
 ---
