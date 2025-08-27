@@ -1,2 +1,5 @@
 .DS_Store
-/data/spider_data
+__pycache__/
+/data/
+.env
+/models/ # these will be large and can be generated locally for now
