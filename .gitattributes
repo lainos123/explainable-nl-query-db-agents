@@ -1,0 +1,22 @@
+# .gitattributes for Capstone App
+# Ensure consistent git behavior and avoid common cross-platform issues
+
+# Set default text file handling to auto normalize line endings
+* text=auto
+
+# Explicitly set line endings for common file types
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.txt text eol=lf
+
+# Treat Jupyter notebooks as binary to avoid merge conflicts
+*.ipynb binary
+
+# Prevent CRLF/LF issues on Windows
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Exclude compiled Python files from diff
+*.pyc binary

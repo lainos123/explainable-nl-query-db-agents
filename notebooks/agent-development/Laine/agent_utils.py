@@ -27,3 +27,12 @@ def schema_text(db: Dict[str, Any], max_cols_per_table: int = 24) -> str:
 def build_texts(schemas: Dict[str, Dict[str, Any]]) -> Dict[str, str]:
     """Creates a dictionary of schemas to their tables(...columns...)"""
     return {db_id: schema_text(db) for db_id, db in schemas.items()}
+
+def get_schema_text(db_id: str, schemas: dict) -> str:
+    """
+    Return the schema text for a specific database id.
+    """
+    if db_id not in schemas:
+        raise ValueError(f"Database id '{db_id}' not found in schemas.")
+    
+    return schema_text(schemas[db_id])
