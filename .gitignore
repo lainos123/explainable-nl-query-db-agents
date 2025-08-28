@@ -1,23 +1,25 @@
-﻿# python junk
+﻿# Python artifacts
 __pycache__/
-.ipynb_checkpoints/
-*.py[cod]
+*.pyc
 
-# virtual envs
+# Local envs / build
+agent/
 .venv/
 venv/
-env/
 
-# build / outputs
-output/
-
-# heavy Spider data (we only keep tables.json)
-spider_data/spider_data/database/
-spider_data/spider_data/test_database/
-spider_data/__MACOSX/
-*.sqlite
-
-# OS/editor junk + secrets
+# OS junk
 .DS_Store
 Thumbs.db
+
+# Secrets
 .env
+
+# Spider data: ignore everything…
+spider_data/**
+# …but keep the minimal stuff we track
+!spider_data/spider_data/
+!spider_data/spider_data/tables.json
+
+# Jupyter
+.ipynb_checkpoints/
+# Track this notebook explicitly (since we ignored *.ipynb above only for checkpoints)
