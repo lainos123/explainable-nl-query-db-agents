@@ -1,0 +1,25 @@
+﻿__pycache__/
+.ipynb_checkpoints/
+*.pyc
+*.pyo
+*.pyd
+
+# virtual envs
+agent/
+.venv/
+venv/
+env/
+
+# build / outputs / large data (recreate locally)
+output/
+
+# raw Spider SQLite databases (keep the small JSONs)
+spider_data/spider_data/database/
+spider_data/spider_data/test_database/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+
+# secrets
+.env
