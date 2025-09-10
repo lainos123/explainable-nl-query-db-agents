@@ -1,21 +1,24 @@
 from django.shortcuts import render
 from httpcore import Response
-from .serializers import FileSerializer, SessionSerializer, ChatSerializer, APIKeySerializer
+from .serializers import FilesSerializer, SessionsSerializer, ChatsSerializer, APIKeysSerializer
 from rest_framework import viewsets
-from .models import File, Session, Chat, APIKey
+from .models import Files, Sessions, Chats, APIKeys
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
 
 MEDIA_ROOT = settings.MEDIA_ROOT
 
 # Create your views here.
-class FileViewSet(viewsets.ModelViewSet):
+class FilesViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     # Allow mutliple file uploads with zip/.sql
-    queryset = File.objects.all()
-    serializer_class = FileSerializer
+    queryset = Files.objects.all()
+    serializer_class = FilesSerializer
 
     # Handle file uploads
     def create(self, request, *args, **kwargs):
         files = request.FILES.getlist('files')
+        saved = []
         for file in files:
             # For zip
             if file.name.endswith('.zip'):
@@ -25,17 +28,21 @@ class FileViewSet(viewsets.ModelViewSet):
                     zip_ref.extractall(MEDIA_ROOT)
         else:
             # For all other files
-            File.objects.create(file=file)
-        return Response(status=201)
+            obj = Files.objects.create(file=f, user=request.user)
+            saved.append(FilesSerializer(obj).data)
+        return Response(saved, status=201)
 
-class SessionViewSet(viewsets.ModelViewSet):
-    queryset = Session.objects.all()
-    serializer_class = SessionSerializer
+class SessionsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = Sessions.objects.all()
+    serializer_class = SessionsSerializer
 
-class ChatViewSet(viewsets.ModelViewSet):
-    queryset = Chat.objects.all()
-    serializer_class = ChatSerializer
+class ChatsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = Chats.objects.all()
+    serializer_class = ChatsSerializer
 
-class APIKeyViewSet(viewsets.ModelViewSet):
-    queryset = APIKey.objects.all()
-    serializer_class = APIKeySerializer
+class APIKeysViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = APIKeys.objects.all()
+    serializer_class = APIKeysSerializer
