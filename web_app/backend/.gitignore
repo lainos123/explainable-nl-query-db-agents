@@ -4,3 +4,4 @@ media/ # Ignore media files
 
 # Ignore SQLite database file/ Must manually remove,
 # then re-create stop gitignore then git ignore again to protect the code
+# db.sqlite3
