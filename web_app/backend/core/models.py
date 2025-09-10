@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class SQLFile(models.Model):
+class Files(models.Model):
     # SQL DB logging to store uploaded SQL files
     id = models.AutoField(primary_key=True)
     # File send to /backend/media/sql_files/
