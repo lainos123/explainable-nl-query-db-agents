@@ -1,17 +1,17 @@
 from django.shortcuts import render
 from httpcore import Response
-from .serializers import ChatHistorySerializer, FilesSerializer
+from .serializers import ChatSerializer, FileSerializer
 from rest_framework import viewsets
-from .models import ChatHistory, Files
+from .models import Chat, File
 from django.conf import settings
 
 MEDIA_ROOT = settings.MEDIA_ROOT
 
 # Create your views here.
-class FilesViewSet(viewsets.ModelViewSet):
+class FileViewSet(viewsets.ModelViewSet):
     # Allow mutliple file uploads with zip/.sql
-    queryset = Files.objects.all()
-    serializer_class = FilesSerializer
+    queryset = File.objects.all()
+    serializer_class = FileSerializer
 
     # Handle file uploads
     def create(self, request, *args, **kwargs):
@@ -25,11 +25,11 @@ class FilesViewSet(viewsets.ModelViewSet):
                     zip_ref.extractall(MEDIA_ROOT)
         else:
             # For all other files
-            Files.objects.create(file=file)
+            File.objects.create(file=file)
         return Response(status=201)
 
 
 
-class ChatHistoryViewSet(viewsets.ModelViewSet):
-    queryset = ChatHistory.objects.all()
-    serializer_class = ChatHistorySerializer
+class ChatViewSet(viewsets.ModelViewSet):
+    queryset = Chat.objects.all()
+    serializer_class = ChatSerializer

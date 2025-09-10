@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import ChatHistory, Files
+from .models import Chat, File
 
-class FilesSerializer(serializers.ModelSerializer):
+class FileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Files
+        model = File
         fields = ['id', 'file', 'time']
 
-class ChatHistorySerializer(serializers.ModelSerializer):
+class ChatSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ChatHistory
+        model = Chat
         fields = ['id', 'time', 'user', 'agent', 'prompt', 'response']

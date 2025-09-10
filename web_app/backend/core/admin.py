@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Files, ChatHistory
+from .models import Chat, File, Chat
 
 # Register your models here.
-admin.site.register(Files) # For SQL file upload logging
-admin.site.register(ChatHistory) # For user-agent chat history logging
+admin.site.register(File) # For SQL file upload logging
+admin.site.register(Chat) # For user-agent chat logging

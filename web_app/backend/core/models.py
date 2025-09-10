@@ -1,14 +1,14 @@
 from django.db import models
 
 # Create your models here.
-class Files(models.Model):
+class File(models.Model):
     # SQL DB logging to store uploaded SQL files
     id = models.AutoField(primary_key=True)
     # File send to /backend/media/sql_files/
     file = models.FileField(upload_to='sql_files/')
     time = models.DateTimeField(auto_now_add=True)
 
-class ChatHistory(models.Model):
+class Chat(models.Model):
     # Log of user queries and corresponding SQL queries
     id = models.AutoField(primary_key=True)
     time = models.DateTimeField(auto_now_add=True)
