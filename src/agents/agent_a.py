@@ -15,23 +15,21 @@ Make sure you have already run:
 before using this agent, to ensure the schema embeddings are available.
 """
 
-import os
-import sys
-from pathlib import Path
-from typing import Dict, Any, List, Tuple
 import json
+import os
 import pprint
+import sys
 
 # Import project config
-from src.config import PROJECT_ROOT, EMBEDDINGS_FOLDER, SCHEMA_PROCESSED_FILE
+from src.config import EMBEDDINGS_FOLDER, PROJECT_ROOT, SCHEMA_PROCESSED_FILE
 
 # Add project root to Python path
 sys.path.append(str(PROJECT_ROOT))
 
 # Import LangChain components
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
+from langchain_community.vectorstores import FAISS
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 # --- 1.1 OpenAI Setup ---
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "not-set")

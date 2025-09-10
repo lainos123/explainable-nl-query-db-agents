@@ -19,14 +19,14 @@ from pathlib import Path
 from typing import List
 
 # Import project config
-from src.config import PROJECT_ROOT, SCHEMA_PROCESSED_FILE, EMBEDDINGS_FOLDER
+from src.config import EMBEDDINGS_FOLDER, PROJECT_ROOT, SCHEMA_PROCESSED_FILE
 
 # Add project root to Python path
 sys.path.append(str(PROJECT_ROOT))
 
 # Import LangChain components
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
 
 
 def load_processed_schema(input_file: Path) -> List[str]:

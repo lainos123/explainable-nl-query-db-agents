@@ -18,13 +18,13 @@ Usage:
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 # Import project config
 from src.config import (
     PROJECT_ROOT,
-    SCHEMA_PATH,
     SCHEMA_OUTPUT_DIR,
+    SCHEMA_PATH,
     SCHEMA_PROCESSED_FILE,
 )
 
