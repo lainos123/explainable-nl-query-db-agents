@@ -1,0 +1,4 @@
+
+# Or ignore a specific data folder, e.g. in agent-development
+notebooks/agent-development/data/
+# You can add more patterns as needed
