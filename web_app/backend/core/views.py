@@ -28,7 +28,7 @@ class FilesViewSet(viewsets.ModelViewSet):
                     zip_ref.extractall(MEDIA_ROOT)
         else:
             # For all other files
-            obj = Files.objects.create(file=f, user=request.user)
+            obj = Files.objects.create(file=file, user=request.user)
             saved.append(FilesSerializer(obj).data)
         return Response(saved, status=201)
 
