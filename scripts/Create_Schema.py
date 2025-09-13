@@ -207,7 +207,7 @@ def create_combined_schema(sql_file_paths, save_json: bool = False):
 def schema_from_json_file(path: str, db_name: str, save_json=False):
     with open(path, "r") as f:
         data = json.load(f)
-        schema = data.get("schema").get(db_name)  # Updated to use Franco's structure
+        schema = data.get("schema").get(db_name)
         if save_json:
             schema_file = SCHEMA_OUTPUT_DIR / f"schema_{db_name}.json"
             with open(schema_file, "w") as f:
@@ -236,7 +236,6 @@ def schema_from_json_names(db_names: str, path: str, save_json: bool = False):
 def create_names_json_test(combined_schema: str, save_json: bool = False):
     data = json.loads(combined_schema)
     result = {}
-    # Updated to use Franco's structure
     for db, schema in data.get("schema", {}).items():
         result[db] = {}
         for table, info in schema.get("tables", {}).items():

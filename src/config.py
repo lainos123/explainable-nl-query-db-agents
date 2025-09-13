@@ -8,7 +8,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # 2. Subdirectories
 DATA_PATH = PROJECT_ROOT / "data"
-DATA_PATH_SPIDER = DATA_PATH / "spider_data"
 SCHEMA_OUTPUT_DIR = DATA_PATH / "processed"
 MODELS_PATH = PROJECT_ROOT / "models"
 EMBEDDINGS_FOLDER = SCHEMA_OUTPUT_DIR / "spider_schemas_embeddings"
@@ -19,6 +18,7 @@ SQL_TESTING_PATH = DATA_PATH / "test" / "spider_query_answers.json"
 SCHEMA_PATH = DATA_PATH / "spider_data" / "tables.json"
 SCHEMA_PROCESSED_FILE = SCHEMA_OUTPUT_DIR / "spider_schemas_processed.jsonl"
 COMBINED_SCHEMA_FILE = SCHEMA_OUTPUT_DIR / "combined_schema.json"
+PROCESSED_SCHEMA_AI_FRIENDLY = SCHEMA_OUTPUT_DIR / "combined_schema.json"  # not used
 SQL_FILE_PATHS_FILE = SCHEMA_OUTPUT_DIR / "sql_file_paths.json"
 DB_NAMES_FILE = SCHEMA_OUTPUT_DIR / "db_names.json"
 

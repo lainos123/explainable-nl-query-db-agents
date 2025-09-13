@@ -93,7 +93,9 @@ def create_or_load_embeddings():
             print(f"Embeddings not found at {EMBEDDINGS_FOLDER}, creating new ones...")
         final_schema_result = load_processed_schema(SCHEMA_PROCESSED_FILE)
         if not QUIET_MODE:
-            print(f"Loaded {len(final_schema_result)} entries from {SCHEMA_PROCESSED_FILE}")
+            print(
+                f"Loaded {len(final_schema_result)} entries from {SCHEMA_PROCESSED_FILE}"
+            )
 
         # Step 1: create embeddings + vectorstore
         embeddings = OpenAIEmbeddings()
@@ -173,7 +175,10 @@ Example format:
                 )
             except json.JSONDecodeError:
                 structured_schema.append(
-                    {"score": round(float(score), 4), "raw_content": doc.page_content}  # Convert to regular float
+                    {
+                        "score": round(float(score), 4),
+                        "raw_content": doc.page_content,
+                    }  # Convert to regular float
                 )
 
         # Return based on mode
@@ -195,11 +200,11 @@ Example format:
                 "columns": parsed.get("columns", []),
                 "reasons": parsed.get("reasons", ""),
             }
-            
+
             # Only include raw LLM response if not in quiet mode
             if not QUIET_MODE:
                 result["llm_raw"] = response
-                
+
             return result
 
     return database_selection_agent
@@ -278,7 +283,7 @@ def apply_database_selector(query, mode="light", top_k=5):
 
     # Get similarity search results first
     relevant_docs = vectorstore.similarity_search_with_score(query, k=top_k)
-    
+
     # Print similarity search results for medium and heavy modes
     if mode in ["medium", "heavy"] and not QUIET_MODE:
         print("\n" + "=" * 60)
@@ -304,14 +309,14 @@ def apply_database_selector(query, mode="light", top_k=5):
         print("=" * 60)
         pprint.pprint(result)
         print("\n" + "=" * 60)
-    
+
     return result
 
 
 def main():
     """Main function to handle command line arguments and execute the agent."""
     global QUIET_MODE
-    
+
     parser = argparse.ArgumentParser(description="Agent A: Database Selector")
     parser.add_argument("--test", action="store_true", help="Run in test mode")
     parser.add_argument("--index", type=int, help="Test query index (0-based)")
@@ -350,7 +355,9 @@ def main():
                 query = test_queries[args.index]
                 if not QUIET_MODE:
                     print(f"Running test query {args.index}: {query}")
-                result = apply_database_selector(query, mode=args.mode, top_k=args.top_k)
+                result = apply_database_selector(
+                    query, mode=args.mode, top_k=args.top_k
+                )
                 if QUIET_MODE:
                     print(json.dumps(result, indent=2))
             else:
@@ -391,9 +398,7 @@ def main():
         print(
             "  python3 -m src.agents.agent_a --query 'Find all students' --mode medium --top_k 3"
         )
-        print(
-            "  python3 -m src.agents.agent_a --query 'Find all students' --quiet"
-        )
+        print("  python3 -m src.agents.agent_a --query 'Find all students' --quiet")
 
 
 if __name__ == "__main__":

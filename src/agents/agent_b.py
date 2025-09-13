@@ -196,11 +196,11 @@ def agent_b(user_query: str, db_name: str, mode: str = "light") -> Dict[str, Any
                 "Columns": parsed.get("relevant_columns", []),
                 "Reasons": parsed.get("reasons", ""),
             }
-            
+
             # Only include raw LLM response if not in quiet mode
             if not QUIET_MODE:
                 result["Raw LLM Response"] = response
-                
+
             return result
 
         else:
