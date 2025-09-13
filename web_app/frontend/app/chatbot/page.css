@@ -1,0 +1,116 @@
+/* Global Agentic AI theme tokens */
+:root {
+  --ai-accent: #7b61ff;
+  --ai-accent-rgb: 123,97,255;
+  --ai-accent-hover: #6a51f8;
+  --ai-accent-active: #5b43ee;
+  --ai-accent-gradient: linear-gradient(135deg,#8c74ff 0%,#7b61ff 42%,#694df0 100%);
+  --ai-accent-gradient-soft: linear-gradient(135deg,rgba(123,97,255,0.12) 0%, rgba(123,97,255,0.04) 100%);
+  --ai-bg: #ffffff;
+  --ai-bg-alt: #f6f7fb;
+  --ai-bg-elevated: #ffffff;
+  --ai-bg-inset: #f1f3f9;
+  --ai-border: rgba(0,0,0,0.08);
+  --ai-border-strong: rgba(0,0,0,0.18);
+  --ai-text: #1f2330;
+  --ai-text-soft: #4b5261;
+  --ai-shadow-sm: 0 2px 4px -2px rgba(0,0,0,0.08),0 4px 10px -6px rgba(0,0,0,0.08);
+  --ai-shadow-md: 0 4px 18px -6px rgba(0,0,0,0.1),0 6px 30px -12px rgba(0,0,0,0.08);
+  --ai-glow-accent: 0 0 0 3px rgba(123,97,255,0.25);
+  --ai-radius-sm: 6px;
+  --ai-radius-md: 10px;
+  --ai-radius-lg: 14px;
+  --ai-transition: 0.28s cubic-bezier(.4,.15,.2,1);
+}
+
+.chatbot-root-full.dark {
+  --ai-accent: #8d7bff;
+  --ai-accent-rgb: 141,123,255;
+  --ai-accent-hover: #7d6bf6;
+  --ai-accent-active: #6c58ec;
+  --ai-accent-gradient: linear-gradient(135deg,#9c8dff 0%,#7f68ff 50%,#6b54f0 100%);
+  --ai-accent-gradient-soft: linear-gradient(135deg,rgba(141,123,255,0.18) 0%, rgba(141,123,255,0.05) 100%);
+  --ai-bg: #1f2025;
+  --ai-bg-alt: #25262c;
+  --ai-bg-elevated: #292b32;
+  --ai-bg-inset: #2e3036;
+  --ai-border: rgba(255,255,255,0.08);
+  --ai-border-strong: rgba(255,255,255,0.18);
+  --ai-text: #f1f2f6;
+  --ai-text-soft: #b6bcc9;
+  --ai-shadow-sm: 0 2px 6px -2px rgba(0,0,0,0.55),0 4px 16px -8px rgba(0,0,0,0.55);
+  --ai-shadow-md: 0 6px 26px -10px rgba(0,0,0,0.65),0 10px 42px -18px rgba(0,0,0,0.55);
+  --ai-glow-accent: 0 0 0 3px rgba(141,123,255,0.35);
+}
+
+.chatbot-root-full {
+  display: grid;
+  grid-template-columns: 1fr 9fr;
+  height: 100vh;
+  width: 100vw;
+  background: var(--ai-bg);
+  color: var(--ai-text);
+  transition: background var(--ai-transition), color var(--ai-transition);
+}
+
+/* When menu hidden -> single column full width */
+.chatbot-root-full.menu-hidden {
+  grid-template-columns: 1fr;
+}
+
+/* Ensure main content uses flex for column layout */
+.chatbot-root-full main {
+  background: var(--ai-bg-alt);
+  padding: 0.75rem 1rem 0.9rem 1.15rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Center wrapper for chat content */
+.chatbot-center-wrap {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+  gap: 0.75rem;
+  height: 100%;
+}
+
+/* Floating bubble when menu hidden */
+.chatbot-menu-floating {
+  position: fixed;
+  left: 18px;
+  bottom: 24px;
+  z-index: 180;
+}
+
+/* Surface style for chat container (light: white, dark: near-black) */
+.chatbot-window.surface {
+  background: linear-gradient(145deg, var(--ai-bg-elevated) 0%, var(--ai-bg-alt) 100%);
+  border: 1px solid var(--ai-border);
+  border-radius: 18px;
+  box-shadow: 0 6px 28px -10px rgba(0,0,0,0.12), 0 4px 14px -6px rgba(0,0,0,0.08);
+  overflow: hidden;
+  transition: background var(--ai-transition), border-color var(--ai-transition), box-shadow var(--ai-transition);
+}
+.dark .chatbot-window.surface {
+  background: linear-gradient(145deg, var(--ai-bg-elevated) 0%, var(--ai-bg-alt) 100%);
+  color: var(--ai-text);
+  border: 1px solid var(--ai-border);
+}
+
+/* Provide a subtle top gradient overlay for aesthetic */
+.chatbot-root-full main:before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 64px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(var(--ai-accent-rgb),0.18) 0%, rgba(var(--ai-accent-rgb),0) 90%);
+  opacity: 0.55;
+}
+
