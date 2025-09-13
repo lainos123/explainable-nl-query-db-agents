@@ -1,9 +1,17 @@
 """
 Schema Generation Pipeline
 
-Generates complete database schemas from SQLite files in the Spider dataset.
-Creates path mappings, database names, and combined schema files.
-All output files are saved to data/processed/ directory.
+Generates complete AI-agent friendly database schemas from SQLite files.
+Creates all schema files in data/processed/ directory.
+
+Output Files:
+- combined_schema.json: Main schema with AI instructions and metadata
+- sql_file_paths.json: Database name to file path mapping  
+- db_names.json: Database names structure
+- db_names_test.json: Simplified table/column mapping
+
+Usage:
+    python3 scripts/Schema_Generation.py
 """
 
 import sys

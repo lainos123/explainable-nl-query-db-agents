@@ -1,9 +1,13 @@
 """
 SQLite Database Connector
 
-This script connects with SQLite databases based on extracted paths.
-Currently only works with SQLite, future plan to support other SQL databases.
-Returns a connection object that can be used to interact with the database.
+Connects to SQLite databases and executes queries.
+Returns JSON-formatted results for easy processing.
+
+Usage:
+    connector = SQLite_Connector(sql_file_paths_json)
+    connector.connect("database_name")
+    results = connector.execute_queries(["SELECT * FROM table"])
 """
 
 import sqlite3

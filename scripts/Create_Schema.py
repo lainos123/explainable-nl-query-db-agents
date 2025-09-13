@@ -1,9 +1,20 @@
 """
 Schema Creation Utilities
 
-Creates database schemas from SQLite files in the Spider dataset.
+Creates AI-agent friendly database schemas from SQLite files in the Spider dataset.
 Extracts table structures, columns, primary keys, and foreign keys.
-Saves schemas to data/processed/ directory using centralized config paths.
+
+Output Files (to data/processed/):
+- combined_schema.json: Main AI-agent friendly schema with metadata
+- sql_file_paths.json: Database name to file path mapping
+- db_names.json: Database names structure
+- db_names_test.json: Simplified table/column mapping for testing
+- schema_{db_name}.json: Individual database schemas (optional)
+
+Usage:
+    from Create_Schema import create_combined_schema, extract_sql_file_paths
+    sql_paths = extract_sql_file_paths(save_json=True)
+    schema = create_combined_schema(sql_paths, save_json=True)
 """
 
 import os
@@ -66,7 +77,10 @@ def schema_extractor(sql_file_paths: str, db_name: str, save_json: bool = False)
     )
     table_names = json.loads(table_names)
 
-    schema = {"tables": {}}
+    schema = {
+        "database_name": db_name,  # Include database name in schema
+        "tables": {},
+    }
     for table_dict in table_names[0]:
         table_name = table_dict["name"]
         cols_raw = connector.execute_queries([f"PRAGMA table_info({table_name});"])
@@ -118,13 +132,68 @@ def create_names_json(sql_file_paths: str, save_json: bool = False):
     return json.dumps(db_names, indent=4, ensure_ascii=False)
 
 
-# Function to create combined schema from SQL file paths
+# Function to create combined schema from SQL file paths (AI-agent friendly version)
 def create_combined_schema(sql_file_paths, save_json: bool = False):
-    combined_schema = {}
+    # Add database's name into a list
+    database_list = []
+    for db_name in json.loads(sql_file_paths):
+        database_list.append(db_name)
+
+    # AI-agent friendly combined schema with detailed structure and instructions
+    combined_schema = {
+        "database_list": database_list,  # List of all database names
+        "json_structure": (
+            # Structure of the combined schema JSON
+            "{\n"
+            "  'database_list': List[str],  # List of database names\n"
+            "  'json_structure': str,       # Description of this JSON structure\n"
+            "  'schema_data_instruction': str,  # Instructions for using the schema\n"
+            "  'schema': {\n"
+            "    <database_name>: {\n"
+            "      'database_name': str,    # Name of the database\n"
+            "      'tables': {\n"
+            "        <table_name>: {\n"
+            "          'columns': List[str],      # List of column names in the table\n"
+            "          'primary_key': List[str],  # List of primary key columns\n"
+            "          'foreign_keys': [          # List of foreign key relationships\n"
+            "            {\n"
+            "              'from_column': str,    # Column in this table\n"
+            "              'ref_table': str,      # Referenced table\n"
+            "              'ref_column': str      # Referenced column\n"
+            "            }\n"
+            "          ]\n"
+            "        }\n"
+            "      }\n"
+            "    }\n"
+            "  }\n"
+            "}"
+        ),
+        "schema_data_instruction": (
+            # Instructions for using the combined schema JSON
+            "- 'database_list': List of all database names in the schema.\n"
+            "- 'json_structure': Description of the JSON structure.\n"
+            "- 'schema_data_instruction': How to use this schema JSON.\n"
+            "- 'schema': Dictionary containing schema details for each database.\n"
+            "  - Each <database_name> contains:\n"
+            "    - 'database_name': Name of the database.\n"
+            "    - 'tables': Dictionary of tables in the database.\n"
+            "      - Each <table_name> contains:\n"
+            "        - 'columns': List of column names.\n"
+            "        - 'primary_key': List of primary key columns.\n"
+            "        - 'foreign_keys': List of foreign key relationships, each with:\n"
+            "          - 'from_column': Column in this table.\n"
+            "          - 'ref_table': Referenced table.\n"
+            "          - 'ref_column': Referenced column.\n"
+            "Instructions: Use 'database_list' to enumerate databases. For each database, access tables and their columns, primary keys, and foreign keys as needed."
+        ),
+        "schema": {},
+    }
+
+    # Extract schema for each database
     json_sql = json.loads(sql_file_paths)
     for db_name in tqdm(json_sql):
         schema = schema_extractor(sql_file_paths, db_name=db_name)
-        combined_schema[db_name] = json.loads(schema)
+        combined_schema["schema"][db_name] = json.loads(schema)
 
     if save_json:
         with open(COMBINED_SCHEMA_FILE, "w") as f:
@@ -138,7 +207,7 @@ def create_combined_schema(sql_file_paths, save_json: bool = False):
 def schema_from_json_file(path: str, db_name: str, save_json=False):
     with open(path, "r") as f:
         data = json.load(f)
-        schema = data.get(db_name)
+        schema = data.get("schema").get(db_name)  # Updated to use Franco's structure
         if save_json:
             schema_file = SCHEMA_OUTPUT_DIR / f"schema_{db_name}.json"
             with open(schema_file, "w") as f:
@@ -167,7 +236,8 @@ def schema_from_json_names(db_names: str, path: str, save_json: bool = False):
 def create_names_json_test(combined_schema: str, save_json: bool = False):
     data = json.loads(combined_schema)
     result = {}
-    for db, schema in data.items():
+    # Updated to use Franco's structure
+    for db, schema in data.get("schema", {}).items():
         result[db] = {}
         for table, info in schema.get("tables", {}).items():
             result[db][table] = info.get("columns", [])
