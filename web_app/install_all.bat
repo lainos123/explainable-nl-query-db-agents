@@ -1,4 +1,4 @@
-@echo off
+aqW@echo off
 :: Install backend dependencies from web_app folder
 cd backend
 python -m venv venv
