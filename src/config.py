@@ -13,6 +13,7 @@ MODELS_PATH = PROJECT_ROOT / "models"
 EMBEDDINGS_FOLDER = SCHEMA_OUTPUT_DIR / "spider_schemas_embeddings"
 
 # 3. Files
+DATA_PATH_SPIDER = DATA_PATH / "spider_data" ### FM: this was missing ? 
 SQL_DATA_PATH = DATA_PATH / "spider_data" / "train_spider.json"
 SQL_TESTING_PATH = DATA_PATH / "test" / "spider_query_answers.json"
 SCHEMA_PATH = DATA_PATH / "spider_data" / "tables.json"

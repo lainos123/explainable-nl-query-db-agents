@@ -21,7 +21,7 @@ import os
 import json
 import sys
 from pathlib import Path
-from SQL_Connector import SQLite_Connector
+from SQL_Connector import SQLite_Connector   
 from tqdm import tqdm
 
 # Import project config
@@ -246,3 +246,4 @@ def create_names_json_test(combined_schema: str, save_json: bool = False):
             json.dump(result, f, indent=4, ensure_ascii=False)
         print(f"Database names test file saved to {db_names_test_file}")
     return json.dumps(result, indent=4, ensure_ascii=False)
+
