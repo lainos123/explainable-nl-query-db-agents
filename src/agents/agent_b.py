@@ -70,7 +70,7 @@ from langchain.prompts import PromptTemplate
 def setup_llm():
     """Initialize and return the LLM for table/column selection"""
     try:
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        llm = ChatOpenAI(model="gpt-5-mini", temperature=0)  ## should be gpt 5 mini not gpt 4 ?
         return llm
     except Exception as e:
         if not QUIET_MODE:
