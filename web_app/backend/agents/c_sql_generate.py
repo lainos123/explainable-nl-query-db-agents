@@ -29,7 +29,7 @@
 
 # Logic above this line
 import time
-def run(api_key, payload, media_path):
+def run(api_key, payload):
     return {
         "database": "academic",
         "query": "SELECT name FROM sqlite_master;"

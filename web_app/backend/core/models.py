@@ -9,15 +9,9 @@ def data_path(instance, filename):
     return f'data/{filename}'
 
 class Files(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     file = models.FileField(upload_to=data_path)
     database = models.CharField(max_length=255, blank=True)
     time = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'database'], name='unique_user_database')
-        ]
 
 class Sessions(models.Model):
     # Store user sessions for chat history

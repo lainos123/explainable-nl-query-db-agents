@@ -8,5 +8,4 @@ def api_root(request, format=None):
         "core": reverse("files-list", request=request, format=format),
         "agents": reverse("agents-list", request=request, format=format),
         "schema": reverse("schema", request=request, format=format),
-        "utils": reverse("utils-list", request=request, format=format),
     })

@@ -2,7 +2,6 @@ import sqlite3
 import os
 from django.apps import apps
 
-
 class SQLiteConnector:
     def __init__(self):
         self.path_dict = self._build_path_dict()
@@ -58,7 +57,7 @@ class SQLiteConnector:
             self.conn = None
 
 
-def run(api_key, payload: dict, media_path: str = None):
+def run(api_key, payload: dict):
     """
     Agent endpoint.
     Expected payload:
@@ -67,6 +66,7 @@ def run(api_key, payload: dict, media_path: str = None):
         "query": "SELECT ..."
     }
     """
+
     try:
         db_name = payload.get("database")
         query = payload.get("query")

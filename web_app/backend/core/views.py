@@ -1,3 +1,4 @@
+import json
 import re
 import os, zipfile
 from django.core.files import File
@@ -7,7 +8,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-
+from utils import schema_builder
 
 from .models import Files, Sessions, Chats, APIKey
 from .serializers import (
@@ -59,6 +60,7 @@ class OAuthRestrictedModelViewSet(viewsets.ModelViewSet):
 
 
 # File upload #
+
 class FilesViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Files.objects.all()
@@ -70,7 +72,6 @@ class FilesViewSet(viewsets.ModelViewSet):
             return Response({"error": "No files uploaded."}, status=status.HTTP_400_BAD_REQUEST)
 
         saved = []
-
         try:
             for file in files:
                 name = file.name
@@ -86,10 +87,8 @@ class FilesViewSet(viewsets.ModelViewSet):
                 if name.endswith(".zip"):
                     with zipfile.ZipFile(file, "r") as zip_ref:
                         for extracted_file in zip_ref.namelist():
-                            # Skip directories
                             if extracted_file.endswith("/"):
                                 continue
-                            # Reject non-SQLite files
                             if not is_valid_sqlite(extracted_file):
                                 continue
 
@@ -113,7 +112,6 @@ class FilesViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST,
                         )
 
-                    # Check file name safe
                     if re.search(r"[\\/]", name) or name.startswith(".") or not name.isascii():
                         return Response({"error": f"Invalid file name `{name}`."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,24 +121,50 @@ class FilesViewSet(viewsets.ModelViewSet):
             if not saved:
                 return Response({"error": "No valid SQLite files found."}, status=status.HTTP_400_BAD_REQUEST)
 
+            # After all files are saved, build schema files
+            all_files = Files.objects.all()
+            sql_file_paths = {
+                f.database: f.file.path
+                for f in all_files if f.file and os.path.isfile(f.file.path)
+            }
+            sql_file_paths_json = json.dumps(sql_file_paths, ensure_ascii=False)
+
+            schema_builder.build_schema_ab(sql_file_paths_json) # Version similar with table.json - no FK PK (for Agent A/B)
+            schema_builder.build_schema_c(sql_file_paths_json) # Version with FK PK (for Agent C)
+
             return Response(saved, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # Clear all records and files
+
+
+    # Clear all records, files, and schemas
     @action(detail=False, methods=["delete"])
     def clear(self, request, *args, **kwargs):
         try:
+            # Delete DB files
             files = Files.objects.all()
             for f in files:
                 if f.file and f.file.path and os.path.isfile(f.file.path):
                     os.remove(f.file.path)
             files.delete()
-            # Re-create empty data directory
+
+            # Wipe schema dir completely
+            if os.path.exists(settings.SCHEMA_DIR):
+                for root, dirs, files in os.walk(settings.SCHEMA_DIR):
+                    for fname in files:
+                        os.remove(os.path.join(root, fname))
+                # if you want to delete subdirs too:
+                for dname in dirs:
+                    os.rmdir(os.path.join(root, dname))
+            os.makedirs(settings.SCHEMA_DIR, exist_ok=True)
+
+            # Re-create empty data dir
             os.makedirs(settings.DATA_DIR, exist_ok=True)
+
             return Response(
-                {"status": "All files and their data deleted."},
+                {"status": "All files and schemas deleted."},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
