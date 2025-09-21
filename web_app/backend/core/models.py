@@ -4,15 +4,20 @@ from django.db.models.signals import post_delete
 from solo.models import SingletonModel
 
 # Create your models here.
-
-DATA_DIR = settings.DATA_DIR
+def data_path(instance, filename):
+    # file will be uploaded to data/<filename>
+    return f'data/{filename}'
 
 class Files(models.Model):
-    # SQL DB logging to store uploaded SQL files
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    # File send to /backend/media/sql_files/
-    file = models.FileField(upload_to=DATA_DIR)
+    file = models.FileField(upload_to=data_path)
+    database = models.CharField(max_length=255, blank=True)
     time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'database'], name='unique_user_database')
+        ]
 
 class Sessions(models.Model):
     # Store user sessions for chat history

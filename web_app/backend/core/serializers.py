@@ -4,7 +4,8 @@ from .models import APIKey, Files, Sessions, Chats, APIKey
 class FilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Files
-        fields = ['id', 'file', 'time']
+        fields = ['id', 'database', 'file', 'time']
+        extra_kwargs = {"database": {"read_only": True}}
 
 class SessionsSerializer(serializers.ModelSerializer):
     class Meta:
