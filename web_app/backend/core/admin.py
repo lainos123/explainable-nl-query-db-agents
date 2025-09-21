@@ -1,8 +1,11 @@
 from django.contrib import admin
-from .models import Files, Sessions, Chats, APIKeys
+from solo.admin import SingletonModelAdmin
+from .models import Files, Sessions, Chats, APIKey
 
 # Register your models here.
 admin.site.register(Files) # For file upload logging
 admin.site.register(Sessions) # For session logging
 admin.site.register(Chats) # For chat logging
-admin.site.register(APIKeys) # For API key management
+@admin.register(APIKey)
+class APIKeyAdmin(SingletonModelAdmin):
+    pass

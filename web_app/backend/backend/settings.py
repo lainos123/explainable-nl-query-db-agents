@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -18,10 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # For the stored uploaded files
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
+DATA_DIR = MEDIA_ROOT / 'data'
+UTILS_DIR = MEDIA_ROOT / 'utils'
+SCHEMA_DIR = MEDIA_ROOT / 'schema'
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# Initialize the API key for model access
+API_KEY = None
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-49i2wzh&d2(tzgcv60g@6tm)234od!3wduo*i)8$9815kwbx7)'
@@ -44,9 +49,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'core',
     'drf_spectacular',
+    'solo',
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",  # SessionAuthentication
+        "rest_framework.authentication.BasicAuthentication",    # BasicAuthentication (Not recommended for production)
+        "rest_framework.authentication.TokenAuthentication",    # TokenAuthentication
+    ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
@@ -65,7 +76,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

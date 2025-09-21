@@ -1,35 +1,23 @@
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_delete
-from django.dispatch import receiver
-import os
+from solo.models import SingletonModel
 
 # Create your models here.
+def data_path(instance, filename):
+    # file will be uploaded to data/<filename>
+    return f'data/{filename}'
 
-def user_directory_path(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return f'user_{instance.user.id}/{filename}'
 class Files(models.Model):
-    # SQL DB logging to store uploaded SQL files
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    # File send to /backend/media/sql_files/
-    file = models.FileField(upload_to=user_directory_path)
+    file = models.FileField(upload_to=data_path)
+    database = models.CharField(max_length=255, blank=True)
     time = models.DateTimeField(auto_now_add=True)
 
-# Delete file from storage when deleted from DB
-@receiver(post_delete, sender=Files)
-def delete_file_and_empty_folder(sender, instance, **kwargs):
-    if instance.file and instance.file.path:
-        file_path = instance.file.path
-        folder_path = os.path.dirname(file_path)
-
-        # Remove file
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-
-        # If folder is empty, remove folder
-        if os.path.isdir(folder_path) and not os.listdir(folder_path):
-            os.rmdir(folder_path)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'database'], name='unique_user_database')
+        ]
 
 class Sessions(models.Model):
     # Store user sessions for chat history
@@ -48,7 +36,8 @@ class Chats(models.Model):
     prompt = models.TextField()
     response = models.TextField()
 
-class APIKeys(models.Model):
-    # Store API keys for different LLMs
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+class APIKey(SingletonModel):
+    # API One-Record table
     api_key = models.TextField()
+    def __str__(self):
+        return "API Key"

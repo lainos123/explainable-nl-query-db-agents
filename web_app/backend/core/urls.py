@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import FilesViewSet, SessionsViewSet, ChatsViewSet, APIKeysViewSet
+from .views import FilesViewSet, SessionsViewSet, ChatsViewSet, APIKeyViewSet
 
 # Register viewsets with the router
 router = DefaultRouter()
@@ -9,9 +9,6 @@ router = DefaultRouter()
 router.register(r'files', FilesViewSet, basename='files')
 router.register(r'sessions', SessionsViewSet, basename='sessions')
 router.register(r'chats', ChatsViewSet, basename='chats')
-router.register(r'apikeys', APIKeysViewSet, basename='apikeys')
+router.register(r'apikey', APIKeyViewSet, basename='apikey')
 
-# Define the URL patterns for the core app
-urlpatterns = [
-    path('', include(router.urls)),
-]
+urlpatterns = router.urls
