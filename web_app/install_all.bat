@@ -1,12 +1,15 @@
-aqW@echo off
-:: Install backend dependencies from web_app folder
+@echo off
+:: Install backend dependencies
 cd backend
 python -m venv venv
-call venv\Scripts\activate
+call venv\Scripts\activate.bat
 pip install -r requirements.txt
-cd ..
-:: Install frontend dependencies from web_app folder
+cd ..\..
+
+:: Install frontend dependencies
 cd frontend
 npm install
-cd ..
+cd ..\..
+
 echo All dependencies installed.
+pause

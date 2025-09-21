@@ -33,5 +33,10 @@
 #     return json.loads(llm_output)
 
 # Agent A specific logic here
-def db_select(api_key, request, media_path):
-    return {"content": "Agent A DB Selector executed successfully."}
+import time
+def run(api_key, payload, media_path):
+    time.sleep(3)
+    return {
+        "content": "Executed successfully.",
+        "previous": payload
+    }

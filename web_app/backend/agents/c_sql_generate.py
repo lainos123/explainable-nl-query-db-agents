@@ -28,5 +28,10 @@
 #     return json.loads(llm_output)
 
 # Agent C specific logic here
-def sql_generate(api_key, request, media_path):
-    return {"content": "Agent C SQL Generate executed successfully."}
+import time
+def run(api_key, payload, media_path):
+    time.sleep(3)
+    return {
+        "content": "Executed successfully.",
+        "previous": payload
+    }

@@ -27,5 +27,10 @@
 
 
 # Agent B specific logic here
-def table_select(api_key, request, media_path):
-    return {"content": "Agent B executed successfully."}
+import time
+def run(api_key, payload, media_path):
+    time.sleep(3)
+    return {
+        "content": "Executed successfully.",
+        "previous": payload
+    }

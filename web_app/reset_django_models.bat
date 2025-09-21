@@ -3,7 +3,7 @@ echo Running Django resetting...
 
 cd backend
 
-:: Activate virtualenv
+:: Activate virtualenv (CMD version)
 call venv\Scripts\activate.bat
 
 :: Remove migrations and old database
