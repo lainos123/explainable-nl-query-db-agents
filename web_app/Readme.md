@@ -34,8 +34,9 @@ npm install
 - Make sure you are in the root directory where requirements.txt is located
 
 ```
-python -m venv .venv
-.venv/Scripts/activate
+cd backend
+python -m venv venv
+venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
@@ -62,14 +63,14 @@ npm run dev
 **Linux**
 
 ```
-.venv/bin/activate
+venv/Scripts/activate
 django-admin startproject backend
 cd backend
 ```
 **Windows**
 
 ```
-.venv/Scripts/activate.ps1
+venv/Scripts/activate.ps1
 django-admin startproject backend
 cd backend
 ```
@@ -80,7 +81,7 @@ cd backend
 
 ```
 # Change port number if needed
-python manage.py runserver
+python manage.py runserver 8081
 ```
 - You then can go to {URL} (e.g., http://localhost:8000) to see the backend
 
@@ -90,7 +91,7 @@ python manage.py runserver
 - We use turbopack for faster performance so make sure to include `--turbopack` flag
 
 ```
-npm run dev
+npm run dev -- -p 8080 --turbopack
 ```
 
 - You then can go to {URL} (e.g., http://localhost:3001) to see the frontend
@@ -133,6 +134,7 @@ python manage.py createsuperuser
 
 - Go to {URL} (e.g., http://localhost:3001)
 
-## 10. CAN THIS GO ONLINE ?
+## 10. Fast start for development (Windows only)
 
-- Yes, we can deploy the app online using services like Vercel for both frontend and backend. Vercel is the platform that developed Next.js, so it is optimized for Next.js applications deployment and it is a fulstack platform that can handle both frontend and backend.
+- Use start_all.bat, start_fe.bat, start_be.bat to start both frontend and backend, only frontend, only backend respectively
+- Make sure you have already set up the environment by following the above steps or it will not work

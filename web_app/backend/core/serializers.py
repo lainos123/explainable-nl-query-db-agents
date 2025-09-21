@@ -1,23 +1,23 @@
 from rest_framework import serializers
-from .models import File, Session, Chat, APIKey
+from .models import Files, Sessions, Chats, APIKeys
 
-class FileSerializer(serializers.ModelSerializer):
+class FilesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = File
+        model = Files
         fields = ['id', 'file', 'time']
 
-class SessionSerializer(serializers.ModelSerializer):
+class SessionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Session
+        model = Sessions
         fields = ['id', 'user', 'start_time']
 
-class ChatSerializer(serializers.ModelSerializer):
+class ChatsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Chat
+        model = Chats
         fields = ['id', 'time', 'user', 'agent', 'prompt', 'response']
 
 
-class APIKeySerializer(serializers.ModelSerializer):
+class APIKeysSerializer(serializers.ModelSerializer):
     class Meta:
-        model = APIKey
+        model = APIKeys
         fields = ['id', 'user', 'api_key']
