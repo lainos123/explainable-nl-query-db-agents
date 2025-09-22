@@ -1,5 +1,6 @@
 from django.http import StreamingHttpResponse
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 import json
@@ -62,3 +63,9 @@ class AgentViewSet(viewsets.ViewSet):
         if not data:
             return Response({"status": "no previous result"}, status=status.HTTP_404_NOT_FOUND)
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["delete"], url_path="cache")
+    def clear_cache(self, request):
+        """Clear last cached agent result."""
+        cache.delete(CACHE_KEY)
+        return Response(status=status.HTTP_204_NO_CONTENT)
