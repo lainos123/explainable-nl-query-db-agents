@@ -80,7 +80,7 @@ QUIET_MODE = False
 def setup_llm():
     """Initialize and return the LLM for SQL generation"""
     try:
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        llm = ChatOpenAI(model="gpt-5-mini", temperature=0)
         return llm
     except Exception as e:
         if not QUIET_MODE:
