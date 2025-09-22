@@ -1,3 +1,7 @@
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { marked } from "marked";
+import { renderStreamData } from "./streaming_logic";
 import React, { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -128,12 +132,77 @@ const ChatBox: React.FC<ChatBoxProps> = ({ messages, loadingBot, onEdit, onDelet
                     {msg.sender === 'bot' ? (
                       <div className="space-y-3">
                         {msg.text
-                          ? msg.text.split(/\n\n-+\n\n/g).map((part, idx) => (
-                              <React.Fragment key={idx}>
-                                {idx > 0 && <div className="h-px bg-gray-500/60" role="separator" />}
-                                <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{part}</div>
-                              </React.Fragment>
-                            ))
+                          ? (() => {
+                              // Split by separator and render each part
+                              const parts = msg.text.split(/\n\n-+\n\n/);
+                              return parts.map((part, idx) => {
+                                let rendered;
+                                try {
+                                  const parsed = JSON.parse(part);
+                                  // Custom HTML rendering from JSON
+                                  rendered = <BotJsonRender data={parsed} />;
+                                } catch {
+                                  rendered = <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{part}</div>;
+                                }
+// Custom bot JSON to HTML renderer
+function BotJsonRender({ data }: { data: any }) {
+  // Error
+  if (data.error) return <div className="text-red-500 font-semibold">❌ Error: {data.error}</div>;
+  if (data.success === false) return <div className="text-yellow-500 font-semibold">⚠️ Failed: {data.message || "Unknown error"}</div>;
+
+  return (
+    <div className="space-y-2">
+      {data.query && <div><span className="font-bold">Query:</span> <span className="bg-gray-900 px-2 py-1 rounded text-sm">{data.query}</span></div>}
+      {data.database && <div><span className="font-bold">Database:</span> {data.database}</div>}
+      {data.tables && <div><span className="font-bold">Tables:</span> {Array.isArray(data.tables) ? data.tables.join(", ") : data.tables}</div>}
+      {data.columns && <div><span className="font-bold">Columns:</span> {Array.isArray(data.columns) ? data.columns.join(", ") : data.columns}</div>}
+      {data.SQL && (
+        <div>
+          <span className="font-bold">SQL:</span>
+          <SyntaxHighlighter language="sql" style={oneDark} customStyle={{ borderRadius: "0.5rem", fontSize: "0.95em", marginTop: "0.25rem" }}>
+            {data.SQL}
+          </SyntaxHighlighter>
+        </div>
+      )}
+      {data.reasons && <div className="italic text-gray-400">{data.reasons}</div>}
+      {data.result && Array.isArray(data.result) && data.result.length > 0 && (
+        <div>
+          <span className="font-bold">Result:</span>
+          <table className="min-w-[200px] border mt-2 text-sm">
+            <thead>
+              <tr>
+                {Object.keys(data.result[0]).map((h) => (
+                  <th key={h} className="border px-2 py-1 bg-gray-800 text-gray-100">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.result.map((row: any, i: number) => (
+                <tr key={i}>
+                  {Object.keys(row).map((h) => (
+                    <td key={h} className="border px-2 py-1">{row[h]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {/* Fallback: show full JSON if no known keys */}
+      {!data.query && !data.database && !data.tables && !data.columns && !data.SQL && !data.reasons && !data.result && (
+        <pre className="bg-gray-900 rounded p-2 text-xs overflow-x-auto">{JSON.stringify(data, null, 2)}</pre>
+      )}
+    </div>
+  );
+}
+                                return (
+                                  <React.Fragment key={idx}>
+                                    {idx > 0 && <div className="h-px bg-gray-500/60" role="separator" />}
+                                    {rendered}
+                                  </React.Fragment>
+                                );
+                              });
+                            })()
                           : <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]" />}
                       </div>
                     ) : (
