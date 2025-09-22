@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface ChatBoxProps {
   messages: { id: string; sender: "user" | "bot"; text: string }[];
@@ -9,10 +10,14 @@ interface ChatBoxProps {
   username?: string | null;
 }
 const ChatBox: React.FC<ChatBoxProps> = ({ messages, loadingBot, onEdit, onDelete, onResend, username }) => {
+  const router = useRouter();
   const [editId, setEditId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [dots, setDots] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Modal for 401 stream error
+  const [show401Modal, setShow401Modal] = useState(false);
 
   // Example: auto scroll
   useEffect(() => {
@@ -42,15 +47,59 @@ const ChatBox: React.FC<ChatBoxProps> = ({ messages, loadingBot, onEdit, onDelet
 
   // You can lift state up and pass setMessages, setLoading, etc. as props if needed
 
+    // OAuth 401 handler: logout and redirect to login
+    useEffect(() => {
+      // Check if any bot message contains 401 OAuth failure
+      const has401 = messages.some(
+        (msg) => msg.sender === "bot" && /401.*Oau.*thất bại/i.test(msg.text)
+      );
+      if (has401) {
+        // Clear local/session storage if needed
+        if (typeof window !== "undefined") {
+          localStorage.clear();
+          sessionStorage.clear();
+        }
+        // Redirect to login page
+  window.location.href = "/";
+      }
+        // Check for [Stream error] HTTP 401
+        const hasStream401 = messages.some(
+          (msg) => /\[Stream error\]\s*HTTP 401/i.test(msg.text)
+        );
+        if (hasStream401) {
+          setShow401Modal(true);
+        }
+    }, [messages, router]);
+
   return (
   <div className={`flex-1 overflow-hidden rounded-xl border border-gray-700 bg-gray-800 shadow-sm`}> 
+      {/* 401 Stream Error Modal */}
+      {show401Modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 min-w-[300px] text-center">
+            <div className="text-lg font-semibold mb-2 text-red-600 dark:text-red-400">[Stream error] HTTP 401</div>
+            <div className="mb-4 text-gray-700 dark:text-gray-200">Your login session has expired or is invalid. Please log in again.</div>
+            <button
+              className="px-4 py-2 rounded bg-blue-600 text-white font-medium hover:bg-blue-700"
+              onClick={() => {
+                setShow401Modal(false);
+                if (typeof window !== "undefined") {
+                  localStorage.clear();
+                  sessionStorage.clear();
+                }
+                window.location.href = "/";
+              }}
+            >Continue</button>
+          </div>
+        </div>
+      )}
     <div className="h-full overflow-y-auto p-4 space-y-3" role="log" aria-live="polite" aria-relevant="additions" aria-label="Chat messages">
         {messages.length === 0 && !loadingBot && (
           <div className="flex items-start gap-0">
             <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm bg-gray-700 text-gray-100 break-words [overflow-wrap:anywhere]">
               <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                 <div className="font-medium mb-1">Hello{username ? `, ${username}` : ""}! 👋</div>
-                <div className="text-gray-200">What query would you like to run against the dataset? Ask in natural language in any language you like, but remember to make it relevant, e.g., "What is the average age of students?".</div>
+                <div className="text-gray-200">What query would you like to run against the dataset? Ask in natural language, e.g., "What is the average age of students?".</div>
                 <div className="text-xs text-gray-300 mt-2">Tip: Press Enter to send, Shift+Enter for a new line.</div>
               </div>
             </div>

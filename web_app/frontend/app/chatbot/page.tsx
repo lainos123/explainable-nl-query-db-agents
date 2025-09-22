@@ -4,6 +4,9 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { performLogout } from "./logout";
 import Menu from "./menu";
+import MobileMenu from "./mobile_menu";
+import { useStreamingLogic } from "./streaming_logic";
+import { useResendDeleteEdit } from "./resend_delete_edit";
 import ChatBox from "./chatbox";
 import InsertBox from "./insert_box";
 import { streamAgents, deleteAgentsCache } from "../services/api";
@@ -24,6 +27,7 @@ export default function ChatbotPage() {
 	const [entering, setEntering] = useState(true);
 	const [username, setUsername] = useState<string | null>(null);
 	const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+	// const { sendUserMessage } = useStreaming(setMessages, setLoadingBot);
 
 	useEffect(() => {
 		// entrance overlay
@@ -46,176 +50,10 @@ export default function ChatbotPage() {
 
 	// Dragging disabled per request
 
-	// Generate id helper
-	const genId = () => crypto.randomUUID();
 
-	const sendUserMessage = useCallback((text: string) => {
-		if (!text.trim()) return;
-			const userMsg: ChatMessage = { id: genId(), sender: "user", text: text.trim(), createdAt: Date.now() };
-			setMessages(prev => [...prev, userMsg]);
-			setLoadingBot(true);
-			const botId = genId();
-			// insert placeholder bot message
-			setMessages(prev => [...prev, { id: botId, sender: "bot", text: "", createdAt: Date.now() }]);
-
-			// start streaming
-				let lastAgent: string | null = null;
-				const SEP = "\n\n------------------------\n\n";
-				const s = streamAgents({ query: userMsg.text }, {
-					onEvent: (evt) => {
-						// Only separate on content events (output/error), not on 'running'
-						const isContent = !!(evt && (evt.output || evt.error));
-						let sepNow = false;
-						if (isContent && evt?.agent) {
-							if (lastAgent && evt.agent !== lastAgent) sepNow = true;
-							lastAgent = evt.agent;
-						}
-
-						if (evt?.output) {
-							const chunk = JSON.stringify(evt.output);
-							setMessages(prev => prev.map(m => {
-								if (m.id !== botId) return m;
-								const prefix = m.text ? (sepNow ? SEP : "\n") : "";
-								return { ...m, text: (m.text || "") + prefix + chunk };
-							}));
-						} else if (evt?.error) {
-							setMessages(prev => prev.map(m => {
-								if (m.id !== botId) return m;
-								const prefix = m.text ? (sepNow ? SEP : "\n") : "";
-								return { ...m, text: (m.text || "") + prefix + `Error: ${evt.error}` };
-							}));
-						}
-					},
-				onError: (err) => {
-					setMessages(prev => prev.map(m => m.id === botId ? { ...m, text: (m.text ? m.text + "\n" : "") + `\n[Stream error] ${err.message}` } : m));
-				},
-				onDone: () => {
-					setLoadingBot(false);
-				},
-			});
-	}, []);
-
-		const editMessage = useCallback((id: string, newText: string) => {
-			// update user message text
-			setMessages(prev => prev.map(m => m.id === id ? { ...m, text: newText, updatedAt: Date.now() } : m));
-			// find user message and resend with new text (using new-stream endpoint per requirement)
-			setTimeout(() => {
-				const msg = messages.find(m => m.id === id && m.sender === "user");
-				if (!msg) return;
-				// remove next bot answer if exists
-				setMessages(prev => {
-					const idx = prev.findIndex(m => m.id === id);
-					if (idx === -1) return prev;
-					const next = [...prev];
-					if (next[idx+1] && next[idx+1].sender === "bot") next.splice(idx+1, 1);
-					return next;
-				});
-
-				// stream with edited content
-				const botId = genId();
-				setLoadingBot(true);
-				setMessages(prev => {
-					const idx = prev.findIndex(m => m.id === id);
-					const copy = [...prev];
-					copy.splice(idx + 1, 0, { id: botId, sender: "bot", text: "", createdAt: Date.now() });
-					return copy;
-				});
-						let lastAgent: string | null = null;
-						const SEP = "\n\n------------------------\n\n";
-						streamAgents({ query: newText }, {
-							onEvent: (evt) => {
-								const isContent = !!(evt && (evt.output || evt.error));
-								let sepNow = false;
-								if (isContent && evt?.agent) {
-									if (lastAgent && evt.agent !== lastAgent) sepNow = true;
-									lastAgent = evt.agent;
-								}
-								if (evt?.output) {
-									const chunk = JSON.stringify(evt.output);
-									setMessages(prev => prev.map(m => {
-										if (m.id !== botId) return m;
-										const prefix = m.text ? (sepNow ? SEP : "\n") : "";
-										return { ...m, text: (m.text || "") + prefix + chunk };
-									}));
-								} else if (evt?.error) {
-									setMessages(prev => prev.map(m => {
-										if (m.id !== botId) return m;
-										const prefix = m.text ? (sepNow ? SEP : "\n") : "";
-										return { ...m, text: (m.text || "") + prefix + `Error: ${evt.error}` };
-									}));
-								}
-							},
-					onError: (err) => {
-						setMessages(prev => prev.map(m => m.id === botId ? { ...m, text: (m.text ? m.text + "\n" : "") + `\n[Stream error] ${err.message}` } : m));
-					},
-					onDone: () => setLoadingBot(false),
-				});
-			}, 0);
-		}, [messages]);
-
-		const deleteMessage = useCallback((id: string) => {
-			setMessages(prev => {
-				const idx = prev.findIndex(m => m.id === id);
-				if (idx === -1) return prev;
-				const toDelete: string[] = [id];
-				if (prev[idx].sender === "user" && prev[idx+1] && prev[idx+1].sender === "bot") {
-					toDelete.push(prev[idx+1].id);
-				}
-				return prev.filter(m => !toDelete.includes(m.id));
-			});
-			// also clear backend cached result for this conversation
-			deleteAgentsCache().catch(() => void 0);
-		}, []);
-
-		const resendUserMessage = useCallback((id: string) => {
-			const msg = messages.find(m => m.id === id && m.sender === "user");
-			if (!msg) return;
-			setMessages(prev => {
-				const idx = prev.findIndex(m => m.id === id);
-				if (idx === -1) return prev;
-				const next = [...prev];
-				if (next[idx+1] && next[idx+1].sender === "bot") next.splice(idx+1, 1);
-				return next;
-			});
-			const botId = genId();
-			setLoadingBot(true);
-			setMessages(prev => {
-				const idx = prev.findIndex(m => m.id === id);
-				const copy = [...prev];
-				copy.splice(idx + 1, 0, { id: botId, sender: "bot", text: "", createdAt: Date.now() });
-				return copy;
-			});
-				let lastAgent: string | null = null;
-				const SEP = "\n\n------------------------\n\n";
-				streamAgents({ query: msg.text }, {
-					onEvent: (evt) => {
-						const isContent = !!(evt && (evt.output || evt.error));
-						let sepNow = false;
-						if (isContent && evt?.agent) {
-							if (lastAgent && evt.agent !== lastAgent) sepNow = true;
-							lastAgent = evt.agent;
-						}
-						if (evt?.output) {
-							const chunk = JSON.stringify(evt.output);
-							setMessages(prev => prev.map(m => {
-								if (m.id !== botId) return m;
-								const prefix = m.text ? (sepNow ? SEP : "\n") : "";
-								return { ...m, text: (m.text || "") + prefix + chunk };
-							}));
-						} else if (evt?.error) {
-							setMessages(prev => prev.map(m => {
-								if (m.id !== botId) return m;
-								const prefix = m.text ? (sepNow ? SEP : "\n") : "";
-								return { ...m, text: (m.text || "") + prefix + `Error: ${evt.error}` };
-							}));
-						}
-					},
-				onError: (err) => {
-					setMessages(prev => prev.map(m => m.id === botId ? { ...m, text: (m.text ? m.text + "\n" : "") + `\n[Stream error] ${err.message}` } : m));
-				},
-				onDone: () => setLoadingBot(false),
-			});
-		}, [messages]);
+		// Use logic hooks
+		const { sendUserMessage } = useStreamingLogic(setMessages, setLoadingBot);
+		const { editMessage, deleteMessage, resendUserMessage } = useResendDeleteEdit(messages, setMessages, setLoadingBot);
 
 	return (
 		<div className={`min-h-screen w-full flex bg-gray-900 text-gray-100 relative`}> 
@@ -230,15 +68,8 @@ export default function ChatbotPage() {
 				</div>
 			</aside>
 
-			{/* Mobile overlay menu */}
-			{!menuMinimized && (
-				<div className="md:hidden">
-					<div className="fixed inset-0 z-40 bg-black/50" onClick={() => setMenuMinimized(true)} />
-					<div className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[80vw] bg-gray-900 border-r border-gray-700 p-4 shadow-xl">
-						<Menu minimized={menuMinimized} setMinimized={setMenuMinimized} username={username} onRequestLogout={() => setShowLogoutConfirm(true)} />
-					</div>
-				</div>
-			)}
+						{/* Mobile overlay menu */}
+						<MobileMenu minimized={menuMinimized} setMinimized={setMenuMinimized} username={username} onRequestLogout={() => setShowLogoutConfirm(true)} />
 
 			<main className={`flex flex-col h-screen w-full relative transition-all duration-300 ease-in-out ${menuMinimized ? "md:pl-0" : "md:pl-72"}`}>
 				<div className="flex flex-col flex-1 max-w-4xl w-full mx-auto px-4 py-6 gap-4">

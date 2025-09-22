@@ -30,8 +30,18 @@ export default function Home() {
         body: JSON.stringify({ username, password }),
       })
       if (!res.ok) {
-        const detail = await res.text()
-        throw new Error(detail || "Invalid credentials")
+        let detail = "Invalid credentials";
+        try {
+          const text = await res.text();
+          // Try to parse JSON error
+          const json = JSON.parse(text);
+          if (json && json.detail) detail = json.detail;
+          else detail = text;
+        } catch {
+          // Fallback to text
+          detail = "Invalid credentials";
+        }
+        throw new Error(detail);
       }
       const data = await res.json()
       // Expecting Django simplejwt: { access, refresh }
@@ -39,12 +49,12 @@ export default function Home() {
       if (data?.refresh) localStorage.setItem("refresh_token", data.refresh)
   if (username) localStorage.setItem("username", username)
 
-      setMessage("✅ Logged in successfully! Redirecting…")
+      setMessage("Logged in successfully! Redirecting…")
 
       // Example: navigate to chatbot page
       setTimeout(() => router.push("/chatbot"), 400)
     } catch (err: any) {
-      setMessage(`❌ ${err.message}`)
+      setMessage(`${err.message}`)
       setProcessing(false)
     }
   }
@@ -116,7 +126,17 @@ export default function Home() {
         {/* Theme toggle removed: single dark theme */}
 
         {message && (
-          <p className={`mt-4 text-center text-sm text-gray-300`}>{message}</p>
+          <p
+            className={`mt-4 text-center text-sm italic ${
+              message.toLowerCase().includes('success')
+                ? 'text-green-500'
+                : message.toLowerCase().includes('no active account found with the given credentials')
+                ? 'text-red-500'
+                : message.startsWith('❌')
+                ? 'text-red-500'
+                : 'text-gray-300'
+            }`}
+          >{message}</p>
         )}
       </form>
     </main>
