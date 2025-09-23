@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 def api_root(request, format=None):
     return Response({
         "files-list": reverse("files-list", request=request, format=format),
-        "apikey": reverse("apikey-list", request=request, format=format),
+        "apikeys": reverse("apikeys-list", request=request, format=format),
         "agents": reverse("agents-list", request=request, format=format),
         "schema": reverse("schema", request=request, format=format),
     })
