@@ -7,8 +7,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 
-# --- Helpers per user ---
-
+# Helpers
 def get_user_schema_dir(user_id: int) -> str:
     """Schema directory cho user trong MEDIA_ROOT/<user_id>/schema"""
     schema_dir = os.path.join(settings.MEDIA_ROOT, str(user_id), "schema")
@@ -29,7 +28,7 @@ def load_processed_schema(input_file: str):
         return [line.strip() for line in f if line.strip()]
 
 
-# --- Embeddings + vectorstore ---
+# Embeddings + vectorstore 
 
 def create_or_load_embeddings(api_key: str, user_id: int):
     schema_file = get_user_schema_file(user_id)
@@ -50,7 +49,7 @@ def create_or_load_embeddings(api_key: str, user_id: int):
     return vectorstore
 
 
-# --- LLM chain ---
+# LLM chain
 
 def create_agent(vectorstore, api_key: str):
     llm = ChatOpenAI(model="gpt-5-mini", temperature=0, api_key=api_key)
@@ -101,7 +100,7 @@ Respond ONLY with JSON:
     return database_selection_agent
 
 
-# --- Entrypoint ---
+# Entrypoint
 
 def run(api_key: str, payload: dict, user_id: int):
     """

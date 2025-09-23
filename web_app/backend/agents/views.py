@@ -44,16 +44,34 @@ class AgentViewSet(viewsets.ViewSet):
         def event_stream():
             result = request.data  # initial input (dict from client)
 
+            # Ensure API key exists before running any agent that calls LLMs
+            if not api_key:
+                yield f"data: {json.dumps({'status': 'error', 'agent': 'bootstrap', 'error': 'Missing API key. Please set your API key in profile settings.', 'time': now_str()}, ensure_ascii=False)}\n\n"
+                yield f"data: {json.dumps({'status': 'finished', 'time': now_str()}, ensure_ascii=False)}\n\n"
+                cache.set(f"{CACHE_KEY_PREFIX}:{request.user.id}", {"error": "Missing API key"}, None)
+                return
+
             for name, func in AGENTS:
                 # Announce agent start
                 yield f"data: {json.dumps({'status': 'running', 'agent': name, 'time': now_str()}, ensure_ascii=False)}\n\n"
                 try:
                     start_time = now_str()
-                    result = func(api_key, result)
+                    # Agent A needs user_id to access per-user schema/embeddings
+                    if func is a_db_select.run:
+                        result = func(api_key, result, request.user.id)
+                    else:
+                        result = func(api_key, result)
                     end_time = now_str()
                     yield f"data: {json.dumps({'agent': name, 'output': result, 'started_at': start_time, 'finished_at': end_time}, ensure_ascii=False)}\n\n"
+
+                    # If any agent returns an error, stop the pipeline early to avoid cascading errors
+                    if isinstance(result, dict) and result.get("error"):
+                        yield f"data: {json.dumps({'status': 'error', 'agent': name, 'time': now_str()}, ensure_ascii=False)}\n\n"
+                        break
                 except Exception as e:
+                    # Stop pipeline on unexpected exception as well
                     yield f"data: {json.dumps({'agent': name, 'error': str(e), 'time': now_str()}, ensure_ascii=False)}\n\n"
+                    break
 
             # Pipeline finished
             yield f"data: {json.dumps({'status': 'finished', 'time': now_str()}, ensure_ascii=False)}\n\n"
