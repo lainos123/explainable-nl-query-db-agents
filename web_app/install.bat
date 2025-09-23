@@ -1,15 +1,14 @@
-@echo off
 :: Install backend dependencies
 cd backend
 python -m venv venv
-call venv\Scripts\activate.bat
-pip install -r requirements.txt
-cd ..\..
+call venv\Scripts\python.exe -m pip install --upgrade pip
+call venv\Scripts\pip.exe install -r requirements.txt
+cd ..
 
 :: Install frontend dependencies
 cd frontend
 npm install
-cd ..\..
+cd ..
 
 echo All dependencies installed.
 pause
