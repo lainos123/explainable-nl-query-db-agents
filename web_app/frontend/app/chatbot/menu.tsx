@@ -10,8 +10,11 @@ interface MenuProps {
 
 const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onRequestLogout }) => {
   if (minimized) return null;
+  // Remove modal logic, use tab view
+
   return (
     <div className="flex flex-col gap-4">
+  {/* Move View Files button to bottom, open tab */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-7 h-7 rounded-full bg-violet-600 text-white grid place-items-center text-xs">
@@ -57,7 +60,78 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
           window.location.reload();
         }}
       >Clear chat session</button>
-    </div>
+
+      {/* File actions */}
+      <div className="flex flex-col gap-2 mt-2">
+        <label className="w-full px-3 py-2 rounded bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 cursor-pointer text-center">
+          Upload .zip/.sqlite/.sqlite3... files
+          <input type="file" multiple hidden onChange={async (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            const formData = new FormData();
+            for (let i = 0; i < files.length; ++i) formData.append("file", files[i]);
+            const res = await fetch("/backend/core/files/", {
+              method: "POST",
+              body: formData,
+              credentials: "include"
+            });
+            if (res.status === 401) {
+              localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; return;
+            }
+            window.location.reload();
+          }} />
+        </label>
+        <button className="w-full px-3 py-2 rounded bg-gray-600 text-white text-xs font-medium hover:bg-gray-700" onClick={async () => {
+          const res = await fetch("/backend/core/files/clear/", {
+            method: "DELETE",
+            credentials: "include"
+          });
+          if (res.status === 401) {
+            localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; return;
+          }
+          window.location.reload();
+        }}>Clear databases</button>
+      </div>
+
+      {/* API actions */}
+      <div className="flex flex-col gap-2 mt-2">
+        <button className="w-full px-3 py-2 rounded bg-green-600 text-white text-xs font-medium hover:bg-green-700" onClick={async () => {
+          const key = prompt("Nhập API key mới:");
+          if (key !== null) {
+            const res = await fetch("/backend/core/apikey/", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ key }),
+              credentials: "include"
+            });
+            if (res.status === 401) {
+              localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; return;
+            }
+            window.location.reload();
+          }
+        }}>Add/Replace chatGPT API key</button>
+        <button className="w-full px-3 py-2 rounded bg-gray-600 text-white text-xs font-medium hover:bg-gray-700" onClick={async () => {
+          const res = await fetch("/backend/core/apikey/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: "" }),
+            credentials: "include"
+          });
+          if (res.status === 401) {
+            localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; return;
+          }
+          window.location.reload();
+        }}>Clear chatGPT API key</button>
+      </div>
+    {/* ...existing menu content... */}
+    <div className="mt-8" />
+    <button
+      className="w-full px-3 py-2 rounded bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 mt-8"
+      onClick={() => {
+        window.open("/view-files", "_blank");
+      }}
+    >View databases</button>
+  </div>
   );
 };
 

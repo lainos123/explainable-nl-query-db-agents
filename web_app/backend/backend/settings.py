@@ -7,8 +7,8 @@ from datetime import timedelta
 
 # CORS config, Please adjust according to your frontend domains, very important !!!
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",     # Next.js dev
-    "https://your-next-app.com", # domain production
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -29,9 +29,13 @@ API_KEY = None
 SECRET_KEY = 'django-insecure-49i2wzh&d2(tzgcv60g@6tm)234od!3wduo*i)8$9815kwbx7)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "192.168.234.1",
+]
 
 # Application definition
 INSTALLED_APPS = [

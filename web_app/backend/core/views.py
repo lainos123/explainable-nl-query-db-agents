@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from utils import schema_builder
+from django.http import FileResponse
 
 from .models import Files, Sessions, Chats, APIKey
 from .serializers import (
@@ -168,6 +169,13 @@ class FilesViewSet(viewsets.ModelViewSet):
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=["get"])
+    def download(self, request, pk=None):
+        file_obj = self.get_object()
+        if not file_obj.file or not os.path.exists(file_obj.file.path):
+            return Response({"error": "File not found"}, status=404)
+        return FileResponse(open(file_obj.file.path, "rb"), as_attachment=True, filename=os.path.basename(file_obj.file.name))
 
 # Other viewsets #
 class SessionsViewSet(OAuthRestrictedModelViewSet):

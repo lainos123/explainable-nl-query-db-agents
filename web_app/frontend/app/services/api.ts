@@ -14,15 +14,23 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     ...options,
     headers: {
       ...(options.headers || {}),
-      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // Only set Content-Type for non-FormData
+      ...(options.body && !(options.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
     },
   });
+  console.log("apiFetch raw response", res);
 
   if (!res.ok) {
     // Bubble up error text/json
-    const text = await res.text();
-    throw new Error(text || `HTTP ${res.status}`);
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) {
+      const json = await res.json();
+      throw new Error(typeof json === "string" ? json : JSON.stringify(json));
+    } else {
+      const text = await res.text();
+      throw new Error(text || `HTTP ${res.status}`);
+    }
   }
 
   const ct = res.headers.get("content-type") || "";
