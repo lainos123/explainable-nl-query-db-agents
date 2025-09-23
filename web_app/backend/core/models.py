@@ -9,29 +9,25 @@ def data_path(instance, filename):
     return f'data/{filename}'
 
 class Files(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # Store uploaded files
     file = models.FileField(upload_to=data_path)
     database = models.CharField(max_length=255, blank=True)
     time = models.DateTimeField(auto_now_add=True)
 
-class Sessions(models.Model):
-    # Store user sessions for chat history
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    start_time = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(max_length=100)
-
 class Chats(models.Model):
-    # Log of user queries and corresponding SQL queries
-    session = models.ForeignKey(Sessions, on_delete=models.CASCADE, related_name='chats')
-    time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    agent = models.CharField(max_length=1) # Name as a, b, c, d
-    # Type of the response: sql, text, json, etc.
-    type = models.CharField(max_length=10)
-    prompt = models.TextField()
-    response = models.TextField()
+    chats = models.TextField()  # Store chat history as text
+    time = models.DateTimeField(auto_now_add=True) # Last updated time
 
-class APIKey(SingletonModel):
-    # API One-Record table
-    api_key = models.TextField()
-    def __str__(self):
-        return "API Key"
+    # user is PK
+    class Meta:
+        unique_together = ('user',)
+
+class APIKeys(SingletonModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    api_key = models.TextField(blank=True, null=True)
+
+    # user is PK
+    class Meta:
+        unique_together = ('user',)

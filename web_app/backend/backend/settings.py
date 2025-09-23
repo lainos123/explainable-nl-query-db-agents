@@ -18,8 +18,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # For the stored uploaded files
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
-DATA_DIR = MEDIA_ROOT / 'data'
-SCHEMA_DIR = MEDIA_ROOT / 'schema'
 
 # Initialize the API key for model access
 API_KEY = None
@@ -28,7 +26,7 @@ API_KEY = None
 SECRET_KEY = 'django-insecure-49i2wzh&d2(tzgcv60g@6tm)234od!3wduo*i)8$9815kwbx7)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",

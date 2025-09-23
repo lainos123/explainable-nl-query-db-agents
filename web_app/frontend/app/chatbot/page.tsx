@@ -48,9 +48,6 @@ export default function ChatbotPage() {
 		setUsername(u);
 	}, [router]);
 
-	// Dragging disabled per request
-
-
 		// Use logic hooks
 		const { sendUserMessage } = useStreamingLogic(setMessages, setLoadingBot);
 		const { editMessage, deleteMessage, resendUserMessage } = useResendDeleteEdit(messages, setMessages, setLoadingBot);

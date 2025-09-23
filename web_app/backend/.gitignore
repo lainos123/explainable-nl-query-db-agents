@@ -1,8 +1,6 @@
 # Ignore virtual environment folder
 venv/
 media/ # Ignore media files
-/media/data/
-/media/schema
 /media/
 # Ignore SQLite database file/ Must manually remove,
 # then re-create stop gitignore then git ignore again to protect the code

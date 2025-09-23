@@ -1,38 +1,56 @@
 import json
 import os
+import re
 from django.conf import settings
 from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-SCHEMA_DIR = settings.SCHEMA_DIR
-EMBEDDINGS_FOLDER = os.path.join(SCHEMA_DIR, "embeddings")
-SCHEMA_PROCESSED_FILE = os.path.join(SCHEMA_DIR, "schema_ab.jsonl")
+
+# --- Helpers per user ---
+
+def get_user_schema_dir(user_id: int) -> str:
+    """Schema directory cho user trong MEDIA_ROOT/<user_id>/schema"""
+    schema_dir = os.path.join(settings.MEDIA_ROOT, str(user_id), "schema")
+    os.makedirs(schema_dir, exist_ok=True)
+    return schema_dir
 
 
-def load_processed_schema(input_file):
+def get_user_embeddings_folder(user_id: int) -> str:
+    return os.path.join(get_user_schema_dir(user_id), "embeddings")
+
+
+def get_user_schema_file(user_id: int) -> str:
+    return os.path.join(get_user_schema_dir(user_id), "schema_ab.jsonl")
+
+
+def load_processed_schema(input_file: str):
     with open(input_file, "r", encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip()]
 
 
-def create_or_load_embeddings(api_key: str):
-    os.makedirs(SCHEMA_DIR, exist_ok=True)
+# --- Embeddings + vectorstore ---
 
-    if os.path.exists(EMBEDDINGS_FOLDER) and os.listdir(EMBEDDINGS_FOLDER):
-        embeddings = OpenAIEmbeddings(api_key=api_key)
+def create_or_load_embeddings(api_key: str, user_id: int):
+    schema_file = get_user_schema_file(user_id)
+    embeddings_folder = get_user_embeddings_folder(user_id)
+    embeddings = OpenAIEmbeddings(api_key=api_key)
+
+    if os.path.exists(embeddings_folder) and os.listdir(embeddings_folder):
         return FAISS.load_local(
-            EMBEDDINGS_FOLDER, embeddings, allow_dangerous_deserialization=True
+            embeddings_folder, embeddings, allow_dangerous_deserialization=True
         )
 
-    if not os.path.exists(SCHEMA_PROCESSED_FILE):
-        raise FileNotFoundError(f"Schema file not found: {SCHEMA_PROCESSED_FILE}")
+    if not os.path.exists(schema_file):
+        raise FileNotFoundError(f"Schema file not found for user {user_id}: {schema_file}")
 
-    schema_texts = load_processed_schema(SCHEMA_PROCESSED_FILE)
-    embeddings = OpenAIEmbeddings(api_key=api_key)
+    schema_texts = load_processed_schema(schema_file)
     vectorstore = FAISS.from_texts(schema_texts, embeddings)
-    vectorstore.save_local(EMBEDDINGS_FOLDER)
+    vectorstore.save_local(embeddings_folder)
     return vectorstore
 
+
+# --- LLM chain ---
 
 def create_agent(vectorstore, api_key: str):
     llm = ChatOpenAI(model="gpt-5-mini", temperature=0, api_key=api_key)
@@ -70,7 +88,11 @@ Respond ONLY with JSON:
         raw = response.content if hasattr(response, "content") else str(response)
 
         try:
-            parsed = json.loads(raw)
+            match = re.search(r"\{.*\}", raw, re.DOTALL)
+            parsed = json.loads(match.group(0)) if match else {
+                "error": "no JSON found",
+                "raw": raw
+            }
         except json.JSONDecodeError:
             parsed = {"error": "invalid LLM output", "raw": raw}
 
@@ -79,9 +101,12 @@ Respond ONLY with JSON:
     return database_selection_agent
 
 
-def run(api_key, payload: dict):
+# --- Entrypoint ---
+
+def run(api_key: str, payload: dict, user_id: int):
     """
     Agent A entrypoint.
+
     Expected payload:
     {
         "query": "Find all students ..."
@@ -92,19 +117,17 @@ def run(api_key, payload: dict):
         if not user_query:
             return {"error": "query is required"}
 
-        vectorstore = create_or_load_embeddings(api_key)
+        vectorstore = create_or_load_embeddings(api_key, user_id)
         agent = create_agent(vectorstore, api_key)
         parsed = agent(user_query, top_k=5)
 
-        # Merge user query with Agent A output
-        result = {
+        return {
             "query": user_query,
             "database": parsed.get("database"),
             "tables": parsed.get("tables", []),
             "columns": parsed.get("columns", []),
             "reasons": parsed.get("reasons", "")
         }
-        return result
 
     except Exception as e:
         return {"error": f"Agent A failed: {str(e)}"}

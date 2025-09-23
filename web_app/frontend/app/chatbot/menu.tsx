@@ -12,7 +12,7 @@ interface MenuProps {
 const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onRequestLogout }) => {
   if (minimized) return null;
 
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/core/apikey/`;
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/core/apikeys/`;
   const getToken = () => localStorage.getItem("access_token");
 
   const updateApiKey = async (value: string) => {
@@ -27,7 +27,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
 
     try {
       const res = await fetch(apiUrl, {
-        method: "POST", 
+        method: "POST", // DRF ViewSet.create
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

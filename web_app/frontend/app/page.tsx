@@ -29,47 +29,48 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       })
+
       if (!res.ok) {
-        let detail = "Invalid credentials";
+        let detail = `HTTP ${res.status}`
+        const ct = res.headers.get("content-type") || ""
         try {
-          const text = await res.text();
-          // Try to parse JSON error
-          const json = JSON.parse(text);
-          if (json && json.detail) detail = json.detail;
-          else detail = text;
+          if (ct.includes("application/json")) {
+            const json = await res.json()
+            if (json?.detail) detail = json.detail
+            else detail = JSON.stringify(json)
+          } else {
+            detail = await res.text()
+          }
         } catch {
-          // Fallback to text
-          detail = "Invalid credentials";
+          /* ignore parsing errors */
         }
-        throw new Error(detail);
+        throw new Error(detail || "Login failed")
       }
+
       const data = await res.json()
-      // Expecting Django simplejwt: { access, refresh }
       if (data?.access) localStorage.setItem("access_token", data.access)
       if (data?.refresh) localStorage.setItem("refresh_token", data.refresh)
-  if (username) localStorage.setItem("username", username)
+      if (username) localStorage.setItem("username", username)
 
-      setMessage("Logged in successfully! Redirecting…")
-
-      // Example: navigate to chatbot page
+      setMessage("✅ Logged in successfully! Redirecting…")
       setTimeout(() => router.push("/chatbot"), 400)
     } catch (err: any) {
-      setMessage(`${err.message}`)
+      setMessage(err.message || "Login error")
       setProcessing(false)
     }
   }
 
   return (
-    <main className={`flex min-h-screen items-center justify-center bg-gray-900 text-gray-100`}>
+    <main className="flex min-h-screen items-center justify-center bg-gray-900 text-gray-100">
       <form
         onSubmit={handleLogin}
-        className={`bg-gray-800 text-gray-100 border-gray-700 shadow-xl shadow-black/30 p-8 rounded-xl w-96 border`}
+        className="bg-gray-800 text-gray-100 border-gray-700 shadow-xl shadow-black/30 p-8 rounded-xl w-96 border"
       >
         <div className="mb-4 text-center">
           <div className="text-sm font-medium tracking-wide text-violet-600">NL to SQL chatbot</div>
         </div>
         <div className="flex items-center justify-between mb-6">
-          <h1 className={`text-2xl font-bold text-center w-full text-gray-100`}>Login</h1>
+          <h1 className="text-2xl font-bold text-center w-full text-gray-100">Login</h1>
         </div>
 
         <label className="block text-sm mb-1">Username</label>
@@ -79,7 +80,7 @@ export default function Home() {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           disabled={processing}
-          className={`w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 bg-gray-900 border-gray-700 placeholder-gray-400 focus:ring-violet-500`}
+          className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 bg-gray-900 border-gray-700 placeholder-gray-400 focus:ring-violet-500"
         />
 
         <label className="block text-sm mb-1">Password</label>
@@ -89,15 +90,26 @@ export default function Home() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={processing}
-          className={`w-full p-3 mb-6 border rounded-lg focus:outline-none focus:ring-2 bg-gray-900 border-gray-700 placeholder-gray-400 focus:ring-violet-500`}
+          className="w-full p-3 mb-6 border rounded-lg focus:outline-none focus:ring-2 bg-gray-900 border-gray-700 placeholder-gray-400 focus:ring-violet-500"
         />
 
         <button
           type="submit"
           disabled={processing}
-          className={`w-full py-3 rounded-lg transition flex items-center justify-center gap-2 ${processing ? 'bg-violet-400 cursor-not-allowed' : 'bg-violet-600 hover:bg-violet-700'} text-white`}
+          className={`w-full py-3 rounded-lg transition flex items-center justify-center gap-2 ${
+            processing ? "bg-violet-400 cursor-not-allowed" : "bg-violet-600 hover:bg-violet-700"
+          } text-white`}
         >
-          {processing ? (<><span role="img" aria-label="cat" className="animate-bounce">🐱</span> Processing…</>) : 'Sign In'}
+          {processing ? (
+            <>
+              <span role="img" aria-label="cat" className="animate-bounce">
+                🐱
+              </span>
+              Processing…
+            </>
+          ) : (
+            "Sign In"
+          )}
         </button>
 
         {/* Admin page link */}
@@ -118,25 +130,34 @@ export default function Home() {
               <div className="absolute inset-y-0 left-0 w-1/3 bg-violet-500 animate-[slide_1.2s_linear_infinite]"></div>
             </div>
             <style jsx>{`
-              @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+              @keyframes slide {
+                0% {
+                  transform: translateX(-100%);
+                }
+                100% {
+                  transform: translateX(300%);
+                }
+              }
             `}</style>
           </div>
         )}
 
-        {/* Theme toggle removed: single dark theme */}
-
         {message && (
           <p
             className={`mt-4 text-center text-sm italic ${
-              message.toLowerCase().includes('success')
-                ? 'text-green-500'
-                : message.toLowerCase().includes('no active account found with the given credentials')
-                ? 'text-red-500'
-                : message.startsWith('❌')
-                ? 'text-red-500'
-                : 'text-gray-300'
+              message.includes("success")
+                ? "text-green-500"
+                : message.toLowerCase().includes("invalid")
+                ? "text-red-500"
+                : message.startsWith("HTTP 4")
+                ? "text-red-400"
+                : message.startsWith("HTTP 5")
+                ? "text-orange-400"
+                : "text-gray-300"
             }`}
-          >{message}</p>
+          >
+            {message}
+          </p>
         )}
       </form>
     </main>
