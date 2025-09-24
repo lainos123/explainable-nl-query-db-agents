@@ -8,7 +8,7 @@ import MobileMenu from "./mobile_menu";
 import { useStreamingLogic } from "./streaming_logic";
 import { useResendDeleteEdit } from "./resend_delete_edit";
 import ChatBox from "./chatbox";
-import InsertBox from "./insert_box";
+import InsertBox, { InsertBoxHandle } from "./insert_box";
 import { streamAgents, deleteAgentsCache } from "../services/api";
 
 export interface ChatMessage {
@@ -22,22 +22,20 @@ export interface ChatMessage {
 export default function ChatbotPage() {
 	const router = useRouter();
 	const [menuMinimized, setMenuMinimized] = useState(false);
-	const [messages, setMessages] = useState<ChatMessage[]>(() => {
-		// Lazy initializer reads cached messages from localStorage on first client render.
-		// This prevents a render/race where children persist an empty array before
-		// the cache is restored (which caused chat to be lost on F5).
-		if (typeof window === "undefined") return [];
+	const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+	// Restore cached messages after mount (do not read localStorage during SSR/client initial render)
+	useEffect(() => {
 		try {
 			const cache = localStorage.getItem("chatbot_messages");
 			if (cache) {
 				const parsed = JSON.parse(cache);
-				if (Array.isArray(parsed)) return parsed;
+				if (Array.isArray(parsed)) setMessages(parsed);
 			}
 		} catch (e) {
 			console.warn("Failed to read chat cache during init", e);
 		}
-		return [];
-	});
+	}, []);
 	const [loadingBot, setLoadingBot] = useState(false);
 	const [entering, setEntering] = useState(true);
 	const [username, setUsername] = useState<string | null>(null);
@@ -72,6 +70,17 @@ export default function ChatbotPage() {
 		const { sendUserMessage } = useStreamingLogic(setMessages, setLoadingBot);
 		const { editMessage, deleteMessage, resendUserMessage } = useResendDeleteEdit(messages, setMessages, setLoadingBot);
 
+		const insertRef = React.useRef<InsertBoxHandle | null>(null);
+
+		// expose helper for dev/testing to insert text into input
+		useEffect(() => {
+			if (typeof window === 'undefined') return;
+			(window as any).insertChatInput = (text: string, append = false) => {
+				try { insertRef.current?.insertText(text, append); } catch (e) { console.warn(e); }
+			};
+			return () => { try { delete (window as any).insertChatInput; } catch {} };
+		}, []);
+
 	return (
 		<div className={`min-h-screen w-full flex bg-gray-900 text-gray-100 relative`}> 
 			{/* Desktop sidebar with smooth slide */
@@ -98,7 +107,7 @@ export default function ChatbotPage() {
 						onResend={resendUserMessage}
 						username={username}
 					/>
-					<InsertBox onSend={sendUserMessage} sending={loadingBot} />
+					<InsertBox ref={insertRef} onSend={sendUserMessage} sending={loadingBot} />
 				</div>
 			</main>
 			{menuMinimized && (

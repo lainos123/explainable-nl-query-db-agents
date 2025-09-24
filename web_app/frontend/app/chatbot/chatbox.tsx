@@ -20,16 +20,26 @@ const ChatBox: React.FC<ChatBoxProps> = ({ messages, loadingBot, onEdit, onDelet
   const [editValue, setEditValue] = useState("");
   const [dots, setDots] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // Chat cache state
-  const [cachedMessages, setCachedMessages] = useState<{ id: string; sender: "user" | "bot"; text: string }[]>(() => {
-    if (typeof window !== "undefined") {
-      const cache = localStorage.getItem("chatbot_messages");
-      if (cache) return JSON.parse(cache);
-    }
-    return [];
-  });
+  // Chat cache state (avoid reading localStorage during render to prevent hydration mismatch)
+  const [cachedMessages, setCachedMessages] = useState<{ id: string; sender: "user" | "bot"; text: string }[]>([]);
   // Track whether we've synced the initial cache to avoid overwriting it with an empty array
-  const restoredRef = useRef<boolean>(cachedMessages.length > 0);
+  const restoredRef = useRef<boolean>(false);
+
+  // Restore cache after mount
+  useEffect(() => {
+    try {
+      const cache = localStorage.getItem("chatbot_messages");
+      if (cache) {
+        const parsed = JSON.parse(cache);
+        if (Array.isArray(parsed)) {
+          setCachedMessages(parsed);
+          restoredRef.current = parsed.length > 0;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   // 401 handling is centralized via performLogout; no separate modal is needed
 
