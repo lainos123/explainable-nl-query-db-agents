@@ -4,6 +4,12 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.core.cache import cache
 from .models import Files, APIKeys
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+from .models import UserLimits, DailyUsage
+from django.contrib.auth import get_user_model
 
 # Delete file from filesystem when Files instance is deleted
 @receiver(post_delete, sender=Files)
@@ -48,4 +54,36 @@ def update_file_size_on_save(sender, instance, created, **kwargs):
             instance.size = file_size
             # Avoid recursion by updating only the field
             Files.objects.filter(pk=instance.pk).update(size=file_size)
+
+
+# Ensure related per-user defaults exist when a User is created
+@receiver(post_save, sender=get_user_model())
+def create_user_related_defaults(sender, instance, created, **kwargs):
+    """On user creation ensure APIKeys, UserLimits and a DailyUsage row for today exist.
+
+    This runs for any user creation (including superusers) so the UI and usage
+    endpoints don't need to handle missing related objects.
+    """
+    if not created:
+        return
+
+    # Create APIKeys if missing
+    try:
+        APIKeys.objects.get_or_create(user=instance)
+    except Exception:
+        # be defensive: don't let signal crash user creation
+        pass
+
+    # Create default limits
+    try:
+        UserLimits.objects.get_or_create(user=instance)
+    except Exception:
+        pass
+
+    # Create today's DailyUsage with zero chats
+    try:
+        today = timezone.now().date()
+        DailyUsage.objects.get_or_create(user=instance, date=today, defaults={"chats_used": 0})
+    except Exception:
+        pass
 

@@ -17,6 +17,7 @@ from django.utils import timezone
 from datetime import date
 
 from .models import Files, APIKeys, DailyUsage, UserLimits
+from .models import Chats
 from .limit_rate import GBLimitMixin
 from .serializers import FilesSerializer, APIKeysSerializer
 from rest_framework.views import APIView
@@ -131,7 +132,40 @@ class FilesViewSet(GBLimitMixin, viewsets.ModelViewSet):
             schema_builder.build_schema_ab(sql_file_paths_json, schema_dir)
             schema_builder.build_schema_c(sql_file_paths_json, schema_dir)
 
-            return Response(saved, status=status.HTTP_201_CREATED)
+            # After successful import, update usage cache so frontend can sync immediately
+            try:
+                today = timezone.now().date()
+                du, _ = DailyUsage.objects.get_or_create(user=user, date=today, defaults={'chats_used': 0})
+                cache_key = f"usage_cache:{user.id}"
+                # compute used bytes and other fields for a best-effort payload
+                agg = Files.objects.filter(user=user).aggregate(total=Sum('size'))
+                used_bytes = int(agg.get('total') or 0)
+                GB = 1024 ** 3
+                limits, _ = UserLimits.objects.get_or_create(user=user)
+                now = timezone.now()
+                next_day = (now + timezone.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+                seconds_until_reset = int((next_day - now).total_seconds())
+                payload = {
+                    'max_chats': limits.max_chats,
+                    'max_gb': limits.max_gb_db,
+                    'chats_used_today': du.chats_used,
+                    'used_bytes': used_bytes,
+                    'max_bytes': int(limits.max_gb_db) * GB,
+                    'seconds_until_reset': seconds_until_reset,
+                }
+                from django.core.cache import cache as _cache
+                try:
+                    _cache.set(cache_key, payload, 60)
+                except Exception:
+                    pass
+            except Exception:
+                payload = None
+
+            response_body = {'saved': saved}
+            if payload:
+                response_body['usage'] = payload
+
+            return Response(response_body, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -145,7 +179,37 @@ class FilesViewSet(GBLimitMixin, viewsets.ModelViewSet):
                 if f.file and f.file.path and os.path.isfile(f.file.path):
                     os.remove(f.file.path)
             files.delete()
-            return Response({"status": "All files deleted."}, status=200)
+            # update usage cache after clearing
+            try:
+                today = timezone.now().date()
+                du, _ = DailyUsage.objects.get_or_create(user=user, date=today, defaults={'chats_used': 0})
+                agg = Files.objects.filter(user=user).aggregate(total=Sum('size'))
+                used_bytes = int(agg.get('total') or 0)
+                GB = 1024 ** 3
+                limits, _ = UserLimits.objects.get_or_create(user=user)
+                now = timezone.now()
+                next_day = (now + timezone.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+                seconds_until_reset = int((next_day - now).total_seconds())
+                payload = {
+                    'max_chats': limits.max_chats,
+                    'max_gb': limits.max_gb_db,
+                    'chats_used_today': du.chats_used,
+                    'used_bytes': used_bytes,
+                    'max_bytes': int(limits.max_gb_db) * GB,
+                    'seconds_until_reset': seconds_until_reset,
+                }
+                from django.core.cache import cache as _cache
+                try:
+                    _cache.set(f"usage_cache:{user.id}", payload, 60)
+                except Exception:
+                    pass
+            except Exception:
+                payload = None
+
+            resp = {"status": "All files deleted."}
+            if payload:
+                resp['usage'] = payload
+            return Response(resp, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
@@ -228,19 +292,15 @@ class UsageView(APIView):
     def get(self, request):
         user = request.user
 
-        # max values from settings
-        try:
-            limits = user.userlimits
-            max_chats = limits.max_chats
-            max_gb = limits.max_gb_db
-        except UserLimits.DoesNotExist:
-            max_chats = 0
-            max_gb = 0
+        # Ensure default related rows exist (defensive for older users)
+        limits, _ = UserLimits.objects.get_or_create(user=user)
+        max_chats = limits.max_chats
+        max_gb = limits.max_gb_db
 
-        # today's chats used
+        # today's chats used; create row if missing
         today = timezone.now().date()
-        usage = DailyUsage.objects.filter(user=user, date=today).first()
-        chats_used = usage.chats_used if usage else 0
+        usage_obj, _ = DailyUsage.objects.get_or_create(user=user, date=today, defaults={"chats_used": 0})
+        chats_used = usage_obj.chats_used
 
         # used bytes on server
         agg = Files.objects.filter(user=user).aggregate(total=Sum('size'))
@@ -265,3 +325,40 @@ class UsageView(APIView):
                 "seconds_until_reset": seconds_until_reset,
             }
         )
+
+
+@api_view(["GET", "POST", "DELETE"])
+@permission_classes([IsAuthenticated])
+def chats_view(request):
+    """GET: return saved chat messages for the current user
+       POST: accept JSON { messages: [...] } and save into Chats model
+       DELETE: remove saved chat history for user
+    """
+    try:
+        user = request.user
+        if request.method == "GET":
+            try:
+                obj = Chats.objects.get(user=user)
+                data = obj.chats
+                try:
+                    parsed = json.loads(data) if data else []
+                except Exception:
+                    parsed = []
+                return Response({"messages": parsed}, status=200)
+            except Chats.DoesNotExist:
+                return Response({"messages": []}, status=200)
+
+        if request.method == "POST":
+            msgs = request.data.get("messages")
+            if msgs is None:
+                return Response({"error": "Missing messages"}, status=400)
+            obj, _ = Chats.objects.get_or_create(user=user)
+            obj.chats = json.dumps(msgs, ensure_ascii=False)
+            obj.save(update_fields=["chats"])
+            return Response({"status": "saved"}, status=200)
+
+        if request.method == "DELETE":
+            Chats.objects.filter(user=user).delete()
+            return Response({"status": "deleted"}, status=200)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)

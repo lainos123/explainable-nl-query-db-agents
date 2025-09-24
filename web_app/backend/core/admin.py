@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Files, APIKeys, UserLimits, DailyUsage
+from .models import Files, Chats, APIKeys, UserLimits, DailyUsage
 
 
 @admin.register(Files)
@@ -8,9 +8,10 @@ class FilesAdmin(admin.ModelAdmin):
 	list_filter = ("user",)
 	search_fields = ("database",)
 
-
-# Chats model removed - frontend keeps chat sessions in localStorage
-
+@admin.register(Chats)
+class ChatsAdmin(admin.ModelAdmin):
+	list_display = ("user", "time")
+	search_fields = ("user__username",)
 
 @admin.register(APIKeys)
 class APIKeysAdmin(admin.ModelAdmin):
@@ -21,7 +22,6 @@ class APIKeysAdmin(admin.ModelAdmin):
 class UserLimitsAdmin(admin.ModelAdmin):
 	list_display = ("user", "max_chats", "max_gb_db")
 	search_fields = ("user__username",)
-
 
 @admin.register(DailyUsage)
 class DailyUsageAdmin(admin.ModelAdmin):
