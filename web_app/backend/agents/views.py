@@ -139,4 +139,3 @@ class AgentViewSet(viewsets.ViewSet):
         """Clear last cached agent result for this user."""
         cache.delete(f"{CACHE_KEY_PREFIX}:{request.user.id}")
         return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_204_NO_CONTENT)

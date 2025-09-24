@@ -81,7 +81,6 @@ def run(api_key, payload: dict, user_id: int):
             "query": user_query,
             "database": db_name,
             "relevant_tables": parsed.get("relevant_tables", selected_tables),
-            "tables": parsed.get("relevant_tables", selected_tables),
             "SQL": parsed.get("SQL") or parsed.get("SQL Code"),
             "reasons": parsed.get("reasons", payload.get("reasons", "")),
         }

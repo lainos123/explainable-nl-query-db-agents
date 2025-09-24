@@ -77,3 +77,82 @@ Output D:
         }
     ]
 }
+
+============================================================
+=== Test Run 2025-09-24T12:34:32.221695+00:00 ===
+
+Running pipeline for user_id=1, username=admin
+User query: Please show the themes of competitions with host cities having populations larger than 1000
+
+>>> Agent A
+
+=== PROMPT SENT TO LLM ===
+text='\nPlease selects the most relevant database and table in order to answer user\'s query.\nUser query: Please show the themes of competitions with host cities having populations larger than 1000\nSchema info: score: 0.5177, content: {"database": "farm", "table": "farm_competition", "columns": ["Competition_ID", "Year", "Theme", "Host_city_ID", "Hosts"]}\nscore: 0.5539, content: {"database": "theme_gallery", "table": "exhibition_record", "columns": ["Exhibition_ID", "Date", "Attendance"]}\nscore: 0.5553, content: {"database": "cre_Theme_park", "table": "Hotels", "columns": ["hotel_id", "star_rating_code", "pets_allowed_yn", "price_range", "other_hotel_details"]}\nscore: 0.5574, content: {"database": "cre_Theme_park", "table": "Royal_Family", "columns": ["Royal_Family_ID", "Royal_Family_Details"]}\nscore: 0.5605, content: {"database": "city_record", "table": "hosting_city", "columns": ["Year", "Match_ID", "Host_City"]}\nWhich database and tables has the most relevant information for this query? Selecting 1 database only. \nRespond the database name, table and column infomation in JSON format: { "db_name": "...", "tables": ["..."], "columns":["..."]}\n'
+=== END PROMPT ===
+
+Output A:
+{
+    "query": "Please show the themes of competitions with host cities having populations larger than 1000",
+    "database": "farm",
+    "reasons": ""
+}
+
+>>> Agent B
+
+=== PROMPT SENT TO LLM ===
+text='Given the selected database schema, return ONLY valid JSON with exactly these keys\n  "relevant_tables": ["..."],\n  "reasons": "..." \n\nUser query: Please show the themes of competitions with host cities having populations larger than 1000\nDB schema JSON: {"tables": ["city", "farm", "farm_competition", "competition_record"], "columns": ["City_ID", "Official_Name", "Status", "Area_km_2", "Population", "Census_Ranking", "Farm_ID", "Year", "Total_Horses", "Working_Horses", "Total_Cattle", "Oxen", "Bulls", "Cows", "Pigs", "Sheep_and_Goats", "Competition_ID", "Theme", "Host_city_ID", "Hosts", "Rank"]}\nDo not wrap all_tables in an extra list. Do not include any text outside JSON.'
+=== END PROMPT ===
+
+Output B:
+{
+    "query": "Please show the themes of competitions with host cities having populations larger than 1000",
+    "database": "farm",
+    "tables": [
+        "competition_record",
+        "city"
+    ],
+    "relevant_tables": [
+        "competition_record",
+        "city"
+    ],
+    "reasons": "Retrieve competition_record.Theme and link to host city via competition_record.Host_city_ID = city.City_ID; filter city.Population > 1000 to return themes of competitions hosted in cities with population greater than 1000."
+}
+
+>>> Agent C
+
+=== PROMPT SENT TO LLM ===
+text='Given the selected database schema and selected table names, please be case insensitive, return ONLY valid JSON with exactly these keys\n  "relevant_tables": ["..."],\n  "SQL Code": "..."\n\n  "reasons": "..." \n\nUser query: Please show the themes of competitions with host cities having populations larger than 1000\nDB schema JSON: {"tables": {"city": {"columns": ["City_ID", "Official_Name", "Status", "Area_km_2", "Population", "Census_Ranking"], "primary_key": ["City_ID"], "foreign_keys": []}, "farm": {"columns": ["Farm_ID", "Year", "Total_Horses", "Working_Horses", "Total_Cattle", "Oxen", "Bulls", "Cows", "Pigs", "Sheep_and_Goats"], "primary_key": ["Farm_ID"], "foreign_keys": []}, "farm_competition": {"columns": ["Competition_ID", "Year", "Theme", "Host_city_ID", "Hosts"], "primary_key": ["Competition_ID"], "foreign_keys": [{"from_column": "Host_city_ID", "ref_table": "city", "ref_column": "City_ID"}]}, "competition_record": {"columns": ["Competition_ID", "Farm_ID", "Rank"], "primary_key": ["Competition_ID", "Farm_ID"], "foreign_keys": [{"from_column": "Farm_ID", "ref_table": "farm", "ref_column": "Farm_ID"}, {"from_column": "Competition_ID", "ref_table": "farm_competition", "ref_column": "Competition_ID"}]}}}\nSelected tables: ["competition_record", "city"]\nDo not wrap all_tables in an extra list. Do not include any text outside JSON.'
+=== END PROMPT ===
+
+Output C:
+{
+    "query": "Please show the themes of competitions with host cities having populations larger than 1000",
+    "database": "farm",
+    "relevant_tables": [
+        "farm_competition",
+        "city"
+    ],
+    "tables": [
+        "farm_competition",
+        "city"
+    ],
+    "SQL": "SELECT DISTINCT fc.Theme FROM farm_competition fc JOIN city c ON fc.Host_city_ID = c.City_ID WHERE c.Population > 1000;",
+    "reasons": "farm_competition stores competition themes and the host city id (Host_city_ID); city stores city populations (Population). Join on Host_city_ID = City_ID and filter cities with Population > 1000. DISTINCT ensures each theme appears only once. No case-sensitive text comparisons are required for this query."
+}
+
+>>> Agent D (SQL execution)
+Output D:
+{
+    "success": true,
+    "result": [
+        {
+            "Theme": "Carnival M is back!"
+        },
+        {
+            "Theme": "Codehunters"
+        },
+        {
+            "Theme": "MTV Asia Aid"
+        }
+    ]
+}
