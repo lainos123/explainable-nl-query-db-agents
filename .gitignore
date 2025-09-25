@@ -5,3 +5,4 @@ __pycache__/
 .env
 /models/ # these will be large and can be generated locally for now
 /capstone*
+/web_app/backend/media/
