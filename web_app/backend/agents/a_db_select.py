@@ -38,7 +38,7 @@ def create_or_load_embeddings(api_key: str, user_id: int):
         )
 
     if not os.path.exists(schema_file):
-        raise FileNotFoundError(f"Schema file not found for user {user_id}: {schema_file}")
+        raise FileNotFoundError(f"Database file not found, please upload a database first.")
 
     schema_texts = load_processed_schema(schema_file)
     vectorstore = FAISS.from_texts(schema_texts, embeddings)

@@ -24,8 +24,8 @@ if "%choice%"=="1" (
     start cmd /k "cd backend && call venv\Scripts\python.exe -m uvicorn backend.asgi:application --host 127.0.0.1 --port 8001"
 
     echo Opening browser windows...
-    start http://localhost:8000
     start http://localhost:8001/admin/
+    start http://localhost:8000
     goto end
 )
 
@@ -50,4 +50,3 @@ if "%choice%"=="3" (
 echo Invalid choice: "%choice%". Please run the script again and enter 1, 2, or 3.
 
 :end
-pause

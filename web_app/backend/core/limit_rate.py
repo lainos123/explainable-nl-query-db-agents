@@ -9,6 +9,7 @@ import zipfile
 import os
 
 def can_user_chat(user):
+    # Deprecated: use has_chat_quota / increment_user_chats for clearer semantics.
     today = timezone.now().date()
     usage, _ = DailyUsage.objects.get_or_create(user=user, date=today)
     try:
@@ -17,11 +18,42 @@ def can_user_chat(user):
     except UserLimits.DoesNotExist:
         max_chats = 0
 
-    if usage.chats_used >= max_chats:
-        return False
-    usage.chats_used += 1
-    usage.save()
-    return True
+    return usage.chats_used < max_chats
+
+
+def has_chat_quota(user) -> bool:
+    """Return True if user has quota left for today's chats (does not mutate state)."""
+    today = timezone.now().date()
+    usage, _ = DailyUsage.objects.get_or_create(user=user, date=today)
+    try:
+        limits = user.userlimits
+        max_chats = getattr(limits, 'max_chats', 0)
+    except UserLimits.DoesNotExist:
+        max_chats = 0
+    return usage.chats_used < max_chats
+
+
+def increment_user_chats(user, amount: int = 1):
+    """Atomically increment the user's chats_used counter for today by `amount`.
+    Safe against race conditions; returns the new value or None on failure."""
+    from django.db.models import F
+    today = timezone.now().date()
+    try:
+        du, created = DailyUsage.objects.get_or_create(user=user, date=today, defaults={'chats_used': 0})
+    except Exception:
+        # Fallback to get after create race
+        du = DailyUsage.objects.get(user=user, date=today)
+    try:
+        DailyUsage.objects.filter(pk=du.pk).update(chats_used=F('chats_used') + amount)
+        du.refresh_from_db()
+        return du.chats_used
+    except Exception:
+        try:
+            du.chats_used = du.chats_used + amount
+            du.save(update_fields=['chats_used'])
+            return du.chats_used
+        except Exception:
+            return None
 
 
 class ChatLimitMixin:

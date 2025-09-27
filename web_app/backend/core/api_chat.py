@@ -17,21 +17,22 @@ class APIKeysViewSet(viewsets.ViewSet):
     def get_object(self):
         obj, _ = APIKeys.objects.get_or_create(user=self.request.user)
         return obj
-
-    def retrieve(self, request):
-        obj = self.get_object()
-        serializer = APIKeysSerializer(obj)
-        return Response(serializer.data)
-
     def create(self, request):
         obj = self.get_object()
         new_value = request.data.get("key", "")
         obj.api_key = new_value
         obj.save(update_fields=["api_key"])
-        return Response(
-            {"message": "API key updated", "api_key": obj.api_key},
-            status=status.HTTP_200_OK,
-        )
+        # Do NOT return the raw API key. Return only has_key flag.
+        serializer = APIKeysSerializer(obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, pk=None):
+        # full update (PUT) - same behavior as create for this one-field model
+        return self.create(request)
+
+    def partial_update(self, request, pk=None):
+        # PATCH
+        return self.create(request)
 
 
 class UsageView(APIView):

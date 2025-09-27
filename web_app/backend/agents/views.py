@@ -27,6 +27,7 @@ import threading
 import time
 from django.utils import timezone
 from core.models import DailyUsage
+from core.limit_rate import has_chat_quota, increment_user_chats
 
 # Pipeline agents
 AGENTS = [
@@ -54,6 +55,15 @@ class AgentViewSet(viewsets.ViewSet):
     def create(self, request, pk=None):
         """Run the full agent pipeline as an SSE stream."""
         api_key = get_api_key(request.user)
+
+        # Quick pre-check: block request if user has no chat quota left for today.
+        try:
+            if not has_chat_quota(request.user):
+                return Response({"error": "Daily chat limit reached."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+        except Exception:
+            # If quota check fails for any reason, allow the request to proceed rather than blocking
+            # (fail-open to avoid denying service on incidental errors).
+            pass
 
         def now_str():
             return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -113,49 +123,58 @@ class AgentViewSet(viewsets.ViewSet):
                 }
                 yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
+                # Increment user's chat usage for each meaningful response emitted by an agent.
+                try:
+                    # Only increment when the agent produced a non-error output
+                    if not (isinstance(result, dict) and result.get('error')):
+                        new_count = increment_user_chats(request.user, amount=1)
+                        try:
+                            # read user's limit
+                            max_chats = getattr(request.user.userlimits, 'max_chats', 0)
+                        except Exception:
+                            max_chats = 0
+
+                        # If user reached or exceeded their limit as a result of this increment,
+                        # emit an error event and stop the pipeline to prevent further work.
+                        if new_count is not None and max_chats and new_count >= max_chats:
+                            yield f"data: {json.dumps({'status': 'error', 'agent': name, 'error': 'Daily chat limit reached during run', 'time': now_str()}, ensure_ascii=False)}\n\n"
+                            break
+                except Exception:
+                    # Do not break the stream if increment or limit-check fails
+                    pass
+
                 # Stop pipeline if error returned
                 if isinstance(result, dict) and result.get("error"):
                     yield f"data: {json.dumps({'status': 'error', 'agent': name, 'time': now_str()}, ensure_ascii=False)}\n\n"
                     break
 
             # Pipeline finished
-            # Update usage: count as a chat only if pipeline finished and returned no error
+            # Build final usage payload (do not mutate usage here; increments occurred during the stream)
             final_usage_payload = None
             try:
-                if not (isinstance(result, dict) and result.get('error')):
-                    today = timezone.now().date()
-                    du, created = DailyUsage.objects.get_or_create(user=request.user, date=today, defaults={'chats_used': 0})
-                    # Use F() update to avoid race conditions
-                    try:
-                        from django.db.models import F
-                        DailyUsage.objects.filter(pk=du.pk).update(chats_used=F('chats_used') + 1)
-                        # Refresh du.chats_used value
-                        du.refresh_from_db()
-                    except Exception:
-                        # fallback: read-modify-write
-                        DailyUsage.objects.filter(pk=du.pk).update(chats_used=du.chats_used + 1)
-                        du.refresh_from_db()
+                today = timezone.now().date()
+                du, _ = DailyUsage.objects.get_or_create(user=request.user, date=today, defaults={'chats_used': 0})
 
-                    # compute used_bytes and limits for final payload
-                    from core.models import Files, UserLimits
-                    from django.db.models import Sum
-                    agg = Files.objects.filter(user=request.user).aggregate(total=Sum('size'))
-                    used_bytes = int(agg.get('total') or 0)
-                    limits, _ = UserLimits.objects.get_or_create(user=request.user)
-                    GB = 1024 ** 3
-                    now = timezone.now()
-                    next_day = (now + timezone.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-                    seconds_until_reset = int((next_day - now).total_seconds())
-                    final_usage_payload = {
-                        'max_chats': limits.max_chats,
-                        'max_gb': limits.max_gb_db,
-                        'chats_used_today': du.chats_used,
-                        'used_bytes': used_bytes,
-                        'max_bytes': int(limits.max_gb_db) * GB,
-                        'seconds_until_reset': seconds_until_reset,
-                        'server_time': now.isoformat(),
-                        'reset_time': next_day.isoformat(),
-                    }
+                # compute used_bytes and limits for final payload
+                from core.models import Files, UserLimits
+                from django.db.models import Sum
+                agg = Files.objects.filter(user=request.user).aggregate(total=Sum('size'))
+                used_bytes = int(agg.get('total') or 0)
+                limits, _ = UserLimits.objects.get_or_create(user=request.user)
+                GB = 1024 ** 3
+                now = timezone.now()
+                next_day = (now + timezone.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+                seconds_until_reset = int((next_day - now).total_seconds())
+                final_usage_payload = {
+                    'max_chats': limits.max_chats,
+                    'max_gb': limits.max_gb_db,
+                    'chats_used_today': du.chats_used,
+                    'used_bytes': used_bytes,
+                    'max_bytes': int(limits.max_gb_db) * GB,
+                    'seconds_until_reset': seconds_until_reset,
+                    'server_time': now.isoformat(),
+                    'reset_time': next_day.isoformat(),
+                }
             except Exception:
                 # avoid crashing the stream on usage tracking errors
                 final_usage_payload = None

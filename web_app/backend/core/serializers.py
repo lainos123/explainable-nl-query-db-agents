@@ -9,6 +9,12 @@ class FilesSerializer(serializers.ModelSerializer):
 # Chats model removed; frontend stores chat session in localStorage and can POST to download endpoint
 
 class APIKeysSerializer(serializers.ModelSerializer):
+    has_key = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = APIKeys
-        fields = ['id', 'user', 'api_key']
+        # do NOT expose the api_key field
+        fields = ['id', 'user', 'has_key']
+
+    def get_has_key(self, obj):
+        return bool(obj.api_key)
