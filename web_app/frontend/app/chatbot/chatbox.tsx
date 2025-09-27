@@ -229,19 +229,14 @@ function BotJsonRender({ data }: { data: any }) {
               <button
                 className="px-3 py-1 rounded bg-blue-600 text-white text-xs font-medium hover:bg-blue-700"
                 onClick={() => {
-                  const win = window.open("", "_blank");
-                  if (win) {
-                    win.document.write(`<html><head><title>Full SQL Result</title><style>body{background:#18181b;color:#eee;font-family:sans-serif;}table{border-collapse:collapse;width:100%;margin-top:1em;}th,td{border:1px solid #333;padding:6px;}th{background:#222;}td{background:#18181b;}tr:nth-child(even){background:#222;} .scrollable{max-height:80vh;overflow:auto;}</style></head><body><h2>Full SQL Result</h2><div class='scrollable'>`);
-                    win.document.write('<table>');
-                    win.document.write('<thead><tr>' + allHeaders.map(h => `<th>${h}</th>`).join('') + '</tr></thead>');
-                    win.document.write('<tbody>');
-                    data.result.forEach((row: Record<string, any>) => {
-                      win.document.write('<tr>' + allHeaders.map(h => `<td>${row[h]}</td>`).join('') + '</tr>');
-                    });
-                    win.document.write('</tbody></table></div>');
-                    win.document.write('</body></html>');
-                    win.document.close();
+                  try {
+                    // Save full result to sessionStorage so /result page can render it
+                    sessionStorage.setItem('last_full_result', JSON.stringify(data));
+                  } catch (e) {
+                    // ignore storage errors
                   }
+                  // navigate in-app to the result page
+                  try { router.push('/result'); } catch (e) { window.location.href = '/result'; }
                 }}
               >View all columns & rows</button>
               <button

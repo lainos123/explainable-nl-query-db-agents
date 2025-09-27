@@ -58,7 +58,7 @@ export function renderStreamData(data: any): string {
 
   return out || "ℹ️ No data parsed.";
 }
-import { ChatMessage } from "./page";
+import type { ChatMessage } from "./page";
 import { streamAgents, deleteAgentsCache, apiFetch } from "../services/api";
 
 export function useStreamingLogic(setMessages: (fn: (prev: ChatMessage[]) => ChatMessage[]) => void, setLoadingBot: (v: boolean) => void) {

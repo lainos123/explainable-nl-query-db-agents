@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { apiFetch } from "../services/api";
 import { performLogout } from "../services/logout";
 import FileTable from "./file_table";
@@ -139,9 +140,26 @@ const ViewFilesPage: React.FC = () => {
     }
   };
 
+  const router = useRouter();
+
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">Database Files</h1>
+    // Full screen overlay dark-themed (match ResultPage)
+    <div className="fixed inset-0 z-50 bg-gray-900 text-gray-100 p-4 overflow-auto">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <button
+              className="inline-flex items-center gap-2 px-3 py-1 rounded bg-gray-800 text-white text-sm"
+              onClick={() => {
+                try { sessionStorage.removeItem('last_full_result'); } catch {}
+                router.back();
+              }}
+            >
+              ← Back
+            </button>
+            <h1 className="text-lg font-semibold ml-2">Database Files</h1>
+          </div>
+        </div>
       {/* Storage usage (authoritative from server) */}
       <div className="text-sm text-gray-400 mb-4">
         {usage ? (
@@ -189,6 +207,7 @@ const ViewFilesPage: React.FC = () => {
           downloadFile={downloadFile}
         />
       )}
+      </div>
     </div>
   );
 };

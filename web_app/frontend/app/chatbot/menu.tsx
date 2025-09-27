@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from 'next/navigation';
 import { apiFetch } from "../services/api";
 
 interface MenuProps {
@@ -46,6 +47,8 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
     const iv = setInterval(tick, 1000);
     return () => clearInterval(iv);
   }, []);
+
+  const router = useRouter();
 
   // format remainingSeconds into readable countdown
   React.useEffect(() => {
@@ -358,7 +361,8 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
       <button
         className="w-full px-3 py-2 rounded bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 mt-8"
         onClick={() => {
-          window.open("/view-files", "_blank");
+          // navigate in-app instead of opening a new tab
+          router.push('/view-files');
         }}
       >
         View/Import/Delete Databases

@@ -1,11 +1,19 @@
 "use client"
 
 import React, { useState } from "react";
+// Shared types used by other chatbot modules
+export type ChatMessage = {
+  id: string;
+  sender: "user" | "bot";
+  text: string;
+  createdAt: number;
+  updatedAt?: number;
+};
 import Menu from "./menu";
 import MobileMenu from "./mobile_menu";
 import ChatBox from "./chatbox";
 import InsertBox, { InsertBoxHandle } from "./insert_box";
-import { useChatbotLogic } from "./chatbot_logic.tsx";
+import { useChatbotLogic } from "./chatbot_logic";
 
 export default function ChatbotPage() {
   const {

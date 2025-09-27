@@ -1,4 +1,4 @@
-import { ChatMessage } from "./page";
+import type { ChatMessage } from "./page";
 import { streamAgents, deleteAgentsCache } from "../services/api";
 const SEP = "\n\n---\n\n";
 

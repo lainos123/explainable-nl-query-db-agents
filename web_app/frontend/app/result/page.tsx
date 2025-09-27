@@ -51,51 +51,77 @@ const ResultPage: React.FC = () => {
     URL.revokeObjectURL(a.href);
   };
 
-  return (
-    // Full screen overlay dark-themed
-    <div className="fixed inset-0 z-50 bg-gray-900 text-gray-100 p-4 overflow-auto">
-      <div className="max-w-[98vw] mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <button className="inline-flex items-center gap-2 px-3 py-1 rounded bg-gray-800 text-white text-sm" onClick={() => window.history.back()}>← Back</button>
-            <h1 className="text-lg font-semibold ml-2">Full Result</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className={`px-3 py-1 rounded text-sm ${rows ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-700 text-gray-300 cursor-not-allowed'}`} onClick={handleDownload} disabled={!rows}>Download CSV</button>
-            <button className="px-3 py-1 rounded bg-gray-800 text-sm" onClick={() => { try { sessionStorage.removeItem('last_full_result'); } catch {} window.history.back(); }}>Close</button>
-          </div>
+return (
+  // Full screen overlay dark-themed
+  <div className="fixed inset-0 z-50 bg-gray-900 text-gray-100 p-4 overflow-auto">
+    <div className="max-w-[98vw] mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <button
+            className="inline-flex items-center gap-2 px-3 py-1 rounded bg-gray-800 text-white text-sm"
+            onClick={() => {
+              try { sessionStorage.removeItem('last_full_result'); } catch {}
+              window.history.back();
+            }}
+          >
+            ← Back
+          </button>
+          <h1 className="text-lg font-semibold ml-2">Full Result</h1>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            className={`px-3 py-1 rounded text-sm ${
+              rows ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-700 text-gray-300 cursor-not-allowed'
+            }`}
+            onClick={handleDownload}
+            disabled={!rows}
+          >
+            Download CSV
+          </button>
+        </div>
+      </div>
 
-        {rows && rows.length > 0 ? (
-          <div className="w-full bg-gray-900">
-            <div className="overflow-auto border border-gray-700 rounded bg-gray-900">
-              <table className="min-w-full text-sm table-auto">
-                <thead className="sticky top-0 bg-gray-800">
-                  <tr>
+      {rows && rows.length > 0 ? (
+        <div className="w-full bg-gray-900">
+          <div className="overflow-auto border border-gray-700 rounded bg-gray-900">
+            <table className="min-w-full text-sm table-auto">
+              <thead className="sticky top-0 bg-gray-800">
+                <tr>
+                  {headers.map(h => (
+                    <th
+                      key={h}
+                      className="px-3 py-2 text-left text-xs uppercase tracking-wide text-gray-300 border-b border-gray-700"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'}>
                     {headers.map(h => (
-                      <th key={h} className="px-3 py-2 text-left text-xs uppercase tracking-wide text-gray-300 border-b border-gray-700">{h}</th>
+                      <td
+                        key={h}
+                        className="px-2 py-1 align-top border-b border-gray-700"
+                      >
+                        {String((r as any)[h] ?? '')}
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r, i) => (
-                    <tr key={i} className={`${i % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'}`}>
-                      {headers.map(h => (
-                        <td key={h} className="px-2 py-1 align-top border-b border-gray-700">{String((r as any)[h] ?? '')}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          <div className="text-gray-400">No full result available. Trigger a query with "View all columns & rows" to populate.</div>
-        )}
-
-      </div>
+        </div>
+      ) : (
+        <div className="text-gray-400">
+          No full result available. Trigger a query with "View all columns & rows" to populate.
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default ResultPage;
