@@ -7,22 +7,22 @@ It leverages OpenAI embeddings and a FAISS vector store to perform semantic sear
 
 Usage:
     # Test mode - interactive selection
-    python3 -m src.agents.agent_a --test
+    python3 -m scripts.agents.agent_a --test
 
     # Test mode - specific index (0-based)
-    python3 -m src.agents.agent_a --test --index 5
+    python3 -m scripts.agents.agent_a --test --index 5
 
     # Test mode with specific output mode and top_k
-    python3 -m src.agents.agent_a --test --index 5 --mode medium --top_k 10
+    python3 -m scripts.agents.agent_a --test --index 5 --mode medium --top_k 10
 
     # Production mode - provide query directly
-    python3 -m src.agents.agent_a --query "your query here"
+    python3 -m scripts.agents.agent_a --query "your query here"
 
     # Production mode with specific output mode and top_k
-    python3 -m src.agents.agent_a --query "your query here" --mode heavy --top_k 3
+    python3 -m scripts.agents.agent_a --query "your query here" --mode heavy --top_k 3
 
     # Quiet mode for multi-agent systems (suppresses all print statements)
-    python3 -m src.agents.agent_a --query "your query here" --quiet
+    python3 -m scripts.agents.agent_a --query "your query here" --quiet
 
 Parameters:
     --test: Run in test mode (interactive or with --index)
@@ -46,7 +46,7 @@ import pprint
 import sys
 
 # Import project config
-from src.config import EMBEDDINGS_FOLDER, PROJECT_ROOT, SCHEMA_PROCESSED_FILE
+from scripts.config import EMBEDDINGS_FOLDER, PROJECT_ROOT, SCHEMA_PROCESSED_FILE
 
 # Add project root to Python path
 sys.path.append(str(PROJECT_ROOT))
@@ -389,16 +389,16 @@ def main():
         # No arguments provided - show help
         parser.print_help()
         print("\nExamples:")
-        print("  python3 -m src.agents.agent_a --test")
-        print("  python3 -m src.agents.agent_a --test --index 5")
+        print("  python3 -m scripts.agents.agent_a --test")
+        print("  python3 -m scripts.agents.agent_a --test --index 5")
         print(
-            "  python3 -m src.agents.agent_a --test --index 5 --mode medium --top_k 10"
+            "  python3 -m scripts.agents.agent_a --test --index 5 --mode medium --top_k 10"
         )
-        print("  python3 -m src.agents.agent_a --query 'Find all students'")
+        print("  python3 -m scripts.agents.agent_a --query 'Find all students'")
         print(
-            "  python3 -m src.agents.agent_a --query 'Find all students' --mode medium --top_k 3"
+            "  python3 -m scripts.agents.agent_a --query 'Find all students' --mode medium --top_k 3"
         )
-        print("  python3 -m src.agents.agent_a --query 'Find all students' --quiet")
+        print("  python3 -m scripts.agents.agent_a --query 'Find all students' --quiet")
 
 
 if __name__ == "__main__":

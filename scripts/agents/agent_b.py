@@ -7,22 +7,22 @@ Used after Agent A picks the database.
 
 USAGE:
     # Test mode - interactive selection
-    python3 -m src.agents.agent_b --test
+    python3 -m scripts.agents.agent_b --test
 
     # Test mode - specific index (0-based)
-    python3 -m src.agents.agent_b --test --index 1
+    python3 -m scripts.agents.agent_b --test --index 1
 
     # Test mode with specific output mode
-    python3 -m src.agents.agent_b --test --index 1 --mode medium
+    python3 -m scripts.agents.agent_b --test --index 1 --mode medium
 
     # Production mode - provide query and database directly
-    python3 -m src.agents.agent_b --query "How many students are enrolled?" --database "college_2"
+    python3 -m scripts.agents.agent_b --query "How many students are enrolled?" --database "college_2"
 
     # Production mode with specific output mode
-    python3 -m src.agents.agent_b --query "How many students are enrolled?" --database "college_2" --mode heavy
+    python3 -m scripts.agents.agent_b --query "How many students are enrolled?" --database "college_2" --mode heavy
 
     # Quiet mode for multi-agent systems (suppresses all print statements)
-    python3 -m src.agents.agent_b --query "How many students?" --database "college_2" --quiet
+    python3 -m scripts.agents.agent_b --query "How many students?" --database "college_2" --quiet
 
 Parameters:
     --test: Run in test mode (interactive or with --index)
@@ -56,7 +56,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Union
 
 # Import project config
-from src.config import PROJECT_ROOT, SCHEMA_PROCESSED_FILE
+from scripts.config import PROJECT_ROOT, SCHEMA_PROCESSED_FILE
 
 # Add project root to Python path
 sys.path.append(str(PROJECT_ROOT))
@@ -382,17 +382,17 @@ def main():
         # No arguments provided - show help
         parser.print_help()
         print("\nExamples:")
-        print("  python3 -m src.agents.agent_b --test")
-        print("  python3 -m src.agents.agent_b --test --index 1")
-        print("  python3 -m src.agents.agent_b --test --index 1 --mode medium")
+        print("  python3 -m scripts.agents.agent_b --test")
+        print("  python3 -m scripts.agents.agent_b --test --index 1")
+        print("  python3 -m scripts.agents.agent_b --test --index 1 --mode medium")
         print(
-            "  python3 -m src.agents.agent_b --query 'How many students?' --database 'college_2'"
+            "  python3 -m scripts.agents.agent_b --query 'How many students?' --database 'college_2'"
         )
         print(
-            "  python3 -m src.agents.agent_b --query 'How many students?' --database 'college_2' --mode heavy"
+            "  python3 -m scripts.agents.agent_b --query 'How many students?' --database 'college_2' --mode heavy"
         )
         print(
-            "  python3 -m src.agents.agent_b --query 'How many students?' --database 'college_2' --quiet"
+            "  python3 -m scripts.agents.agent_b --query 'How many students?' --database 'college_2' --quiet"
         )
 
 

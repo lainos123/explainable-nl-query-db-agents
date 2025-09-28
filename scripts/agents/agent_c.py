@@ -6,25 +6,25 @@ Generates SQL from a user query, database name, and recommended tables (from Age
 
 USAGE:
     # Test mode - interactive selection
-    python3 -m src.agents.agent_c --test
+    python3 -m scripts.agents.agent_c --test
 
     # Test mode - specific index (0-based)
-    python3 -m src.agents.agent_c --test --index 1
+    python3 -m scripts.agents.agent_c --test --index 1
 
     # Test mode with specific output mode
-    python3 -m src.agents.agent_c --test --index 1 --mode medium
+    python3 -m scripts.agents.agent_c --test --index 1 --mode medium
 
     # Production mode with resasoning - provide query, database, and tables directly
-    python3 -m src.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --mode light
+    python3 -m scripts.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --mode light
 
     # Quiet mode (no debug output)
-    python3 -m src.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --mode light --quiet
+    python3 -m scripts.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --mode light --quiet
 
     # Production mode with resasoning - provide query, database, and tables directly
-    python3 -m src.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --mode medium
+    python3 -m scripts.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --mode medium
 
     # Quiet mode (no debug output)
-    python3 -m src.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --quiet
+    python3 -m scripts.agents.agent_c --query "How many students?" --database "college_2" --tables '{"Tables": ["student"], "Columns": ["id", "name"]}' --quiet
 
 PARAMETERS:
     --test                    Run in test mode (interactive or with --index)
@@ -63,7 +63,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Union, Optional
 
 # Import project config
-from src.config import PROJECT_ROOT, PROCESSED_SCHEMA_AI_FRIENDLY, SQL_TESTING_PATH
+from scripts.config import PROJECT_ROOT, PROCESSED_SCHEMA_AI_FRIENDLY, SQL_TESTING_PATH
 
 # Add project root to Python path
 sys.path.append(str(PROJECT_ROOT))
