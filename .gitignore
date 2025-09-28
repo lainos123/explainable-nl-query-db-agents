@@ -3,5 +3,5 @@ __pycache__/
 /data/spider_data
 /data/processed
 .env
-/models/ # these will be large and can be generated locally for now
 /capstone*
+*/venv/

@@ -14,10 +14,10 @@ interface MenuProps {
 const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onRequestLogout }) => {
   if (minimized) return null;
 
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/core/apikeys/`;
+  const apiUrl = `http://localhost:8000/api/core/apikeys/`;
   // single source of truth: usage comes from agents API cache or SSE usage events
-  const usageApi = `${process.env.NEXT_PUBLIC_API_URL}/api/core/usage/`;
-  const agentsApi = `${process.env.NEXT_PUBLIC_API_URL}/api/agents/`;
+  const usageApi = `http://localhost:8000/api/core/usage/`;
+  const agentsApi = `http://localhost:8000/api/agents/`;
   const getToken = () => localStorage.getItem("access_token");
 
   // backend now may return a slim usage object; make fields optional
