@@ -14,7 +14,6 @@ interface MenuProps {
 const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onRequestLogout }) => {
   if (minimized) return null;
 
-  const apiUrl = `http://localhost:8000/api/core/apikeys/`;
   // single source of truth: usage comes from agents API cache or SSE usage events
   const usageApi = `http://localhost:8000/api/core/usage/`;
   const agentsApi = `http://localhost:8000/api/agents/`;
@@ -172,10 +171,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
   }, []);
 
   // Local UI loading flags
-  const [apiKeyLoading, setApiKeyLoading] = React.useState(false);
   const [downloadLoading, setDownloadLoading] = React.useState(false);
-  // whether server reports a key exists (we never store the raw key in the client)
-  const [hasApiKey, setHasApiKey] = React.useState<boolean | null>(null);
 
   const fmtHMS = (s: number) => {
     const sec = Math.max(0, Math.floor(s || 0));
@@ -185,67 +181,6 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
     return `${h}h ${m}m ${ss}s`;
   };
 
-  const updateApiKey = async (value: string) => {
-    setApiKeyLoading(true);
-    const token = getToken();
-    if (!token) {
-      setApiKeyLoading(false);
-      alert("Unauthorized, please login again.");
-      localStorage.removeItem("access_token");
-      onRequestLogout?.();
-      window.location.href = "/";
-      return;
-    }
-
-    try {
-      const res = await fetch(apiUrl, {
-        method: "POST", // DRF ViewSet.create
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ key: value }),
-      });
-
-      if (res.status === 401) {
-        setApiKeyLoading(false);
-        alert("Session expired, please login again.");
-        localStorage.removeItem("access_token");
-        onRequestLogout?.();
-        window.location.href = "/";
-        return;
-      }
-
-      const result = await res.json().catch(() => ({}));
-      console.log("API key update response:", result);
-
-      // backend returns only { id, user, has_key } — never the raw key
-      if (res.ok) {
-        setHasApiKey(Boolean(result?.has_key));
-        alert(value ? "API key updated successfully." : "API key cleared successfully.");
-      } else {
-        alert("Failed to update API key.");
-      }
-      setApiKeyLoading(false);
-    } catch (err) {
-      console.error("API key update error:", err);
-      alert("Network error while updating API key.");
-      setApiKeyLoading(false);
-    }
-  };
-
-  const addOrReplaceKey = async () => {
-    const key = prompt("Insert new API key:");
-    if (key !== null) {
-      await updateApiKey(key);
-    }
-  };
-
-  const clearKey = async () => {
-    if (window.confirm("Are you sure you want to clear the chatGPT API key?")) {
-      await updateApiKey("");
-    }
-  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -322,24 +257,6 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
         Clear chat session
       </button>
 
-      {/* API actions */}
-      <div className="flex flex-col gap-2 mt-2">
-        <div className="text-xs text-gray-300">API key: {hasApiKey == null ? 'unknown' : hasApiKey ? 'set' : 'not set'}</div>
-        <button
-          className="w-full px-3 py-2 rounded bg-green-600 text-white text-xs font-medium hover:bg-green-700 disabled:opacity-70"
-          onClick={addOrReplaceKey}
-          disabled={apiKeyLoading}
-        >
-          {apiKeyLoading ? 'Working...' : 'Add/Replace chatGPT API key'}
-        </button>
-        <button
-          className="w-full px-3 py-2 rounded bg-gray-600 text-white text-xs font-medium hover:bg-gray-700 disabled:opacity-70"
-          onClick={clearKey}
-          disabled={apiKeyLoading}
-        >
-          {apiKeyLoading ? 'Working...' : 'Clear chatGPT API key'}
-        </button>
-      </div>
 
       {/* Extra actions */}
       <div className="mt-8" />
@@ -366,6 +283,14 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
         }}
       >
         View/Import/Delete Databases
+      </button>
+      <button
+        className="w-full px-3 py-2 rounded bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 mt-3"
+        onClick={() => {
+          router.push('/settings');
+        }}
+      >
+        Settings (API Key)
       </button>
         <button
           className="w-full px-3 py-2 rounded bg-yellow-600 text-white text-xs font-medium hover:bg-yellow-700 mt-3 disabled:opacity-70"

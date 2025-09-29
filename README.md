@@ -61,11 +61,22 @@ For easy deployment and testing, we provide Docker configuration:
    - Backend API: http://localhost:8000
    - Django Admin: http://localhost:8000/admin
 
-4. **Use the "Add All Spider" feature:**
-   - After downloading and placing the Spider datasets as described above
+4. **Set up your OpenAI API Key:**
    - Login to the web application
+   - Click the "Settings (API Key)" button in the menu
+   - Enter your OpenAI API key (get one from https://platform.openai.com/account/api-keys)
+   - Save your API key
+
+5. **Use the "Add All Spider" feature:**
+   - After downloading and placing the Spider datasets as described above
    - Go to the Files section
    - Click the purple "Add All Spider" button
    - This will automatically upload all 200+ Spider databases and generate their schemas
+
+6. **Test the agents:**
+   - Go to the chatbot and ask questions about your databases
+   - The AI agents will use your API key to generate SQL queries
+
+**Note**: Each user needs their own OpenAI API key. The `.env` file API key is only used for development/testing.
 
 The Docker setup automatically mounts the `../data` directory, so your Spider databases will be accessible to the backend container.
