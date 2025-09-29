@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from 'next/navigation';
 import { apiFetch } from "../services/api";
+import { deleteAgentsCache } from "../services/api";
 
 interface MenuProps {
   minimized: boolean;
@@ -87,17 +88,27 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
     const fetchFromAgentsCache = async () => {
       try {
         const tokenNow = getToken();
+        if (!tokenNow) {
+          // No token available; skip calling agents API entirely
+          return;
+        }
         // use full URL so we can inspect status codes directly
-        const res = await fetch(agentsApi, {
-          method: "GET",
-          headers: {
-            ...(tokenNow ? { Authorization: `Bearer ${tokenNow}` } : {}),
-          },
-        });
+        let res: Response | null = null;
+        try {
+          res = await fetch(agentsApi, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${tokenNow}`,
+            },
+          });
+        } catch (_) {
+          // Network or CORS error; fall back to usage endpoint below
+          res = null;
+        }
 
         if (!mounted) return;
 
-        if (res.status === 200) {
+        if (res && res.status === 200) {
           const agentsData = await res.json().catch(() => null);
           if (!mounted) return;
           const u = agentsData?.usage || agentsData;
@@ -110,7 +121,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
         }
 
         // If 404 => no cached result: start a one-time pipeline run (POST) but don't await the full stream
-        if (res.status === 404) {
+        if (res && res.status === 404) {
           try {
             // fire-and-forget start: backend will stream SSE; we intentionally don't keep the connection
             // open here (if client disconnects it's fine per requirement). We still include auth.
@@ -118,7 +129,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                ...(tokenNow ? { Authorization: `Bearer ${tokenNow}` } : {}),
+                Authorization: `Bearer ${tokenNow}`,
               },
               body: JSON.stringify({}),
             }).catch(() => {});
@@ -248,10 +259,20 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
       <button
         className="w-full px-3 py-2 mt-2 rounded bg-red-600 text-white text-xs font-medium hover:bg-red-700"
         onClick={() => {
-          if (window.confirm("Are you sure you want to clear the chat session?")) {
-            localStorage.removeItem("chatbot_messages");
-            window.location.reload();
-          }
+          (async () => {
+            if (!window.confirm("Are you sure you want to clear the chat session?")) return;
+            try {
+              // Clear local cache first
+              try { localStorage.removeItem("chatbot_messages"); } catch {}
+              // Clear server-side stored chat if available
+              try { await apiFetch("/api/core/chats/", { method: "DELETE" }); } catch {}
+              // Clear any cached agent pipeline result
+              try { await deleteAgentsCache(); } catch {}
+            } finally {
+              // Reload UI to ensure clean state
+              window.location.reload();
+            }
+          })();
         }}
       >
         Clear chat session

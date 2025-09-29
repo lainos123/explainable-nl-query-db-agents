@@ -9,33 +9,13 @@ export interface file_table_props {
 }
 
 const FileTable: React.FC<file_table_props> = ({ files, selected, setSelected, downloadFile }) => {
-  const allSelected = files.length > 0 && selected.length === files.length;
-  const someSelected = selected.length > 0 && selected.length < files.length;
-
-  const handleSelectAll = () => {
-    if (allSelected) {
-      // Deselect all
-      setSelected([]);
-    } else {
-      // Select all
-      setSelected(files.map(f => f.id));
-    }
-  };
 
   return (
     <table className="w-full border mb-4 text-sm">
       <thead>
         <tr className="bg-gray-100 dark:bg-gray-800">
           <th className="border px-2 py-1 bg-white text-black">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              ref={(input) => {
-                if (input) input.indeterminate = someSelected;
-              }}
-              onChange={handleSelectAll}
-              title="Select/Deselect all files"
-            />
+            Select
           </th>
           <th className="border px-2 py-1 bg-white text-black">ID</th>
           <th className="border px-2 py-1 bg-white text-black">Database</th>

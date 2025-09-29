@@ -25,6 +25,55 @@ const ChatBox: React.FC<ChatBoxProps> = ({ messages, loadingBot, onEdit, onDelet
   const [cachedMessages, setCachedMessages] = useState<{ id: string; sender: "user" | "bot"; text: string }[]>([]);
   // Track whether we've synced the initial cache to avoid overwriting it with an empty array
   const restoredRef = useRef<boolean>(false);
+  
+  // State for setup messages
+  const [hasApiKey, setHasApiKey] = useState<boolean>(false);
+  const [hasDatabases, setHasDatabases] = useState<boolean>(false);
+  const [isClient, setIsClient] = useState<boolean>(false);
+
+  // Check if we're on the client side to avoid hydration issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Check setup status
+  useEffect(() => {
+    if (!isClient) return;
+    
+    const checkSetupStatus = async () => {
+      try {
+        // Determine if a user auth token exists; without it, skip API calls
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          setHasApiKey(false);
+          setHasDatabases(false);
+          return;
+        }
+
+        // Query backend for API key presence
+        try {
+          const ak = await apiFetch('/api/core/apikeys/');
+          const hasKey = !!(ak && (ak.has_key === true || ak.api_key));
+          setHasApiKey(hasKey);
+        } catch (_) {
+          setHasApiKey(false);
+        }
+
+        // Query backend for uploaded databases
+        try {
+          const files = await apiFetch('/api/core/files/');
+          setHasDatabases(Array.isArray(files) && files.length > 0);
+        } catch (_) {
+          setHasDatabases(false);
+        }
+      } catch (_) {
+        setHasApiKey(false);
+        setHasDatabases(false);
+      }
+    };
+    
+    checkSetupStatus();
+  }, [isClient]);
 
   // Restore cache after mount
   useEffect(() => {
@@ -836,7 +885,7 @@ function BotJsonRender({ data }: { data: any }) {
         return (
           <div className="space-y-3">
             {/* Query Execution Header */}
-            <div className="bg-orange-600 text-white px-3 py-2 rounded-lg">
+            <div className="bg-black text-white px-3 py-2 rounded-lg">
               <div className="font-semibold text-sm">Query Execution</div>
               <div className="text-xs opacity-90">Running SQL query on the selected database</div>
             </div>
@@ -979,6 +1028,58 @@ function BotJsonRender({ data }: { data: any }) {
           </div>
         )}
         <div ref={messagesEndRef} />
+        
+        {/* Setup Messages - Show if API key or databases are missing */}
+        {(() => {
+          if (isClient && !loadingBot) {
+            return (
+              <div className="mt-4 space-y-3">
+            {/* API Key Setup Message */}
+            {!hasApiKey && (
+              <div className="bg-red-600 text-white px-4 py-3 rounded-lg border border-red-500 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <svg className="w-6 h-6 text-red-200" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <div className="font-bold text-lg">API Key Required</div>
+                    <div className="text-sm opacity-90 mt-1">You must add your OpenAI API key in settings before you can use the agents.</div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => window.location.href = '/settings'}
+                  className="mt-3 px-4 py-2 bg-red-500 hover:bg-red-400 text-white text-sm font-semibold rounded transition-colors shadow-md"
+                >
+                  Go to Settings
+                </button>
+              </div>
+            )}
+            
+            {/* Database Upload Message */}
+            {hasApiKey && !hasDatabases && (
+              <div className="bg-orange-600 text-white px-4 py-3 rounded-lg border border-orange-500 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <svg className="w-6 h-6 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <div className="font-bold text-lg">No Databases Found</div>
+                    <div className="text-sm opacity-90 mt-1">Upload your SQLite database files to start querying with natural language.</div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => window.location.href = '/view-files'}
+                  className="mt-3 px-4 py-2 bg-orange-500 hover:bg-orange-400 text-white text-sm font-semibold rounded transition-colors shadow-md"
+                >
+                  Upload Databases
+                </button>
+              </div>
+            )}
+              </div>
+            );
+          }
+          return null;
+        })()}
       </div>
     </div>
   );

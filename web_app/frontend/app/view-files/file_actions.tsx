@@ -36,15 +36,6 @@ const FileActions: React.FC<file_actions_props> = ({
   setSpiderLoading,
   spiderLoading,
 }) => {
-  const allSelected = files.length > 0 && selected.length === files.length;
-  
-  const handleSelectAll = () => {
-    if (allSelected) {
-      setSelected([]);
-    } else {
-      setSelected(files.map(f => f.id));
-    }
-  };
 
   return (
   <div className="flex gap-2 mt-4 mb-8">
@@ -133,12 +124,6 @@ const FileActions: React.FC<file_actions_props> = ({
       disabled={selected.length === 0 || deleteLoading}
       onClick={e => { console.log("Delete button: clicked"); e.preventDefault(); handleDelete(); }}
     >{deleteLoading ? <span className="animate-spin mr-2 w-4 h-4 border-2 border-t-2 border-white rounded-full"></span> : null}Delete selected</button>
-    <button
-      className={`px-4 py-2 rounded font-medium flex items-center justify-center ${files.length === 0 ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60' : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'}`}
-      disabled={files.length === 0}
-      onClick={handleSelectAll}
-      title={allSelected ? "Deselect all files" : "Select all files"}
-    >{allSelected ? "Deselect All" : "Select All"}</button>
     <button
       className={`px-4 py-2 rounded font-medium flex items-center justify-center ${spiderLoading ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60' : 'bg-purple-600 text-white hover:bg-purple-700 cursor-pointer'}`}
       disabled={spiderLoading}

@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
   // Load current API key
@@ -61,6 +62,29 @@ export default function SettingsPage() {
       setError("Failed to save API key");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Delete your saved API key? This cannot be undone.")) return;
+    setDeleting(true);
+    setError("");
+    setMessage("");
+    try {
+      // Backend lacks DELETE; send empty key via POST to clear
+      await apiFetch("/api/core/apikeys/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ api_key: "" })
+      });
+      setApiKey("");
+      try { localStorage.removeItem("has_api_key"); } catch {}
+      setMessage("API key deleted.");
+    } catch (e: any) {
+      console.error("Error deleting API key:", e);
+      setError("Failed to delete API key");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -126,6 +150,17 @@ export default function SettingsPage() {
                   }`}
                 >
                   {saving ? "Saving..." : "Save API Key"}
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className={`px-4 py-2 rounded font-medium ${
+                    deleting
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-red-600 text-white hover:bg-red-700'
+                  }`}
+                >
+                  {deleting ? "Deleting..." : "Delete API Key"}
                 </button>
               </div>
 
