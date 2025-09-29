@@ -8,16 +8,20 @@ export interface file_table_props {
   downloadFile: (f: FileItem) => (e: React.MouseEvent) => void;
 }
 
-const FileTable: React.FC<file_table_props> = ({ files, selected, setSelected, downloadFile }) => (
-  <table className="w-full border mb-4 text-sm">
-    <thead>
-      <tr className="bg-gray-100 dark:bg-gray-800">
-        <th className="border px-2 py-1 bg-white text-black">Select</th>
-        <th className="border px-2 py-1 bg-white text-black">ID</th>
-        <th className="border px-2 py-1 bg-white text-black">Database</th>
-        <th className="border px-2 py-1 bg-white text-black">Download</th>
-      </tr>
-    </thead>
+const FileTable: React.FC<file_table_props> = ({ files, selected, setSelected, downloadFile }) => {
+
+  return (
+    <table className="w-full border mb-4 text-sm">
+      <thead>
+        <tr className="bg-gray-100 dark:bg-gray-800">
+          <th className="border px-2 py-1 bg-white text-black">
+            Select
+          </th>
+          <th className="border px-2 py-1 bg-white text-black">ID</th>
+          <th className="border px-2 py-1 bg-white text-black">Database</th>
+          <th className="border px-2 py-1 bg-white text-black">Download</th>
+        </tr>
+      </thead>
     <tbody>
       {files.map(f => (
         <tr key={f.id}>
@@ -43,6 +47,7 @@ const FileTable: React.FC<file_table_props> = ({ files, selected, setSelected, d
       ))}
     </tbody>
   </table>
-);
+  );
+};
 
 export default FileTable;

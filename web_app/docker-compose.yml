@@ -1,0 +1,48 @@
+services:
+  # Django Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - DEBUG=True
+    volumes:
+      - ./backend:/app
+      - backend_media:/app/media
+      - ../data:/data
+    depends_on:
+      - db
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  # SQLite Database (optional - you can use external DB)
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=nl2sql
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  backend_media:
+  postgres_data:

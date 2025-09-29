@@ -24,7 +24,7 @@ export default function Home() {
     setMessage("")
     setProcessing(true)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token/`, {
+      const res = await fetch(`http://localhost:8000/api/token/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -117,7 +117,7 @@ export default function Home() {
         {/* Admin page link */}
         <div className="mt-3 text-center text-xs">
                 <a
-                  href={`${process.env.NEXT_PUBLIC_API_URL}/admin/`}
+                  href={`http://localhost:8000/admin/`}
                   className="text-violet-400 hover:text-violet-300 underline underline-offset-2"
                 >
                   Open Admin

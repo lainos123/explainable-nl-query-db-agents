@@ -64,6 +64,7 @@ const ViewFilesPage: React.FC = () => {
   const [refreshLoading, setRefreshLoading] = useState(false);
   const [clearLoading, setClearLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
+  const [spiderLoading, setSpiderLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchFiles = async () => {
@@ -194,6 +195,10 @@ const ViewFilesPage: React.FC = () => {
         setClearLoading={setClearLoading}
         setAddLoading={setAddLoading}
         apiFetch={apiFetch}
+        files={files}
+        setSelected={setSelected}
+        setSpiderLoading={setSpiderLoading}
+        spiderLoading={spiderLoading}
       />
       {loading && <div className="mb-4 text-gray-500">Loading...</div>}
   {/* error popup only, no HTML error rendering */}

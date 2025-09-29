@@ -16,6 +16,7 @@ def create_chain(api_key: str):
             '  "relevant_tables": ["..."],\n'
             '  "SQL Code": "..."\n\n'
             '  "reasons": "..." \n\n'
+            "The SQL should be structured and readable, using new lines and indentation as appropriate.\n"
             "User query: {user_query}\n"
             "DB schema JSON: {db_schema_json}\n"
             "Selected tables: {selected_tables}\n"

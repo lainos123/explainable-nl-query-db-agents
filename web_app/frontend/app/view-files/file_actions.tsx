@@ -13,6 +13,10 @@ export interface file_actions_props {
   setClearLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setAddLoading: React.Dispatch<React.SetStateAction<boolean>>;
   apiFetch: typeof import("../services/api").apiFetch;
+  files: import("./page").FileItem[];
+  setSelected: React.Dispatch<React.SetStateAction<number[]>>;
+  setSpiderLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  spiderLoading: boolean;
 }
 
 const FileActions: React.FC<file_actions_props> = ({
@@ -27,7 +31,13 @@ const FileActions: React.FC<file_actions_props> = ({
   setClearLoading,
   setAddLoading,
   apiFetch,
-}) => (
+  files,
+  setSelected,
+  setSpiderLoading,
+  spiderLoading,
+}) => {
+
+  return (
   <div className="flex gap-2 mt-4 mb-8">
     <label className={`px-4 py-2 rounded font-medium text-center flex items-center justify-center ${addLoading ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60' : 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'}`}>
       {addLoading ? (
@@ -114,7 +124,36 @@ const FileActions: React.FC<file_actions_props> = ({
       disabled={selected.length === 0 || deleteLoading}
       onClick={e => { console.log("Delete button: clicked"); e.preventDefault(); handleDelete(); }}
     >{deleteLoading ? <span className="animate-spin mr-2 w-4 h-4 border-2 border-t-2 border-white rounded-full"></span> : null}Delete selected</button>
+    <button
+      className={`px-4 py-2 rounded font-medium flex items-center justify-center ${spiderLoading ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60' : 'bg-purple-600 text-white hover:bg-purple-700 cursor-pointer'}`}
+      disabled={spiderLoading}
+      onClick={async () => {
+        console.log("Add All Spider button: clicked");
+        if (typeof window !== 'undefined') {
+          const ok = window.confirm("This will upload all Spider databases from /data/spider_data/test_database. This may take a few minutes. Continue?");
+          if (!ok) {
+            console.log("Add All Spider button: cancelled by user");
+            return;
+          }
+        }
+        setSpiderLoading(true);
+        try {
+          console.log("Add All Spider button: apiFetch");
+          await apiFetch("/api/core/files/add_spider_databases/", { method: "POST" });
+          console.log("Add All Spider button: fetchFiles");
+          await fetchFiles();
+        } catch (e: any) {
+          console.error("Add All Spider button: error", e);
+          alert(e.message || JSON.stringify(e));
+        } finally {
+          setSpiderLoading(false);
+          console.log("Add All Spider button: end");
+        }
+      }}
+      title="Upload all Spider test databases from /data/spider_data/test_database"
+    >{spiderLoading ? <span className="animate-spin mr-2 w-4 h-4 border-2 border-t-2 border-white rounded-full"></span> : null}Add All Spider</button>
   </div>
-);
+  );
+};
 
 export default FileActions;

@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from 'next/navigation';
 import { apiFetch } from "../services/api";
+import { deleteAgentsCache } from "../services/api";
 
 interface MenuProps {
   minimized: boolean;
@@ -14,10 +15,9 @@ interface MenuProps {
 const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onRequestLogout }) => {
   if (minimized) return null;
 
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/core/apikeys/`;
   // single source of truth: usage comes from agents API cache or SSE usage events
-  const usageApi = `${process.env.NEXT_PUBLIC_API_URL}/api/core/usage/`;
-  const agentsApi = `${process.env.NEXT_PUBLIC_API_URL}/api/agents/`;
+  const usageApi = `http://localhost:8000/api/core/usage/`;
+  const agentsApi = `http://localhost:8000/api/agents/`;
   const getToken = () => localStorage.getItem("access_token");
 
   // backend now may return a slim usage object; make fields optional
@@ -88,17 +88,27 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
     const fetchFromAgentsCache = async () => {
       try {
         const tokenNow = getToken();
+        if (!tokenNow) {
+          // No token available; skip calling agents API entirely
+          return;
+        }
         // use full URL so we can inspect status codes directly
-        const res = await fetch(agentsApi, {
-          method: "GET",
-          headers: {
-            ...(tokenNow ? { Authorization: `Bearer ${tokenNow}` } : {}),
-          },
-        });
+        let res: Response | null = null;
+        try {
+          res = await fetch(agentsApi, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${tokenNow}`,
+            },
+          });
+        } catch (_) {
+          // Network or CORS error; fall back to usage endpoint below
+          res = null;
+        }
 
         if (!mounted) return;
 
-        if (res.status === 200) {
+        if (res && res.status === 200) {
           const agentsData = await res.json().catch(() => null);
           if (!mounted) return;
           const u = agentsData?.usage || agentsData;
@@ -111,7 +121,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
         }
 
         // If 404 => no cached result: start a one-time pipeline run (POST) but don't await the full stream
-        if (res.status === 404) {
+        if (res && res.status === 404) {
           try {
             // fire-and-forget start: backend will stream SSE; we intentionally don't keep the connection
             // open here (if client disconnects it's fine per requirement). We still include auth.
@@ -119,7 +129,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                ...(tokenNow ? { Authorization: `Bearer ${tokenNow}` } : {}),
+                Authorization: `Bearer ${tokenNow}`,
               },
               body: JSON.stringify({}),
             }).catch(() => {});
@@ -172,10 +182,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
   }, []);
 
   // Local UI loading flags
-  const [apiKeyLoading, setApiKeyLoading] = React.useState(false);
   const [downloadLoading, setDownloadLoading] = React.useState(false);
-  // whether server reports a key exists (we never store the raw key in the client)
-  const [hasApiKey, setHasApiKey] = React.useState<boolean | null>(null);
 
   const fmtHMS = (s: number) => {
     const sec = Math.max(0, Math.floor(s || 0));
@@ -185,67 +192,6 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
     return `${h}h ${m}m ${ss}s`;
   };
 
-  const updateApiKey = async (value: string) => {
-    setApiKeyLoading(true);
-    const token = getToken();
-    if (!token) {
-      setApiKeyLoading(false);
-      alert("Unauthorized, please login again.");
-      localStorage.removeItem("access_token");
-      onRequestLogout?.();
-      window.location.href = "/";
-      return;
-    }
-
-    try {
-      const res = await fetch(apiUrl, {
-        method: "POST", // DRF ViewSet.create
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ key: value }),
-      });
-
-      if (res.status === 401) {
-        setApiKeyLoading(false);
-        alert("Session expired, please login again.");
-        localStorage.removeItem("access_token");
-        onRequestLogout?.();
-        window.location.href = "/";
-        return;
-      }
-
-      const result = await res.json().catch(() => ({}));
-      console.log("API key update response:", result);
-
-      // backend returns only { id, user, has_key } — never the raw key
-      if (res.ok) {
-        setHasApiKey(Boolean(result?.has_key));
-        alert(value ? "API key updated successfully." : "API key cleared successfully.");
-      } else {
-        alert("Failed to update API key.");
-      }
-      setApiKeyLoading(false);
-    } catch (err) {
-      console.error("API key update error:", err);
-      alert("Network error while updating API key.");
-      setApiKeyLoading(false);
-    }
-  };
-
-  const addOrReplaceKey = async () => {
-    const key = prompt("Insert new API key:");
-    if (key !== null) {
-      await updateApiKey(key);
-    }
-  };
-
-  const clearKey = async () => {
-    if (window.confirm("Are you sure you want to clear the chatGPT API key?")) {
-      await updateApiKey("");
-    }
-  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -309,48 +255,122 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
         </div>
       </div>
 
-      {/* Clear chat session */}
+      {/* Parameter Selection Section */}
+      <div className="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+        <div className="text-xs font-semibold text-gray-300 mb-3">Agent Parameters</div>
+        
+        {/* LLM Model */}
+        <div className="mb-3">
+          <label className="text-xs text-gray-400 block mb-1">LLM Model:</label>
+          <select 
+            className="w-full px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-600"
+            defaultValue="gpt-5-mini"
+            onChange={(e) => {
+              localStorage.setItem('agent_llm_model', e.target.value);
+            }}
+          >
+            <option value="gpt-5-mini">GPT-5 Mini (Default)</option>
+            <option value="gpt-4o-mini">GPT-4o Mini (Fast)</option>
+            <option value="gpt-4o">GPT-4o (Advanced)</option>
+            <option value="gpt-4">GPT-4 (Legacy)</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Legacy)</option>
+          </select>
+        </div>
+
+        {/* Top-K Similar Schemas */}
+        <div className="mb-3">
+          <label className="text-xs text-gray-400 block mb-1">Top-K Similar Schemas (Agent A):</label>
+          <input 
+            type="number" 
+            min="1" 
+            max="20" 
+            defaultValue="5"
+            className="w-full px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-600"
+            onChange={(e) => {
+              localStorage.setItem('agent_top_k', e.target.value);
+            }}
+          />
+        </div>
+
+        {/* Include Reasons */}
+        <div className="mb-3">
+          <label className="text-xs text-gray-400 block mb-1">Show Reasoning:</label>
+          <select 
+            className="w-full px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-600"
+            defaultValue="false"
+            onChange={(e) => {
+              localStorage.setItem('agent_include_reasons', e.target.value);
+              // Trigger re-render of current messages
+              window.dispatchEvent(new CustomEvent('agent_params_changed'));
+            }}
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        {/* Include Agent Process */}
+        <div className="mb-0">
+          <label className="text-xs text-gray-400 block mb-1">Show Detailed Description of Agent:</label>
+          <select 
+            className="w-full px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-600"
+            defaultValue="false"
+            onChange={(e) => {
+              localStorage.setItem('agent_include_process', e.target.value);
+              // Trigger re-render of current messages
+              window.dispatchEvent(new CustomEvent('agent_params_changed'));
+            }}
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        {/* Include Agent Inputs */}
+        <div className="mt-3">
+          <label className="text-xs text-gray-400 block mb-1">Show Agent Inputs:</label>
+          <select 
+            className="w-full px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-600"
+            defaultValue="false"
+            onChange={(e) => {
+              localStorage.setItem('agent_include_inputs', e.target.value);
+              // Trigger re-render of current messages
+              window.dispatchEvent(new CustomEvent('agent_params_changed'));
+            }}
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Clear chat session (after parameters) */}
       <button
-        className="w-full px-3 py-2 mt-2 rounded bg-red-600 text-white text-xs font-medium hover:bg-red-700"
+        className="w-full px-3 py-2 rounded text-xs font-medium bg-gray-900 text-gray-100 border border-purple-500 hover:bg-gray-800"
         onClick={() => {
-          if (window.confirm("Are you sure you want to clear the chat session?")) {
-            localStorage.removeItem("chatbot_messages");
-            window.location.reload();
-          }
+          (async () => {
+            if (!window.confirm("Are you sure you want to clear the chat session?")) return;
+            try {
+              try { localStorage.removeItem("chatbot_messages"); } catch {}
+              try { await apiFetch("/api/core/chats/", { method: "DELETE" }); } catch {}
+              try { await deleteAgentsCache(); } catch {}
+            } finally {
+              window.location.reload();
+            }
+          })();
         }}
       >
         Clear chat session
       </button>
 
-      {/* API actions */}
-      <div className="flex flex-col gap-2 mt-2">
-        <div className="text-xs text-gray-300">API key: {hasApiKey == null ? 'unknown' : hasApiKey ? 'set' : 'not set'}</div>
-        <button
-          className="w-full px-3 py-2 rounded bg-green-600 text-white text-xs font-medium hover:bg-green-700 disabled:opacity-70"
-          onClick={addOrReplaceKey}
-          disabled={apiKeyLoading}
-        >
-          {apiKeyLoading ? 'Working...' : 'Add/Replace chatGPT API key'}
-        </button>
-        <button
-          className="w-full px-3 py-2 rounded bg-gray-600 text-white text-xs font-medium hover:bg-gray-700 disabled:opacity-70"
-          onClick={clearKey}
-          disabled={apiKeyLoading}
-        >
-          {apiKeyLoading ? 'Working...' : 'Clear chatGPT API key'}
-        </button>
-      </div>
 
-      {/* Extra actions */}
-      <div className="mt-8" />
-
-      {/* Usage card (bottom) */}
-      <div className="mb-16">
-        <div className="rounded-lg bg-gray-800/60 border border-white/10 p-3 text-sm text-gray-200">
-          <div className="font-medium mb-1">Usage</div>
+      {/* Usage (bottom) */}
+      <div className="mt-3 mb-3">
+        <div className="rounded-lg bg-gray-800/60 border border-white/10 p-3 text-xs text-gray-300">
+          <div className="font-medium mb-1 text-xs">Usage</div>
           {usage ? (
             <div className="grid grid-cols-1 gap-1">
-              <div>Chats: <span className="font-semibold">{usage.chats_used_today ?? 0}</span> / <span className="text-gray-300">{usage.max_chats ?? '-'}</span></div>
+              <div>Chats: <span className="font-semibold">{usage.chats_used_today ?? 0}</span> / <span className="text-gray-400">{usage.max_chats ?? '-'}</span></div>
               <div>Reset at: <span className="font-semibold">{countdown}</span></div>
             </div>
           ) : (
@@ -359,7 +379,7 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
         </div>
       </div>
       <button
-        className="w-full px-3 py-2 rounded bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 mt-8"
+        className="w-full px-3 py-2 rounded text-xs font-medium bg-gray-900 text-gray-100 border border-white/10 hover:bg-gray-800"
         onClick={() => {
           // navigate in-app instead of opening a new tab
           router.push('/view-files');
@@ -367,8 +387,18 @@ const Menu: React.FC<MenuProps> = ({ minimized, setMinimized, username, onReques
       >
         View/Import/Delete Databases
       </button>
+      <button
+        className="w-full px-3 py-2 rounded text-xs font-medium bg-gray-900 text-gray-100 border border-white/10 hover:bg-gray-800 mt-3"
+        onClick={() => {
+          router.push('/settings');
+        }}
+      >
+        API Key Settings
+      </button>
+
+      
         <button
-          className="w-full px-3 py-2 rounded bg-yellow-600 text-white text-xs font-medium hover:bg-yellow-700 mt-3 disabled:opacity-70"
+          className="w-full px-3 py-2 rounded text-xs font-medium bg-gray-900 text-gray-100 border border-white/10 hover:bg-gray-800 mt-3 disabled:opacity-70"
           onClick={async () => {
             setDownloadLoading(true);
             try {

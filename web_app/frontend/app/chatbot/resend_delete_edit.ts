@@ -26,7 +26,12 @@ export function useResendDeleteEdit(messages: ChatMessage[], setMessages: (fn: (
         return copy;
       });
       let lastAgent: string | null = null;
-      streamAgents({ query: newText }, {
+      // reuse current parameters from localStorage, same as initial send
+      const model = localStorage.getItem('agent_llm_model') || 'gpt-5-mini';
+      const top_k = parseInt(localStorage.getItem('agent_top_k') || '5');
+      const include_reasons = localStorage.getItem('agent_include_reasons') !== 'false';
+      const include_process = localStorage.getItem('agent_include_process') !== 'false';
+      streamAgents({ query: newText, model, top_k, include_reasons, include_process }, {
         onEvent: (evt) => {
           const isContent = !!(evt && (evt.output || evt.error));
           let sepNow = false;
@@ -89,7 +94,11 @@ export function useResendDeleteEdit(messages: ChatMessage[], setMessages: (fn: (
       return copy;
     });
     let lastAgent: string | null = null;
-    streamAgents({ query: msg.text }, {
+    const model = localStorage.getItem('agent_llm_model') || 'gpt-5-mini';
+    const top_k = parseInt(localStorage.getItem('agent_top_k') || '5');
+    const include_reasons = localStorage.getItem('agent_include_reasons') !== 'false';
+    const include_process = localStorage.getItem('agent_include_process') !== 'false';
+    streamAgents({ query: msg.text, model, top_k, include_reasons, include_process }, {
       onEvent: (evt) => {
         const isContent = !!(evt && (evt.output || evt.error));
         let sepNow = false;

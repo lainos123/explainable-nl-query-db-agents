@@ -1,70 +1,82 @@
 # Explainable Natural Language Query Interface for Relational Databases Using a Multi-Agent System
 For CITS5553 - Data Science Capstone Project | Semester 2, 2025
 
-## Environment Setup
+## Setup & Running the Application (Docker Only)
 
-We use Conda to manage our project's Python environment. Follow these steps to get started:
-
-### 1. Install Conda
-If you don't have Conda, install [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-
-### 2. Create & Activate the Environment
-Open your terminal, navigate to the project's root folder, and run:
-`conda env create -f environment.yml`
-
-Once complete, activate the environment:
-
-`conda activate CITS5553-Group-9`
-
-## Repository Setup
-```
-.
-├── agents/                         # Holds the final, production-ready code for each agent.
-│   ├── __init__.py                 # A file that makes Python treat the 'agents' directory as a package.
-│   ├── agent_a.py                  # A modular file for the first agent's logic (e.g., DatabaseSelector).
-│   ├── agent_b.py                  # A modular file for the second agent's logic (e.g., TableColumnSelector).
-│   └── agent_c.py                  # A modular file for the third agent's logic (e.g., SQLGenerator).
-├── data/                           # Contains all data used in the project.
-│   ├── processed/                  # For data that has been cleaned, transformed, or pre-computed.
-│   │   └── embeddings/             # Specifically for pre-computed database schema embeddings.
-│   ├── raw/                        # For the original, untouched source data (the Spider dataset).
-│   │   └── spider_data/            # The Spider dataset, kept in its original form.
-│   └── interim/                    # For intermediate data generated during processing.
-├── docs/                           # Contains human-readable project documentation.
-│   └── proposal/                   # A sub-directory specifically for the team's project proposal.
-│       └── Group9 - Proposal - FINAL.pdf  # The official project proposal document.
-├── logs/                           # All application and agent log files.
-├── notebooks/                      # For exploratory data analysis (EDA), prototyping, and agent development.
-│   ├── agent-development/          # Notebooks used for building and testing the logic of individual agents.
-│   │   ├── agent-a-dev.ipynb       # An example notebook for developing and testing Agent A.
-│   │   └── ...                     # Other agent development notebooks.
-│   ├── exploratory-analysis/       # Notebooks for general data exploration and analysis.
-│   └── prototyping/                # A sandbox for quick code snippets and small tests.
-├── references/                     # A centralised location for all scholarly articles and research papers.
-├── reports/                        # Contains all generated reports, figures, and evaluation metrics.
-│   └── evaluation_reports/         # Specifically for reports on model performance and agent metrics.
-├── src/                            # The main source code for the application.
-│   ├── __init__.py                 # Makes the 'src' directory a Python package.
-│   ├── pipeline/                   # Holds the core logic that orchestrates the multi-agent system.
-│   │   └── main_pipeline.py        # The main script that runs the full agent pipeline.
-│   ├── utils/                      # A collection of shared helper functions.
-│   │   ├── config.py               # Handles project configuration, settings, and API keys.
-│   │   └── dataset.py              # Contains functions for loading and processing the dataset.
-│   └── app/                        # The web application for the user interface.
-│       ├── __init__.py             # Makes 'app' a Python package.
-│       ├── api.py                  # Defines the API endpoints for the web application.
-│       └── web.py                  # Contains the code for the web interface, handling views and logic.
-└── .gitignore                      # Specifies files and folders to be ignored by Git (e.g., '.DS_Store', 'cache').
-└── environment.yml                 # The Conda file defining the project's dependencies and environment.
-└── LICENSE                         # The project's license file.
-└── README.md                       # The main README file with project information and setup instructions.
-```
+This project is designed to be run entirely using Docker. No manual Python or Conda environment setup is required.
 
 
-## Spider Database Download
+### 1. Download the Spider Database Dataset
 
-**Note:** Each team member must download the Spider database individually and place it in the `data/spider_data` directory on their local machine. The Spider dataset is large (about 1.83 GB) and is not included in the repository—it is ignored by Git via `.gitignore`.
+To use the "Add All Spider" feature and test the system with comprehensive databases, you **must manually download** the Spider dataset and place it in the correct directory.
 
-To download the Spider dataset, visit: [https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view](https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view)
+**Steps:**
 
-After downloading, extract or move the dataset into `data/spider_data` so the project can access it locally.
+1. **Download the Spider dataset:**
+   - Visit the official Spider dataset page: https://yale-lily.github.io/spider/
+   - Or use the direct Google Drive link: [https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view](https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view)
+   - Download the dataset ZIP file to your computer.
+
+2. **Extract and place the dataset:**
+   - Unzip the downloaded file. It should be called `spider_data`
+   - Move or copy this folder to `data` folder so we should have `data/spider/data`
+
+   Your directory structure should look like:
+   ```
+   data/
+   └── spider_data/
+       └── test_database/
+           ├── academic/
+           │   ├── academic.sqlite
+           │   └── schema.sql
+           ├── flight_1/
+           │   ├── flight_1.sqlite
+           │   └── schema.sql
+           ├── car_1/
+           │   ├── car_1.sqlite
+           │   └── schema.sql
+           └── ... (200+ more databases)
+   ```
+
+**Note:** The Spider databases are not included in this Git repository due to size constraints, but they are essential for testing the full functionality of the system. Each team member must perform this manual download and placement step on their own machine.
+
+---
+
+## Docker Setup
+
+For easy deployment and testing, we provide Docker configuration:
+
+1. **Navigate to the web application directory:**
+   ```bash
+   cd web_app
+   ```
+
+2. **Start the application with Docker Compose:**
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the application:**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - Django Admin: http://localhost:8000/admin
+
+4. **Set up your OpenAI API Key:**
+   - Login to the web application
+   - Click the "Settings (API Key)" button in the menu
+   - Enter your OpenAI API key (get one from https://platform.openai.com/account/api-keys)
+   - Save your API key
+
+5. **Use the "Add All Spider" feature:**
+   - After downloading and placing the Spider datasets as described above
+   - Go to the Files section
+   - Click the purple "Add All Spider" button
+   - This will automatically upload all 200+ Spider databases and generate their schemas
+
+6. **Test the agents:**
+   - Go to the chatbot and ask questions about your databases
+   - The AI agents will use your API key to generate SQL queries
+
+**Note**: Each user needs their own OpenAI API key. The `.env` file API key is only used for development/testing.
+
+The Docker setup automatically mounts the `../data` directory, so your Spider databases will be accessible to the backend container.

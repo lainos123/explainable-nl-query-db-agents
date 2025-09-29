@@ -17,9 +17,16 @@ class APIKeysViewSet(viewsets.ViewSet):
     def get_object(self):
         obj, _ = APIKeys.objects.get_or_create(user=self.request.user)
         return obj
+
+    def list(self, request):
+        """GET: return masked API key info"""
+        obj = self.get_object()
+        serializer = APIKeysSerializer(obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def create(self, request):
         obj = self.get_object()
-        new_value = request.data.get("key", "")
+        new_value = request.data.get("api_key", "")
         obj.api_key = new_value
         obj.save(update_fields=["api_key"])
         # Do NOT return the raw API key. Return only has_key flag.
@@ -55,14 +62,16 @@ class UsageView(APIView):
             chats_used = 0
 
         # used bytes on server
-        agg = Files.objects.filter(user=user).aggregate(total=Sum('size'))
-        used_bytes = int(agg.get('total') or 0)
+        agg = Files.objects.filter(user=user).aggregate(total=Sum("size"))
+        used_bytes = int(agg.get("total") or 0)
 
-        GB = 1024 ** 3
+        GB = 1024**3
         # compute next reset at next midnight (server tz)
         now = timezone.now()
         # start of next day
-        next_day = (now + timezone.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        next_day = (now + timezone.timedelta(days=1)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
         seconds_until_reset = int((next_day - now).total_seconds())
 
         # Return a minimal response containing only chat-usage related fields.
@@ -79,8 +88,8 @@ class UsageView(APIView):
 @permission_classes([IsAuthenticated])
 def chats_view(request):
     """GET: return saved chat messages for the current user
-       POST: accept JSON { messages: [...] } and save into Chats model
-       DELETE: remove saved chat history for user
+    POST: accept JSON { messages: [...] } and save into Chats model
+    DELETE: remove saved chat history for user
     """
     try:
         user = request.user

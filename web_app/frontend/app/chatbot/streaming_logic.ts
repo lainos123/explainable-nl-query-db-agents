@@ -72,7 +72,19 @@ export function useStreamingLogic(setMessages: (fn: (prev: ChatMessage[]) => Cha
     const botId = genId();
     setMessages((prev) => [...prev, { id: botId, sender: "bot", text: "", createdAt: Date.now() }]);
     let lastAgent: string | null = null;
-    streamAgents({ query: userMsg.text }, {
+    // Get parameters from localStorage
+    const model = localStorage.getItem('agent_llm_model') || 'gpt-5-mini';
+    const top_k = parseInt(localStorage.getItem('agent_top_k') || '5');
+    const include_reasons = localStorage.getItem('agent_include_reasons') !== 'false';
+    const include_process = localStorage.getItem('agent_include_process') !== 'false';
+    
+    streamAgents({ 
+      query: userMsg.text,
+      model: model,
+      top_k: top_k,
+      include_reasons: include_reasons,
+      include_process: include_process
+    }, {
       onEvent: (evt) => {
         const isContent = !!(evt && (evt.output || evt.error));
           // If server sends usage payload mid-stream, update local cache and notify listeners

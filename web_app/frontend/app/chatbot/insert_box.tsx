@@ -97,7 +97,7 @@ const InsertBox = forwardRef<InsertBoxHandle, InsertBoxProps>(({ onSend, sending
       <textarea
         ref={textRef}
         value={input}
-        className="flex-1 min-h-9 max-h-64 border border-gray-600 rounded-md bg-gray-800 p-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        className="flex-1 min-h-9 max-h-64 border border-gray-700 rounded-md bg-gray-900 p-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
         onChange={e => setInput(e.target.value)}
         onKeyDown={e => {
           if (e.key === "Enter" && !e.shiftKey) {
@@ -145,15 +145,15 @@ const InsertBox = forwardRef<InsertBoxHandle, InsertBoxProps>(({ onSend, sending
       />
       <button
         onClick={handleSend}
-        className={`inline-flex items-center justify-center rounded-md px-3 py-2 transition border-2
+        className={`inline-flex items-center justify-center rounded-md px-3 py-2 transition border
           ${sending
-            ? 'border-neon-animated bg-gradient-to-r from-purple-500 via-blue-500 to-pink-500 animate-pulse-in bg-opacity-80 running-cursor'
-            : 'bg-violet-600 text-white hover:bg-violet-700 border-violet-700'}
+            ? 'border-purple-500 bg-gray-900 text-white opacity-80 cursor-progress'
+            : 'bg-gray-900 text-white border-purple-500 hover:bg-gray-800'}
           ${runAnim ? 'scale-95' : ''}`}
         disabled={sending || !input.trim()}
         title={sending ? 'Running...' : 'Send'}
         aria-label={sending ? 'Pause/Running' : 'Send message'}
-        style={{ minWidth: '48px', minHeight: '40px', width: '48px', height: '40px', cursor: sending ? 'progress' : 'pointer', ...(sending ? { boxShadow: '0 0 8px 2px #a78bfa, 0 0 16px 4px #38bdf8, 0 0 24px 6px #ec4899' } : {}) }}
+        style={{ minWidth: '48px', minHeight: '40px', width: '48px', height: '40px', cursor: sending ? 'progress' : 'pointer' }}
       >
         {sending ? (
           <span className="relative flex items-center w-full h-full justify-center">
