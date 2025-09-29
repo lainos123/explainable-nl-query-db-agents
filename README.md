@@ -5,16 +5,10 @@ For CITS5553 - Data Science Capstone Project | Semester 2, 2025
 
 ## Setup Guide
 
-This project is designed to be run **entirely using Docker**. No manual Python or Conda environment setup is required.  
-**Choose the setup that matches your needs:**
+This project is designed to be run entirely using Docker. No manual Python or Conda environment setup is required.  
 
----
 
-### Setup A: Full System with Spider Databases
-
-This setup is for users who want to use the "Add All Spider" feature and test the system with the full Spider dataset.
-
-#### 1. Download and Prepare the Spider Dataset
+### 1. Download and Prepare the Spider Dataset
 
 - **Download the Spider Dataset:**
   - Visit: https://yale-lily.github.io/spider  
@@ -44,23 +38,14 @@ This setup is for users who want to use the "Add All Spider" feature and test th
 
   > **Note:** The Spider databases are not included in this repository due to size. Each user must download and place them manually.
 
----
 
-### Setup B: Quick Start (Without Spider Databases)
-
-If you want to try the application without the full Spider dataset, you can skip the above step. The app will still run, but the "Add All Spider" feature and some database tests will not be available.
-
----
-
-### Common Steps (For All Setups)
-
-#### 2. Install Docker
+### 2. Install Docker
 
 - Download Docker Desktop: [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
 - Install for your OS (Windows, macOS, or Linux).
 - **Start Docker Desktop** and wait until it is running.
 
-#### 3. Start the Application
+### 3. Start the Application
 
 - Open a terminal and navigate to the web application directory:
   ```bash
@@ -74,13 +59,13 @@ If you want to try the application without the full Spider dataset, you can skip
 
 - The Docker setup automatically mounts the `../data` directory, so your Spider databases (if present) will be accessible to the backend.
 
-#### 4. Access the Application
+### 4. Access the Application
 
 - **Frontend:** [http://localhost:3000](http://localhost:3000)
 - **Backend API:** [http://localhost:8000](http://localhost:8000)
 - **Django Admin:** [http://localhost:8000/admin](http://localhost:8000/admin)
 
-#### 5. Login Credentials
+### 5. Login Credentials
 
 - **Django Admin Login (optional):**
   - Visit [http://localhost:8000/admin](http://localhost:8000/admin)
@@ -93,7 +78,7 @@ If you want to try the application without the full Spider dataset, you can skip
   - Use the same credentials (`admin` / `admin123`)
 
 
-#### 6. Add Your OpenAI API Key
+### 6. Add Your OpenAI API Key
 
 - After logging in, click the **"API Key Settings"** button in the menu.
 - Enter your OpenAI API key (get one from [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)).
@@ -101,12 +86,12 @@ If you want to try the application without the full Spider dataset, you can skip
 
   > **Note:** Each user must enter their own OpenAI API key. The `.env` file API key is only for development/testing.
 
-#### 7. Add the Spider Databases
+### 7. Add the Spider Databases
 
 - Go to "View/Import/Delete Databases" in the menu.
 - Click the purple **"Add All Spider"** button to upload all Spider databases and generate their schemas.
 
-#### 8. Test the Agents
+### 8. Test the Agents
 
 - Go to the chatbot and ask questions about your databases.
 **Example question:**  
