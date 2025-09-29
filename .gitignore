@@ -6,3 +6,4 @@ __pycache__/
 /models/ # these will be large and can be generated locally for now
 /capstone*
 /web_app/backend/media/
+/notebooks/Franco_New/
