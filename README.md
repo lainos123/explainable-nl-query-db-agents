@@ -1,82 +1,121 @@
 # Explainable Natural Language Query Interface for Relational Databases Using a Multi-Agent System
 For CITS5553 - Data Science Capstone Project | Semester 2, 2025
 
-## Setup & Running the Application (Docker Only)
+---
 
-This project is designed to be run entirely using Docker. No manual Python or Conda environment setup is required.
+## Setup Guide
 
-
-### 1. Download the Spider Database Dataset
-
-To use the "Add All Spider" feature and test the system with comprehensive databases, you **must manually download** the Spider dataset and place it in the correct directory.
-
-**Steps:**
-
-1. **Download the Spider dataset:**
-   - Visit the official Spider dataset page: https://yale-lily.github.io/spider/
-   - Or use the direct Google Drive link: [https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view](https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view)
-   - Download the dataset ZIP file to your computer.
-
-2. **Extract and place the dataset:**
-   - Unzip the downloaded file. It should be called `spider_data`
-   - Move or copy this folder to `data` folder so we should have `data/spider/data`
-
-   Your directory structure should look like:
-   ```
-   data/
-   └── spider_data/
-       └── test_database/
-           ├── academic/
-           │   ├── academic.sqlite
-           │   └── schema.sql
-           ├── flight_1/
-           │   ├── flight_1.sqlite
-           │   └── schema.sql
-           ├── car_1/
-           │   ├── car_1.sqlite
-           │   └── schema.sql
-           └── ... (200+ more databases)
-   ```
-
-**Note:** The Spider databases are not included in this Git repository due to size constraints, but they are essential for testing the full functionality of the system. Each team member must perform this manual download and placement step on their own machine.
+This project is designed to be run **entirely using Docker**. No manual Python or Conda environment setup is required.  
+**Choose the setup that matches your needs:**
 
 ---
 
-## Docker Setup
+### Setup A: Full System with Spider Databases
 
-For easy deployment and testing, we provide Docker configuration:
+This setup is for users who want to use the "Add All Spider" feature and test the system with the full Spider dataset.
 
-1. **Navigate to the web application directory:**
-   ```bash
-   cd web_app
-   ```
+#### 1. Download and Prepare the Spider Dataset
 
-2. **Start the application with Docker Compose:**
-   ```bash
-   docker-compose up --build
-   ```
+- **Download the Spider Dataset:**
+  - Visit: https://yale-lily.github.io/spider  
+    or use the direct link: [Google Drive Download](https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view)
+  - Download the ZIP file to your computer.
 
-3. **Access the application:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - Django Admin: http://localhost:8000/admin
+- **Extract and Place the Dataset:**
+  - Unzip the file. The folder should be named `spider_data`.
+  - Move or copy this folder into the `data` directory at the root of this project, so you have: `data/spider_data`
 
-4. **Set up your OpenAI API Key:**
-   - Login to the web application
-   - Click the "Settings (API Key)" button in the menu
-   - Enter your OpenAI API key (get one from https://platform.openai.com/account/api-keys)
-   - Save your API key
+  Your directory should look like:
+  ```
+  data/
+  └── spider_data/
+      └── test_database/
+          ├── academic/
+          │   ├── academic.sqlite
+          │   └── schema.sql
+          ├── flight_1/
+          │   ├── flight_1.sqlite
+          │   └── schema.sql
+          ├── car_1/
+          │   ├── car_1.sqlite
+          │   └── schema.sql
+          └── ... (200+ more databases)
+  ```
 
-5. **Use the "Add All Spider" feature:**
-   - After downloading and placing the Spider datasets as described above
-   - Go to the Files section
-   - Click the purple "Add All Spider" button
-   - This will automatically upload all 200+ Spider databases and generate their schemas
+  > **Note:** The Spider databases are not included in this repository due to size. Each user must download and place them manually.
 
-6. **Test the agents:**
-   - Go to the chatbot and ask questions about your databases
-   - The AI agents will use your API key to generate SQL queries
+---
 
-**Note**: Each user needs their own OpenAI API key. The `.env` file API key is only used for development/testing.
+### Setup B: Quick Start (Without Spider Databases)
 
-The Docker setup automatically mounts the `../data` directory, so your Spider databases will be accessible to the backend container.
+If you want to try the application without the full Spider dataset, you can skip the above step. The app will still run, but the "Add All Spider" feature and some database tests will not be available.
+
+---
+
+### Common Steps (For All Setups)
+
+#### 2. Install Docker
+
+- Download Docker Desktop: [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+- Install for your OS (Windows, macOS, or Linux).
+- **Start Docker Desktop** and wait until it is running.
+
+#### 3. Start the Application
+
+- Open a terminal and navigate to the web application directory:
+  ```bash
+  cd web_app
+  ```
+- Start the application with Docker Compose:
+  ```bash
+  docker-compose up --build
+  ```
+  > The first run may take a few minutes as Docker builds the images.
+
+- The Docker setup automatically mounts the `../data` directory, so your Spider databases (if present) will be accessible to the backend.
+
+#### 4. Access the Application
+
+- **Frontend:** [http://localhost:3000](http://localhost:3000)
+- **Backend API:** [http://localhost:8000](http://localhost:8000)
+- **Django Admin:** [http://localhost:8000/admin](http://localhost:8000/admin)
+
+#### 5. Login Credentials
+
+- **Django Admin Login (optional):**
+  - Visit [http://localhost:8000/admin](http://localhost:8000/admin)
+  - Login 
+      - **Username:** `admin`
+      - **Password:** `admin123`
+  
+- **Web Application Login:**
+  - Log in at [http://localhost:3000](http://localhost:3000)
+  - Use the same credentials (`admin` / `admin123`)
+
+
+#### 6. Add Your OpenAI API Key
+
+- After logging in, click the **"API Key Settings"** button in the menu.
+- Enter your OpenAI API key (get one from [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)).
+- Click **Save**.
+
+  > **Note:** Each user must enter their own OpenAI API key. The `.env` file API key is only for development/testing.
+
+#### 7. Add the Spider Databases
+
+- Go to "View/Import/Delete Databases" in the menu.
+- Click the purple **"Add All Spider"** button to upload all Spider databases and generate their schemas.
+
+#### 8. Test the Agents
+
+- Go to the chatbot and ask questions about your databases.
+**Example question:**  
+> Find the name of all students who were in the tryout sorted in alphabetic order
+- The AI agents will use your API key to generate SQL queries and provide explanations.
+- Play with Agent Parameters
+
+---
+
+**Troubleshooting:**  
+If you encounter issues, ensure Docker is running and the `data/spider_data` directory exists (if using the Spider dataset).  
+For further help, consult your team.
