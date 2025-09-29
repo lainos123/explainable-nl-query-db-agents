@@ -5,6 +5,7 @@ import { renderStreamData } from "./streaming_logic";
 import React, { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { performLogout } from "../services/logout";
+import { apiFetch } from "../services/api";
 
 interface ChatBoxProps {
   messages: { id: string; sender: "user" | "bot"; text: string }[];
@@ -325,14 +326,50 @@ function BotJsonRender({ data }: { data: any }) {
               <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">
                 <button 
                   className="text-blue-400 hover:text-blue-300 underline"
-                  onClick={() => {
-                    // Show filtered schema for selected database
-                    const example = {
-                      "database": data.database,
-                      "table": "Students",
-                      "columns": ["student_id", "first_name", "last_name", "email_address"]
-                    };
-                    alert(`Summarised Schema for ${data.database}:\n\n${JSON.stringify(example, null, 2)}\n\nContains database, table, and column info from the selected database.`);
+                  onClick={async () => {
+                    try {
+                      const schemaData = await apiFetch(`/api/agents/schema/${encodeURIComponent(data.database)}/ab/`);
+                      
+                      // Create a more detailed display for the schema
+                      const tables = schemaData.schemas || [];
+                      let displayText = `Summarised Schema for ${data.database}:\n\n`;
+                      displayText += `Found ${tables.length} tables:\n\n`;
+                      
+                      tables.forEach((table: any, index: number) => {
+                        displayText += `${index + 1}. ${table.table}\n`;
+                        displayText += `   Columns: ${table.columns.join(', ')}\n\n`;
+                      });
+                      
+                      displayText += `\nThis contains database, table, and column info from the selected database.`;
+                      
+                      // Use a more robust display method
+                      const newWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+                      if (newWindow) {
+                        newWindow.document.write(`
+                          <html>
+                            <head><title>Schema for ${data.database}</title></head>
+                            <body style="font-family: monospace; padding: 20px; white-space: pre-wrap; text-align: left;">
+                              <h2>Summarised Schema for ${data.database}</h2>
+                              <p><strong>Found ${tables.length} tables:</strong></p>
+                              ${tables.map((table: any, index: number) => 
+                                `<div style="margin: 15px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; text-align: left;">
+                                  <h3>${index + 1}. ${table.table}</h3>
+                                  <p><strong>Columns:</strong> ${table.columns.join(', ')}</p>
+                                </div>`
+                              ).join('')}
+                              <p><em>This contains database, table, and column info from the selected database.</em></p>
+                            </body>
+                          </html>
+                        `);
+                        newWindow.document.close();
+                      } else {
+                        // Fallback to alert if popup is blocked
+                        alert(displayText);
+                      }
+                    } catch (error) {
+                      console.error('Schema loading error:', error);
+                      alert(`Failed to load schema: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    }
                   }}
                 >
                   Summarised Schema ({data.database} only)
@@ -343,24 +380,70 @@ function BotJsonRender({ data }: { data: any }) {
               <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">
                 <button 
                   className="text-blue-400 hover:text-blue-300 underline"
-                  onClick={() => {
-                    // Show full schema example
-                    const example = {
-                      "database": data.database,
-                      "tables": {
-                        "Students": {
-                          "columns": ["student_id", "first_name", "last_name", "email_address"],
-                          "primary_keys": ["student_id"],
-                          "foreign_keys": []
-                        },
-                        "Courses": {
-                          "columns": ["course_id", "course_name", "instructor_id"],
-                          "primary_keys": ["course_id"],
-                          "foreign_keys": [{"column": "instructor_id", "references": "Instructors.instructor_id"}]
+                  onClick={async () => {
+                    try {
+                      const schemaData = await apiFetch(`/api/agents/schema/${encodeURIComponent(data.database)}/c/`);
+                      
+                      // Create a more detailed display for the full schema
+                      const schema = schemaData.schema || {};
+                      const tables = schema.tables || {};
+                      const tableNames = Object.keys(tables);
+                      
+                      let displayText = `Full Schema for ${data.database}:\n\n`;
+                      displayText += `Found ${tableNames.length} tables with complete schema:\n\n`;
+                      
+                      tableNames.forEach((tableName: string, index: number) => {
+                        const tableInfo = tables[tableName];
+                        displayText += `${index + 1}. ${tableName}\n`;
+                        displayText += `   Columns: ${tableInfo.columns.join(', ')}\n`;
+                        if (tableInfo.primary_key && tableInfo.primary_key.length > 0) {
+                          displayText += `   Primary Keys: ${tableInfo.primary_key.join(', ')}\n`;
                         }
+                        if (tableInfo.foreign_keys && tableInfo.foreign_keys.length > 0) {
+                          displayText += `   Foreign Keys: ${tableInfo.foreign_keys.map((fk: any) => 
+                            `${fk.from_column} -> ${fk.ref_table}.${fk.ref_column}`
+                          ).join(', ')}\n`;
+                        }
+                        displayText += '\n';
+                      });
+                      
+                      displayText += `\nThis contains complete schema with PK/FK relationships for SQL generation.`;
+                      
+                      // Use a more robust display method
+                      const newWindow = window.open('', '_blank', 'width=1000,height=700,scrollbars=yes');
+                      if (newWindow) {
+                        newWindow.document.write(`
+                          <html>
+                            <head><title>Full Schema for ${data.database}</title></head>
+                            <body style="font-family: monospace; padding: 20px; white-space: pre-wrap;">
+                              <h2>Full Schema for ${data.database}</h2>
+                              <p><strong>Found ${tableNames.length} tables with complete schema:</strong></p>
+                              ${tableNames.map((tableName: string, index: number) => {
+                                const tableInfo = tables[tableName];
+                                return `<div style="margin: 15px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
+                                  <h3>${index + 1}. ${tableName}</h3>
+                                  <p><strong>Columns:</strong> ${tableInfo.columns.join(', ')}</p>
+                                  ${tableInfo.primary_key && tableInfo.primary_key.length > 0 ? 
+                                    `<p><strong>Primary Keys:</strong> ${tableInfo.primary_key.join(', ')}</p>` : ''}
+                                  ${tableInfo.foreign_keys && tableInfo.foreign_keys.length > 0 ? 
+                                    `<p><strong>Foreign Keys:</strong> ${tableInfo.foreign_keys.map((fk: any) => 
+                                      `${fk.from_column} → ${fk.ref_table}.${fk.ref_column}`
+                                    ).join(', ')}</p>` : ''}
+                                </div>`;
+                              }).join('')}
+                              <p><em>This contains complete schema with PK/FK relationships for SQL generation.</em></p>
+                            </body>
+                          </html>
+                        `);
+                        newWindow.document.close();
+                      } else {
+                        // Fallback to alert if popup is blocked
+                        alert(displayText);
                       }
-                    };
-                    alert(`Full Schema for ${data.database}:\n\n${JSON.stringify(example, null, 2)}\n\nContains complete schema with PK/FK relationships for SQL generation.`);
+                    } catch (error) {
+                      console.error('Schema loading error:', error);
+                      alert(`Failed to load schema: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    }
                   }}
                 >
                   Full Schema ({data.database})

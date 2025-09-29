@@ -9,17 +9,6 @@ from datetime import datetime
 
 from core.models import APIKeys
 from utils import sql_connector
-from django.http import StreamingHttpResponse
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-import json
-from django.core.cache import cache
-from datetime import datetime
-
-from core.models import APIKeys
-from utils import sql_connector
 from . import a_db_select, b_table_select, c_sql_generate
 from utils.schema_builder import get_schema_dir
 import os
@@ -258,3 +247,84 @@ class AgentViewSet(viewsets.ViewSet):
         """Clear last cached agent result for this user."""
         cache.delete(f"{CACHE_KEY_PREFIX}:{request.user.id}")
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="schema/(?P<database_name>[^/]+)/(?P<schema_type>[^/]+)",
+    )
+    def get_schema(self, request, database_name=None, schema_type=None):
+        """Get schema data for a specific database and schema type (ab or c)."""
+        try:
+            schema_dir = get_schema_dir(request.user.id)
+
+            if schema_type == "ab":
+                # Return summarised schema (schema_ab.jsonl) filtered by database
+                schema_file = os.path.join(schema_dir, "schema_ab.jsonl")
+                if not os.path.exists(schema_file):
+                    return Response(
+                        {
+                            "error": "Schema file not found. Please upload databases first."
+                        },
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
+                filtered_schemas = []
+                with open(schema_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            schema_obj = json.loads(line)
+                            if schema_obj.get("database") == database_name:
+                                filtered_schemas.append(schema_obj)
+                        except json.JSONDecodeError:
+                            continue
+
+                return Response(
+                    {
+                        "database": database_name,
+                        "schema_type": "summarised",
+                        "schemas": filtered_schemas,
+                    }
+                )
+
+            elif schema_type == "c":
+                # Return full schema (schema_c.json) for specific database
+                schema_file = os.path.join(schema_dir, "schema_c.json")
+                if not os.path.exists(schema_file):
+                    return Response(
+                        {
+                            "error": "Schema file not found. Please upload databases first."
+                        },
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
+                with open(schema_file, "r", encoding="utf-8") as f:
+                    all_schema = json.load(f)
+
+                if database_name not in all_schema:
+                    return Response(
+                        {"error": f"Database '{database_name}' not found in schema"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
+                return Response(
+                    {
+                        "database": database_name,
+                        "schema_type": "full",
+                        "schema": all_schema[database_name],
+                    }
+                )
+            else:
+                return Response(
+                    {"error": "Schema type must be 'ab' or 'c'"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve schema: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
