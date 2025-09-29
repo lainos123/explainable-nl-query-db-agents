@@ -151,6 +151,21 @@ function BotJsonRender({ data }: { data: any }) {
   if (data.error) return <div className="text-red-500 font-semibold">❌ Error: {data.error}</div>;
   if (data.success === false) return <div className="text-yellow-500 font-semibold">⚠️ Failed: {data.message || "Unknown error"}</div>;
 
+  // Check parameters from localStorage with state for dynamic updates
+  const [include_reasons, setIncludeReasons] = React.useState(localStorage.getItem('agent_include_reasons') !== 'false');
+  const [include_process, setIncludeProcess] = React.useState(localStorage.getItem('agent_include_process') !== 'false');
+
+  // Listen for parameter changes
+  React.useEffect(() => {
+    const handleParamChange = () => {
+      setIncludeReasons(localStorage.getItem('agent_include_reasons') !== 'false');
+      setIncludeProcess(localStorage.getItem('agent_include_process') !== 'false');
+    };
+
+    window.addEventListener('agent_params_changed', handleParamChange);
+    return () => window.removeEventListener('agent_params_changed', handleParamChange);
+  }, []);
+
   // Determine which agent this output is from based on the data structure
   const getAgentInfo = (data: any) => {
     if (data.SQL) {
@@ -187,7 +202,7 @@ function BotJsonRender({ data }: { data: any }) {
       )}
 
       {/* Agent Process Section */}
-      {agentInfo && (
+      {agentInfo && include_process && (
         <div className="bg-gray-800 rounded-lg p-3">
           <div className="text-xs font-semibold text-gray-300 mb-2">🔄 Agent Process</div>
           {agentInfo.name === "Agent A - Database Selection" && (
@@ -411,7 +426,7 @@ function BotJsonRender({ data }: { data: any }) {
       )}
 
       {/* Reasoning Section */}
-      {data.reasons && (
+      {data.reasons && include_reasons && (
         <div className="bg-gray-800 rounded-lg p-3">
           <div className="text-xs font-semibold text-gray-300 mb-2">💭 Agent Reasoning</div>
           <div className="text-sm text-gray-300 italic">{data.reasons}</div>

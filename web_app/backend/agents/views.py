@@ -75,6 +75,12 @@ class AgentViewSet(viewsets.ViewSet):
         def event_stream():
             result = request.data  # initial input (dict from client)
 
+            # Extract parameters from request data
+            model = result.get("model", "gpt-5-mini")
+            top_k = int(result.get("top_k", 5))
+            include_reasons = result.get("include_reasons", True)
+            include_process = result.get("include_process", True)
+
             # Ensure API key exists before running any agent that calls LLMs
             if not api_key:
                 payload = {
@@ -102,9 +108,19 @@ class AgentViewSet(viewsets.ViewSet):
 
                 def target():
                     try:
-                        result_container["result"] = func(
-                            api_key, result, request.user.id
-                        )
+                        # Pass parameters to agents that support them
+                        if name == "a-db-select":
+                            result_container["result"] = func(
+                                api_key,
+                                result,
+                                request.user.id,
+                                model=model,
+                                top_k=top_k,
+                            )
+                        else:
+                            result_container["result"] = func(
+                                api_key, result, request.user.id
+                            )
                     except Exception as e:
                         result_container["result"] = {"error": str(e)}
 

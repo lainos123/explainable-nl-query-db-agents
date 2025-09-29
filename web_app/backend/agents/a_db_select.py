@@ -55,8 +55,8 @@ def create_or_load_embeddings(api_key: str, user_id: int):
 # LLM chain
 
 
-def create_agent(vectorstore, api_key: str):
-    llm = ChatOpenAI(model="gpt-5-mini", temperature=0, api_key=api_key)
+def create_agent(vectorstore, api_key: str, model: str = "gpt-5-mini", top_k: int = 5):
+    llm = ChatOpenAI(model=model, temperature=0, api_key=api_key)
     prompt_db = PromptTemplate(
         input_variables=["query", "retrieved_schema"],
         template="""
@@ -81,7 +81,7 @@ Example format:
 
     db_chain = prompt_db | llm
 
-    def database_selection_agent(user_query: str, top_k: int = 5):
+    def database_selection_agent(user_query: str):
         relevant_docs = vectorstore.similarity_search_with_score(user_query, k=top_k)
         retrieved_schema = "\n".join(
             f"score: {score:.4f}, content: {doc.page_content}"
@@ -144,7 +144,9 @@ Example format:
 # Entrypoint
 
 
-def run(api_key: str, payload: dict, user_id: int):
+def run(
+    api_key: str, payload: dict, user_id: int, model: str = "gpt-5-mini", top_k: int = 5
+):
     """
     Agent A entrypoint.
 
@@ -159,8 +161,8 @@ def run(api_key: str, payload: dict, user_id: int):
             return {"error": "query is required"}
 
         vectorstore = create_or_load_embeddings(api_key, user_id)
-        agent = create_agent(vectorstore, api_key)
-        parsed = agent(user_query, top_k=5)
+        agent = create_agent(vectorstore, api_key, model=model, top_k=top_k)
+        parsed = agent(user_query)
 
         # Return the full result including retrieved schemas
         return {
