@@ -14,8 +14,10 @@ def get_user_schema_dir(user_id: int) -> str:
     os.makedirs(schema_dir, exist_ok=True)
     return schema_dir
 
+
 def get_user_embeddings_folder(user_id: int) -> str:
     return os.path.join(get_user_schema_dir(user_id), "embeddings")
+
 
 def get_user_schema_file(user_id: int) -> str:
     return os.path.join(get_user_schema_dir(user_id), "schema_ab.jsonl")
@@ -25,7 +27,9 @@ def load_processed_schema(input_file: str):
     with open(input_file, "r", encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip()]
 
+
 # Embeddings + vectorstore
+
 
 def create_or_load_embeddings(api_key: str, user_id: int):
     schema_file = get_user_schema_file(user_id)
@@ -38,7 +42,9 @@ def create_or_load_embeddings(api_key: str, user_id: int):
         )
 
     if not os.path.exists(schema_file):
-        raise FileNotFoundError(f"Database file not found, please upload a database first.")
+        raise FileNotFoundError(
+            f"Database file not found, please upload a database first."
+        )
 
     schema_texts = load_processed_schema(schema_file)
     vectorstore = FAISS.from_texts(schema_texts, embeddings)
@@ -48,16 +54,28 @@ def create_or_load_embeddings(api_key: str, user_id: int):
 
 # LLM chain
 
+
 def create_agent(vectorstore, api_key: str):
     llm = ChatOpenAI(model="gpt-5-mini", temperature=0, api_key=api_key)
     prompt_db = PromptTemplate(
         input_variables=["query", "retrieved_schema"],
         template="""
-Please selects the most relevant database and table in order to answer user's query.
+Please select the single most relevant database and table to answer the user's query.
+
 User query: {query}
 Schema info: {retrieved_schema}
-Which database and tables has the most relevant information for this query? Selecting 1 database only. 
-Respond the database name, table and column infomation in JSON format: {{ "db_name": "...", "tables": ["..."], "columns":["..."]}}
+
+Respond **only** with a valid JSON object (no backticks, no extra text). 
+The JSON must include the following keys: "db_name", "tables", "columns", and "reasons". 
+Each key should appear on its own line for readability.
+
+Example format:
+
+{{
+  "db_name": "...",
+  "tables": ["..."],
+  "reasons": "Explanation of why this database was selected based on the similarity scores and schema content"
+}}
 """,
     )
 
@@ -77,14 +95,36 @@ Respond the database name, table and column infomation in JSON format: {{ "db_na
 
         try:
             match = re.search(r"\{.*\}", raw, re.DOTALL)
-            parsed_json = json.loads(match.group(0)) if match else {
-                "error": "no JSON found",
-                "raw": raw
-            }
+            parsed_json = (
+                json.loads(match.group(0))
+                if match
+                else {"error": "no JSON found", "raw": raw}
+            )
         except json.JSONDecodeError:
             parsed_json = {"error": "invalid LLM output", "raw": raw}
 
-        # Normalize output and return only the three fields requested by the caller
+        # Transform retrieved_schema into structured list for display
+        structured_schema = []
+        for doc, score in relevant_docs:
+            try:
+                schema_json = json.loads(doc.page_content)
+                structured_schema.append(
+                    {
+                        "score": round(float(score), 4),
+                        "database": schema_json.get("database"),
+                        "table": schema_json.get("table"),
+                        "columns": schema_json.get("columns", []),
+                    }
+                )
+            except json.JSONDecodeError:
+                structured_schema.append(
+                    {
+                        "score": round(float(score), 4),
+                        "raw_content": doc.page_content,
+                    }
+                )
+
+        # Normalize output and include retrieved schemas
         db_name = None
         reasons = ""
         if isinstance(parsed_json, dict):
@@ -95,12 +135,14 @@ Respond the database name, table and column infomation in JSON format: {{ "db_na
             "query": user_query,
             "database": db_name,
             "reasons": reasons,
+            "retrieved_schemas": structured_schema,
         }
 
     return database_selection_agent
 
 
 # Entrypoint
+
 
 def run(api_key: str, payload: dict, user_id: int):
     """
@@ -120,11 +162,12 @@ def run(api_key: str, payload: dict, user_id: int):
         agent = create_agent(vectorstore, api_key)
         parsed = agent(user_query, top_k=5)
 
-        # Return only the minimal fields requested by the caller
+        # Return the full result including retrieved schemas
         return {
             "query": user_query,
             "database": parsed.get("database"),
-            "reasons": parsed.get("reasons", "")
+            "reasons": parsed.get("reasons", ""),
+            "retrieved_schemas": parsed.get("retrieved_schemas", []),
         }
 
     except Exception as e:

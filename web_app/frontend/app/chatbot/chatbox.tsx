@@ -151,58 +151,273 @@ function BotJsonRender({ data }: { data: any }) {
   if (data.error) return <div className="text-red-500 font-semibold">❌ Error: {data.error}</div>;
   if (data.success === false) return <div className="text-yellow-500 font-semibold">⚠️ Failed: {data.message || "Unknown error"}</div>;
 
+  // Determine which agent this output is from based on the data structure
+  const getAgentInfo = (data: any) => {
+    if (data.SQL) {
+      return {
+        name: "Agent C - SQL Generation",
+        description: "Generates the final SQL query",
+        color: "bg-purple-600"
+      };
+    } else if (data.tables || data.relevant_tables) {
+      return {
+        name: "Agent B - Table Selection", 
+        description: "Selects relevant tables from the database",
+        color: "bg-blue-600"
+      };
+    } else if (data.database) {
+      return {
+        name: "Agent A - Database Selection",
+        description: "Identifies the most relevant database",
+        color: "bg-green-600"
+      };
+    }
+    return null;
+  };
+
+  const agentInfo = getAgentInfo(data);
+
   return (
-    <div className="space-y-2">
-      {data.query && <div><span className="font-bold">Query:</span> <span className="bg-gray-900 px-2 py-1 rounded text-sm">{data.query}</span></div>}
-      {data.database && <div><span className="font-bold">Database:</span> {Array.isArray(data.database)
-        ? data.database.map((db: string, i: number) => <span key={i} className="bg-gray-900 px-2 py-1 rounded text-sm mx-1">{db}</span>)
-        : <span className="bg-gray-900 px-2 py-1 rounded text-sm">{data.database}</span>}
-      </div>}
-      {data.tables && <div><span className="font-bold">Tables:</span> {Array.isArray(data.tables)
-        ? data.tables.map((t: string, i: number) => <span key={i} className="bg-gray-900 px-2 py-1 rounded text-sm mx-1">{t}</span>)
-        : <span className="bg-gray-900 px-2 py-1 rounded text-sm">{data.tables}</span>}
-      </div>}
-      {data.columns && <div><span className="font-bold">Columns:</span> {Array.isArray(data.columns)
-        ? data.columns.map((c: string, i: number) => <span key={i} className="bg-gray-900 px-2 py-1 rounded text-sm mx-1">{c}</span>)
-        : <span className="bg-gray-900 px-2 py-1 rounded text-sm">{data.columns}</span>}
-      </div>}
-      {data.SQL && (
-        <div className="flex flex-col items-start">
-          <span className="font-bold mb-1">SQL:</span>
-          <div
-            className="chatbot-sql-block"
-            style={{
-              width: '100%',
-              maxWidth: '100%',
-              overflowX: 'auto',
-              border: '1px solid #333',
-              borderRadius: '0.5rem',
-              background: '#18181b',
-              padding: '0.5em',
-              wordBreak: 'break-word',
-              whiteSpace: 'pre-wrap',
-            }}
-          >
-            <SyntaxHighlighter
-              language="sql"
-              style={oneDark}
-              customStyle={{
-                background: "transparent",
-                margin: 0,
-                padding: 0,
-                fontSize: "0.95em",
-                borderRadius: "0.5rem",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-              }}
-              wrapLongLines={true}
-            >
-              {data.SQL}
-            </SyntaxHighlighter>
-          </div>
+    <div className="space-y-3">
+      {agentInfo && (
+        <div className={`${agentInfo.color} text-white px-3 py-2 rounded-lg`}>
+          <div className="font-semibold text-sm">{agentInfo.name}</div>
+          <div className="text-xs opacity-90">{agentInfo.description}</div>
         </div>
       )}
-  {data.reasons && <div className="italic text-gray-400">My reason is: {data.reasons}</div>}
+
+      {/* Agent Process Section */}
+      {agentInfo && (
+        <div className="bg-gray-800 rounded-lg p-3">
+          <div className="text-xs font-semibold text-gray-300 mb-2">🔄 Agent Process</div>
+          {agentInfo.name === "Agent A - Database Selection" && (
+            <div className="text-xs text-gray-400 space-y-1">
+              <div>1. <span className="text-blue-400">Schema Loading</span> - Load full list of all summarised schemas from schema_ab.jsonl 
+                <button 
+                  className="text-blue-400 hover:text-blue-300 underline ml-2"
+                  onClick={() => {
+                    const example = [
+                      {"database": "student_transcripts_tracking", "table": "Students", "columns": ["student_id", "first_name", "last_name"]},
+                      {"database": "online_exams", "table": "Students", "columns": ["Student_ID", "First_Name", "Last_Name"]},
+                      {"database": "e_learning", "table": "Students", "columns": ["student_id", "personal_name", "family_name"]}
+                    ];
+                    alert(`Summarized Schema List (schema_ab.jsonl):\n\n${JSON.stringify(example, null, 2)}\n\nContains database, table, and column info from ALL databases for similarity search.`);
+                  }}
+                >
+                  (view summarised schema example)
+                </button>
+              </div>
+              <div>2. <span className="text-blue-400">Schema Embedding</span> - Convert each schema (database + table + columns) to OpenAI text-embedding-ada-002 vectors</div>
+              <div>3. <span className="text-blue-400">Query Embedding</span> - Convert user query to same OpenAI embedding vector</div>
+              <div>4. <span className="text-blue-400">Similarity Search</span> - Find top-K schemas with highest cosine similarity scores</div>
+              <div>5. <span className="text-blue-400">LLM Decision</span> - Pass retrieved schemas + scores to LLM to select best database with reasoning</div>
+            </div>
+          )}
+          {agentInfo.name === "Agent B - Table Selection" && (
+            <div className="text-xs text-gray-400 space-y-1">
+              <div>1. <span className="text-blue-400">Database Filtering</span> - Load summarised schema (schema_ab.jsonl) for the selected database only</div>
+              <div>2. <span className="text-blue-400">Table Extraction</span> - Parse all available tables and their metadata</div>
+              <div>3. <span className="text-blue-400">Relevance Analysis</span> - Analyze which tables are most relevant to the query</div>
+              <div>4. <span className="text-blue-400">LLM Selection</span> - Pass table information to LLM to select relevant tables</div>
+            </div>
+          )}
+          {agentInfo.name === "Agent C - SQL Generation" && (
+            <div className="text-xs text-gray-400 space-y-1">
+              <div>1. <span className="text-blue-400">Schema Loading</span> - Load full schema (schema_c.json) with PK/FK relationships</div>
+              <div>2. <span className="text-blue-400">Table Filtering</span> - Focus on selected tables from Agent B</div>
+              <div>3. <span className="text-blue-400">Relationship Mapping</span> - Analyze foreign key constraints and join possibilities</div>
+              <div>4. <span className="text-blue-400">LLM Generation</span> - Pass full context to LLM to generate optimized SQL query</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Input Section - only show if there's content */}
+      {(data.query || data.retrieved_schemas || data.database || data.relevant_tables) && (
+        <div className="bg-gray-800 rounded-lg p-3">
+          <div className="text-xs font-semibold text-gray-300 mb-2">Input to Agent</div>
+        {data.query && (
+          <div className="mb-2">
+            <span className="text-xs text-gray-400">User Query:</span>
+            <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">{data.query}</div>
+          </div>
+        )}
+        {/* For Agent A: Show retrieved schemas from similarity search */}
+        {agentInfo?.name === "Agent A - Database Selection" && data.retrieved_schemas && (
+          <div className="mb-2">
+            <span className="text-xs text-gray-400">Top-K Similar Schemas:</span>
+            <div className="bg-gray-900 rounded text-sm mt-1 p-2">
+              <div className="text-xs text-gray-500 mb-2">
+                Semantic similarity search found {data.retrieved_schemas.length} most relevant schemas:
+              </div>
+              {data.retrieved_schemas.map((schema: any, i: number) => (
+                <div key={i} className="mb-2 p-2 bg-gray-800 rounded text-xs">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-blue-400 font-medium">
+                      #{i + 1} Score: {schema.score}
+                    </span>
+                    <span className="text-green-400">{schema.database}</span>
+                  </div>
+                  <div className="text-gray-300">
+                    <span className="text-yellow-400">{schema.table}</span>
+                    {schema.columns && schema.columns.length > 0 && (
+                      <span className="text-gray-400 ml-2">
+                        ({schema.columns.slice(0, 5).join(', ')}{schema.columns.length > 5 ? '...' : ''})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* For Agent B: Show database from Agent A */}
+        {agentInfo?.name === "Agent B - Table Selection" && data.database && (
+          <div className="mb-2">
+            <span className="text-xs text-gray-400">Database:</span>
+            <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">{data.database}</div>
+          </div>
+        )}
+        {/* For Agent C: Show database and tables from previous agents */}
+        {agentInfo?.name === "Agent C - SQL Generation" && (
+          <>
+            {data.database && (
+              <div className="mb-2">
+                <span className="text-xs text-gray-400">Database:</span>
+                <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">{data.database}</div>
+              </div>
+            )}
+            {data.relevant_tables && (
+              <div className="mb-2">
+                <span className="text-xs text-gray-400">Possible Relevant Tables:</span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {Array.isArray(data.relevant_tables)
+                    ? data.relevant_tables.map((t: string, i: number) => (
+                        <span key={i} className="bg-gray-900 px-2 py-1 rounded text-xs">{t}</span>
+                      ))
+                    : <span className="bg-gray-900 px-2 py-1 rounded text-xs">{data.relevant_tables}</span>}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        
+        {/* Schema Input Section - Only for agents that use schema data as input */}
+        {agentInfo && (agentInfo.name === "Agent B - Table Selection" || agentInfo.name === "Agent C - SQL Generation") && (
+          <div className="mb-2">
+            <span className="text-xs text-gray-400">Schema Data:</span>
+            {agentInfo.name === "Agent B - Table Selection" && data.database && (
+              <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">
+                <button 
+                  className="text-blue-400 hover:text-blue-300 underline"
+                  onClick={() => {
+                    // Show filtered schema for selected database
+                    const example = {
+                      "database": data.database,
+                      "table": "Students",
+                      "columns": ["student_id", "first_name", "last_name", "email_address"]
+                    };
+                    alert(`Summarised Schema for ${data.database}:\n\n${JSON.stringify(example, null, 2)}\n\nContains database, table, and column info from the selected database.`);
+                  }}
+                >
+                  Summarised Schema ({data.database} only)
+                </button>
+              </div>
+            )}
+            {agentInfo.name === "Agent C - SQL Generation" && data.database && (
+              <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">
+                <button 
+                  className="text-blue-400 hover:text-blue-300 underline"
+                  onClick={() => {
+                    // Show full schema example
+                    const example = {
+                      "database": data.database,
+                      "tables": {
+                        "Students": {
+                          "columns": ["student_id", "first_name", "last_name", "email_address"],
+                          "primary_keys": ["student_id"],
+                          "foreign_keys": []
+                        },
+                        "Courses": {
+                          "columns": ["course_id", "course_name", "instructor_id"],
+                          "primary_keys": ["course_id"],
+                          "foreign_keys": [{"column": "instructor_id", "references": "Instructors.instructor_id"}]
+                        }
+                      }
+                    };
+                    alert(`Full Schema for ${data.database}:\n\n${JSON.stringify(example, null, 2)}\n\nContains complete schema with PK/FK relationships for SQL generation.`);
+                  }}
+                >
+                  Full Schema ({data.database})
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        </div>
+      )}
+
+      {/* Output Section - only show if there's content */}
+      {(data.database || data.tables || data.SQL) && (
+        <div className="bg-gray-800 rounded-lg p-3">
+          <div className="text-xs font-semibold text-gray-300 mb-2">Agent Output</div>
+        
+        {/* Agent A Output: Selected Database */}
+        {agentInfo?.name === "Agent A - Database Selection" && data.database && (
+          <div className="mb-2">
+            <span className="text-xs text-gray-400">Selected Database:</span>
+            <div className="bg-gray-900 px-2 py-1 rounded text-sm mt-1">{data.database}</div>
+          </div>
+        )}
+        
+        {/* Agent B Output: Relevant Tables */}
+        {agentInfo?.name === "Agent B - Table Selection" && data.tables && (
+          <div className="mb-2">
+            <span className="text-xs text-gray-400">Relevant Tables:</span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {Array.isArray(data.tables)
+                ? data.tables.map((t: string, i: number) => (
+                    <span key={i} className="bg-gray-900 px-2 py-1 rounded text-xs">{t}</span>
+                  ))
+                : <span className="bg-gray-900 px-2 py-1 rounded text-xs">{data.tables}</span>}
+            </div>
+          </div>
+        )}
+
+        {/* Agent C Output: Generated SQL */}
+        {agentInfo?.name === "Agent C - SQL Generation" && data.SQL && (
+          <div className="mb-2">
+            <span className="text-xs text-gray-400">Generated SQL:</span>
+            <div className="mt-2">
+              <SyntaxHighlighter
+                language="sql"
+                style={oneDark}
+                customStyle={{
+                  margin: 0,
+                  background: '#1a1a1a',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.5',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #333',
+                }}
+                wrapLongLines={true}
+              >
+                {data.SQL}
+              </SyntaxHighlighter>
+            </div>
+          </div>
+        )}
+        </div>
+      )}
+
+      {/* Reasoning Section */}
+      {data.reasons && (
+        <div className="bg-gray-800 rounded-lg p-3">
+          <div className="text-xs font-semibold text-gray-300 mb-2">💭 Agent Reasoning</div>
+          <div className="text-sm text-gray-300 italic">{data.reasons}</div>
+          
+        </div>
+      )}
       {data.result && Array.isArray(data.result) && data.result.length > 0 && (() => {
         // Responsive columns/rows
         let colCount = 2, rowCount = 5;
@@ -223,8 +438,29 @@ function BotJsonRender({ data }: { data: any }) {
         const showRows = data.result.slice(0, rowCount);
         const hasMoreRows = data.result.length > rowCount;
         return (
-          <div>
-            <span className="font-bold">Result:</span>
+          <div className="space-y-3">
+            {/* Query Execution Header */}
+            <div className="bg-orange-600 text-white px-3 py-2 rounded-lg">
+              <div className="font-semibold text-sm">Query Execution</div>
+              <div className="text-xs opacity-90">Running SQL query on the selected database</div>
+            </div>
+
+            {/* Tools/Data Access */}
+            <div className="bg-gray-800 rounded-lg p-3">
+              <div className="text-xs font-semibold text-gray-300 mb-2">🛠️ Execution Environment</div>
+              <div className="text-xs text-gray-400 space-y-1">
+                <div>• <span className="text-blue-400">SQLite Database</span> - Direct execution on uploaded database file</div>
+                <div>• <span className="text-blue-400">Query Engine</span> - Native SQLite query processing</div>
+                <div>• <span className="text-blue-400">Result Streaming</span> - Real-time data retrieval and formatting</div>
+              </div>
+            </div>
+
+            {/* Execution Results */}
+            <div className="bg-gray-800 rounded-lg p-3">
+              <div className="text-xs font-semibold text-gray-300 mb-2">📊 Query Results</div>
+              <div className="text-xs text-gray-400 mb-2">
+                Found {data.result.length} rows in the database
+              </div>
             <div className="flex gap-2 mb-2">
               <button
                 className="px-3 py-1 rounded bg-blue-600 text-white text-xs font-medium hover:bg-blue-700"
@@ -281,6 +517,7 @@ function BotJsonRender({ data }: { data: any }) {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         );
       })()}
