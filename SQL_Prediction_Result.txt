@@ -1,0 +1,1799 @@
+
+
+
+
+
+[
+  {
+    "query": "How many heads of the departments are older than 56 ?",
+    "sql_truth": "SELECT count(*) FROM head WHERE age  >  56",
+    "sql_pred": "SELECT COUNT(*) FROM head WHERE age > 56;",
+    "similarity": 0.9744021892547607
+  },
+  {
+    "query": "What are the hosts of competitions whose theme is not "Aliens"?",
+    "sql_truth": "SELECT Hosts FROM farm_competition WHERE Theme !=  'Aliens'",
+    "sql_pred": "SELECT DISTINCT c.official_name FROM farm_competition fc JOIN city c ON fc.host_city_id = c.city_id WHERE fc.theme <> 'Aliens'",
+    "similarity": 0.9094228148460388
+  },
+  {
+    "query": "Please show the themes of competitions with host cities having populations larger than 1000.",
+    "sql_truth": "SELECT T2.Theme FROM city AS T1 JOIN farm_competition AS T2 ON T1.City_ID  =  T2.Host_city_ID WHERE T1.Population  >  1000",
+    "sql_pred": "SELECT fc.theme FROM farm_competition fc JOIN city c ON fc.host_city_id = c.city_id WHERE c.population > 1000",
+    "similarity": 0.9428419470787048
+  },
+  {
+    "query": "What are the ids of the students who either registered or attended a course?",
+    "sql_truth": "SELECT student_id FROM student_course_registrations UNION SELECT student_id FROM student_course_attendance",
+    "sql_pred": "SELECT DISTINCT student_id FROM Student_Course_Registrations UNION SELECT DISTINCT student_id FROM Student_Course_Attendance;",
+    "similarity": 0.9732999801635742
+  },
+  {
+    "query": "What is the id of the shortest trip?",
+    "sql_truth": "SELECT id FROM trip ORDER BY duration LIMIT 1",
+    "sql_pred": "SELECT id FROM trip ORDER BY duration ASC LIMIT 1",
+    "similarity": 0.9967009425163269
+  },
+  {
+    "query": "What is the latitude, longitude, and city of the station from which the trip with smallest duration started?",
+    "sql_truth": "SELECT T1.lat ,  T1.long ,  T1.city FROM station AS T1 JOIN trip AS T2 ON T1.id  =  T2.start_station_id ORDER BY T2.duration LIMIT 1",
+    "sql_pred": "SELECT s.lat, s.long, s.city FROM station s JOIN trip t ON s.id = t.start_station_id ORDER BY t.duration ASC LIMIT 1",
+    "similarity": 0.9635297060012817
+  },
+  {
+    "query": "Which days had a minimum dew point smaller than any day in zip code 94107, and in which zip codes were those measurements taken?",
+    "sql_truth": "SELECT date ,  zip_code FROM weather WHERE min_dew_point_f  <  (SELECT min(min_dew_point_f) FROM weather WHERE zip_code  =  94107)",
+    "sql_pred": "SELECT w.zip_code  FROM weather w  WHERE w.min_dew_point_f < (SELECT MIN(w2.min_dew_point_f) FROM weather w2 WHERE w2.zip_code = '94107')",
+    "similarity": 0.969205379486084
+  },
+  {
+    "query": "What are the ids and names of all start stations that were the beginning of at least 200 trips?",
+    "sql_truth": "SELECT start_station_id ,  start_station_name FROM trip GROUP BY start_station_name HAVING COUNT(*)  >=  200",
+    "sql_pred": "SELECT start_station_id , start_station_name FROM trip GROUP BY start_station_id , start_station_name HAVING COUNT(id) >= 200",
+    "similarity": 0.9888103604316711
+  },
+  {
+    "query": "What are the dates that have an average sea level pressure between 30.3 and 31?",
+    "sql_truth": "SELECT date FROM weather WHERE mean_sea_level_pressure_inches BETWEEN 30.3 AND 31",
+    "sql_pred": "SELECT date FROM weather WHERE mean_sea_level_pressure_inches BETWEEN 30.3 AND 31;",
+    "similarity": 0.9838477969169617
+  },
+  {
+    "query": "List the publisher of the publication with the highest price.",
+    "sql_truth": "SELECT Publisher FROM publication ORDER BY Price DESC LIMIT 1",
+    "sql_pred": "SELECT Publisher FROM publication WHERE Price = (SELECT MAX(Price) FROM publication)",
+    "similarity": 0.9508587121963501
+  },
+  {
+    "query": "List the name of actors whose age is not 20.",
+    "sql_truth": "SELECT Name FROM actor WHERE Age != 20",
+    "sql_pred": "SELECT name FROM actor WHERE age <> 20",
+    "similarity": 0.9805681109428406
+  },
+  {
+    "query": "Show different nominees and the number of musicals they have been nominated.",
+    "sql_truth": "SELECT Nominee ,  COUNT(*) FROM musical GROUP BY Nominee",
+    "sql_pred": "SELECT nominee , COUNT(musical_id) AS number_of_musicals FROM musical GROUP BY nominee",
+    "similarity": 0.9514896273612976
+  },
+  {
+    "query": "Find the number of users who posted some tweets.",
+    "sql_truth": "SELECT count(DISTINCT UID) FROM tweets",
+    "sql_pred": "SELECT COUNT(DISTINCT uid) FROM tweets;",
+    "similarity": 0.9629725217819214
+  },
+  {
+    "query": "Find the maximum and total number of followers of all users.",
+    "sql_truth": "SELECT max(followers) ,  sum(followers) FROM user_profiles",
+    "sql_pred": "SELECT MAX(followers) AS max_followers , SUM(followers) AS total_followers FROM user_profiles",
+    "similarity": 0.9801430702209473
+  },
+  {
+    "query": "Find the level name of the catalog with the lowest price (in USD).",
+    "sql_truth": "SELECT t2.catalog_level_name FROM catalog_contents AS t1 JOIN catalog_structure AS t2 ON t1.catalog_level_number  =  t2.catalog_level_number ORDER BY t1.price_in_dollars LIMIT 1",
+    "sql_pred": "SELECT cs.catalog_level_name FROM Catalog_Contents cc JOIN Catalog_Structure cs ON cc.catalog_level_number = cs.catalog_level_number WHERE cc.price_in_dollars = (SELECT MIN(price_in_dollars) FROM Catalog_Contents);",
+    "similarity": 0.9248973727226257
+  },
+  {
+    "query": "Find the total number of catalog contents.",
+    "sql_truth": "SELECT count(*) FROM catalog_contents",
+    "sql_pred": "SELECT COUNT(*) AS total_catalog_contents FROM catalog_contents;",
+    "similarity": 0.9532467722892761
+  },
+  {
+    "query": "What are the names of all aircrafts that can cover more distances than average?",
+    "sql_truth": "SELECT name FROM Aircraft WHERE distance  >  (SELECT avg(distance) FROM Aircraft)",
+    "sql_pred": "SELECT name FROM aircraft WHERE distance > (SELECT AVG(distance) FROM aircraft)",
+    "similarity": 0.983435332775116
+  },
+  {
+    "query": "What are the numbers of the shortest flights?",
+    "sql_truth": "SELECT flno FROM Flight ORDER BY distance ASC LIMIT 3",
+    "sql_pred": "SELECT flno FROM flight WHERE distance = (SELECT MIN(distance) FROM flight)",
+    "similarity": 0.9278838634490967
+  },
+  {
+    "query": "What is the count of distinct employees with certificates?",
+    "sql_truth": "SELECT count(DISTINCT eid) FROM Certificate",
+    "sql_pred": "SELECT COUNT(DISTINCT eid) FROM certificate;",
+    "similarity": 0.974142849445343
+  },
+  {
+    "query": "How many allergy entries are there?",
+    "sql_truth": "SELECT count(DISTINCT allergy) FROM Allergy_type",
+    "sql_pred": "SELECT COUNT(*) FROM Has_Allergy",
+    "similarity": 0.91957688331604
+  },
+  {
+    "query": "What are the last names and ages of the students who are allergic to milk and cat?",
+    "sql_truth": "SELECT lname ,  age FROM Student WHERE StuID IN (SELECT StuID FROM Has_allergy WHERE Allergy  =  "Milk" INTERSECT SELECT StuID FROM Has_allergy WHERE Allergy  =  "Cat")",
+    "sql_pred": "SELECT s.LName, s.Age FROM Student s JOIN Has_Allergy ha ON s.StuID = ha.StuID WHERE ha.Allergy IN ('milk', 'cat') GROUP BY s.LName, s.Age HAVING COUNT(DISTINCT ha.Allergy) = 2",
+    "similarity": 0.9374977350234985
+  },
+  {
+    "query": "What are the total amount of money in the invoices billed from Chicago, Illinois?",
+    "sql_truth": "SELECT sum(total) FROM invoices WHERE billing_city  =  "Chicago" AND billing_state  =  "IL";",
+    "sql_pred": "SELECT SUM(total) AS total_amount FROM invoices WHERE billing_city = 'Chicago' AND billing_state = 'Illinois'",
+    "similarity": 0.9698330163955688
+  },
+  {
+    "query": "How many customers are from California?",
+    "sql_truth": "SELECT count(*) FROM customers WHERE state = "CA";",
+    "sql_pred": "SELECT COUNT(*) FROM customers WHERE state = 'California'",
+    "similarity": 0.9724439978599548
+  },
+  {
+    "query": "Show the names and ages of editors and the theme of journals for which they serve on committees, in ascending alphabetical order of theme.",
+    "sql_truth": "SELECT T2.Name ,  T2.age ,  T3.Theme FROM journal_committee AS T1 JOIN editor AS T2 ON T1.Editor_ID  =  T2.Editor_ID JOIN journal AS T3 ON T1.Journal_ID  =  T3.Journal_ID ORDER BY T3.Theme ASC",
+    "sql_pred": "SELECT e.name, e.age, j.theme FROM editor e JOIN journal_committee jc ON e.editor_id = jc.editor_id JOIN journal j ON jc.journal_id = j.journal_id ORDER BY j.theme ASC",
+    "similarity": 0.9439623355865479
+  },
+  {
+    "query": "What are card ids, customer ids, card types, and card numbers for each customer card?",
+    "sql_truth": "SELECT card_id ,  customer_id ,  card_type_code ,  card_number FROM Customers_cards",
+    "sql_pred": "SELECT card_id , customer_id , card_type_code , card_number FROM Customers_Cards",
+    "similarity": 0.9896353483200073
+  },
+  {
+    "query": "What are the different card types, and how many cards are there of each?",
+    "sql_truth": "SELECT card_type_code ,  count(*) FROM Customers_cards GROUP BY card_type_code",
+    "sql_pred": "SELECT card_type_code , COUNT(card_id) AS card_count FROM Customers_Cards GROUP BY card_type_code",
+    "similarity": 0.9873501062393188
+  },
+  {
+    "query": "What are the different card types, and how many transactions have been made with each?",
+    "sql_truth": "SELECT T2.card_type_code ,  count(*) FROM Financial_transactions AS T1 JOIN Customers_cards AS T2 ON T1.card_id  =  T2.card_id GROUP BY T2.card_type_code",
+    "sql_pred": "SELECT card_type_code , COUNT(ft.transaction_id) AS transaction_count  FROM customers_cards cc  LEFT JOIN financial_transactions ft ON cc.card_id = ft.card_id  GROUP BY card_type_code",
+    "similarity": 0.9475917220115662
+  },
+  {
+    "query": "Give the different locations of tracks.",
+    "sql_truth": "SELECT DISTINCT LOCATION FROM track",
+    "sql_pred": "SELECT DISTINCT location FROM track",
+    "similarity": 0.9858649969100952
+  },
+  {
+    "query": "What are the names of different tracks, and how many races has each had?",
+    "sql_truth": "SELECT T2.name ,  count(*) FROM race AS T1 JOIN track AS T2 ON T1.track_id  =  T2.track_id GROUP BY T1.track_id",
+    "sql_pred": "SELECT t.name, COUNT(r.race_id) AS race_count FROM track t LEFT JOIN race r ON t.track_id = r.track_id GROUP BY t.name",
+    "similarity": 0.9431435465812683
+  },
+  {
+    "query": "What are the average score and average staff number of all shops?",
+    "sql_truth": "SELECT avg(num_of_staff) ,  avg(score) FROM shop",
+    "sql_pred": "SELECT AVG(Score) AS average_score , AVG(Num_of_staff) AS average_staff_number FROM shop",
+    "similarity": 0.9764031171798706
+  },
+  {
+    "query": "Which customers do not have a first notification of loss record? Give me the customer names.",
+    "sql_truth": "SELECT customer_name FROM customers EXCEPT SELECT t1.customer_name FROM customers AS t1 JOIN first_notification_of_loss AS t2 ON t1.customer_id  =  t2.customer_id",
+    "sql_pred": "SELECT c.Customer_name FROM Customers c LEFT JOIN First_Notification_of_Loss fnol ON c.Customer_ID = fnol.Customer_ID WHERE fnol.FNOL_ID IS NULL",
+    "similarity": 0.8980663418769836
+  },
+  {
+    "query": "What is the maximum OMIM value in the database?",
+    "sql_truth": "SELECT max(OMIM) FROM enzyme",
+    "sql_pred": "SELECT MAX(OMIM) FROM enzyme;",
+    "similarity": 0.9624902009963989
+  },
+  {
+    "query": "How many medicines were not approved by the FDA?",
+    "sql_truth": "SELECT count(*) FROM medicine WHERE FDA_approved  =  'No'",
+    "sql_pred": "SELECT COUNT(*) FROM medicine WHERE fda_approved = 'No'",
+    "similarity": 0.9800306558609009
+  },
+  {
+    "query": "What is all the information about the basketball match?",
+    "sql_truth": "SELECT * FROM basketball_match",
+    "sql_pred": "SELECT * FROM basketball_match;",
+    "similarity": 0.9763747453689575
+  },
+  {
+    "query": "List the hardware model name for the phons that were produced by "Nokia Corporation" but whose screen mode type is not Text.",
+    "sql_truth": "SELECT DISTINCT T2.Hardware_Model_name FROM screen_mode AS T1 JOIN phone AS T2 ON T1.Graphics_mode = T2.screen_mode WHERE t2.Company_name  =  "Nokia Corporation" AND T1.Type != "Text";",
+    "sql_pred": "SELECT Hardware_Model_name FROM phone WHERE Company_name = 'Nokia Corporation' AND screen_mode NOT IN (SELECT Graphics_mode FROM screen_mode WHERE Type = 'Text')",
+    "similarity": 0.9377496242523193
+  },
+  {
+    "query": "What are the names of mountains in ascending alphabetical order?",
+    "sql_truth": "SELECT Name FROM mountain ORDER BY Name ASC",
+    "sql_pred": "SELECT Name FROM mountain ORDER BY Name ASC",
+    "similarity": 0.9999979734420776
+  },
+  {
+    "query": "List the countries that have more than one mountain.",
+    "sql_truth": "SELECT Country FROM mountain GROUP BY Country HAVING COUNT(*)  >  1",
+    "sql_pred": "SELECT country FROM mountain GROUP BY country HAVING COUNT(mountain_id) > 1",
+    "similarity": 0.974708080291748
+  },
+  {
+    "query": "What are the heights of body builders with total score smaller than 315?",
+    "sql_truth": "SELECT T2.Height FROM body_builder AS T1 JOIN people AS T2 ON T1.People_ID  =  T2.People_ID WHERE T1.Total  <  315",
+    "sql_pred": "SELECT p.height FROM people p JOIN body_builder bb ON p.people_id = bb.people_id WHERE bb.total < 315",
+    "similarity": 0.9388571977615356
+  },
+  {
+    "query": "What are the life spans of representatives from New York state or Indiana state?",
+    "sql_truth": "SELECT Lifespan FROM representative WHERE State  =  "New York" OR State  =  "Indiana"",
+    "sql_pred": "SELECT lifespan FROM representative WHERE state IN ('New York', 'Indiana')",
+    "similarity": 0.9471320509910583
+  },
+  {
+    "query": "Show the short names of the buildings managed by "Emma".",
+    "sql_truth": "SELECT building_short_name FROM Apartment_Buildings WHERE building_managert =  "Emma"",
+    "sql_pred": "SELECT building_short_name FROM Apartment_Buildings WHERE building_manager = 'Emma'",
+    "similarity": 0.9901390075683594
+  },
+  {
+    "query": "Show the apartment numbers, start dates, and end dates of all the apartment bookings.",
+    "sql_truth": "SELECT T2.apt_number ,  T1.booking_start_date ,  T1.booking_start_date FROM Apartment_Bookings AS T1 JOIN Apartments AS T2 ON T1.apt_id  =  T2.apt_id",
+    "sql_pred": "SELECT a.apt_number , ab.booking_start_date , ab.booking_end_date FROM apartments a JOIN apartment_bookings ab ON a.apt_id = ab.apt_id",
+    "similarity": 0.9474981427192688
+  },
+  {
+    "query": "Show the total number of rooms of all apartments with facility code "Gym".",
+    "sql_truth": "SELECT sum(T2.room_count) FROM Apartment_Facilities AS T1 JOIN Apartments AS T2 ON T1.apt_id  =  T2.apt_id WHERE T1.facility_code  =  "Gym"",
+    "sql_pred": "SELECT SUM(a.room_count) AS total_rooms  FROM apartments a  JOIN apartment_facilities af ON a.apt_id = af.apt_id  WHERE af.facility_code = 'Gym'",
+    "similarity": 0.956440806388855
+  },
+  {
+    "query": "Show the most common apartment type code.",
+    "sql_truth": "SELECT apt_type_code FROM Apartments GROUP BY apt_type_code ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT apt_type_code, COUNT(*) AS type_count FROM apartments GROUP BY apt_type_code ORDER BY type_count DESC LIMIT 1",
+    "similarity": 0.9863010048866272
+  },
+  {
+    "query": "What is the season of the game which causes the player 'Walter Samuel' to get injured?",
+    "sql_truth": "SELECT T1.season FROM game AS T1 JOIN injury_accident AS T2 ON T1.id  =  T2.game_id WHERE T2.player  =  'Walter Samuel'",
+    "sql_pred": "SELECT g.Season FROM game g JOIN injury_accident ia ON g.id = ia.game_id WHERE ia.Player = 'Walter Samuel'",
+    "similarity": 0.9636119604110718
+  },
+  {
+    "query": "List the names of all left-footed players who have overall rating between 85 and 90.",
+    "sql_truth": "SELECT DISTINCT T1.player_name FROM Player AS T1 JOIN Player_Attributes AS T2 ON T1.player_api_id = T2.player_api_id WHERE T2.preferred_foot  =  "left" AND T2.overall_rating  >=  85 AND T2.overall_rating  <=  90",
+    "sql_pred": "SELECT player_name FROM Player INNER JOIN Player_Attributes ON Player.player_api_id = Player_Attributes.player_api_id WHERE preferred_foot = 'left' AND overall_rating BETWEEN 85 AND 90",
+    "similarity": 0.9644194841384888
+  },
+  {
+    "query": "Show the names of members and the dates of performances they attended in descending order of attendance of the performances.",
+    "sql_truth": "SELECT T2.Name ,  T3.Date FROM member_attendance AS T1 JOIN member AS T2 ON T1.Member_ID  =  T2.Member_ID JOIN performance AS T3 ON T1.Performance_ID  =  T3.Performance_ID ORDER BY T3.Attendance DESC",
+    "sql_pred": "SELECT m.Name, p.Date FROM member m JOIN member_attendance ma ON m.Member_ID = ma.Member_ID JOIN performance p ON ma.Performance_ID = p.Performance_ID ORDER BY p.Attendance DESC",
+    "similarity": 0.9544165730476379
+  },
+  {
+    "query": "How many different courses offered by Physics department?",
+    "sql_truth": "SELECT count(DISTINCT course_id) FROM course WHERE dept_name  =  'Physics'",
+    "sql_pred": "SELECT COUNT(DISTINCT course_id) FROM course WHERE dept_name = 'Physics'",
+    "similarity": 0.9925369024276733
+  },
+  {
+    "query": "what is the name of the instructor who is in Statistics department and earns the lowest salary?",
+    "sql_truth": "SELECT name FROM instructor WHERE dept_name  =  'Statistics' ORDER BY salary LIMIT 1",
+    "sql_pred": "SELECT name FROM instructor WHERE dept_name = 'Statistics' ORDER BY salary ASC LIMIT 1",
+    "similarity": 0.9943250417709351
+  },
+  {
+    "query": "Who is the instructor with the highest salary?",
+    "sql_truth": "SELECT name FROM instructor ORDER BY salary DESC LIMIT 1",
+    "sql_pred": "SELECT name FROM instructor WHERE salary = (SELECT MAX(salary) FROM instructor)",
+    "similarity": 0.9527655839920044
+  },
+  {
+    "query": "Find the minimum salary for the departments whose average salary is above the average payment of all instructors.",
+    "sql_truth": "SELECT min(salary) ,  dept_name FROM instructor GROUP BY dept_name HAVING avg(salary)  >  (SELECT avg(salary) FROM instructor)",
+    "sql_pred": "SELECT MIN(i.salary)  FROM instructor i  JOIN department d ON i.dept_name = d.dept_name  GROUP BY d.dept_name  HAVING AVG(i.salary) > (SELECT AVG(salary) FROM instructor);",
+    "similarity": 0.9691780209541321
+  },
+  {
+    "query": "Find the name of instructors who didn't teach any courses?",
+    "sql_truth": "SELECT name FROM instructor WHERE id NOT IN (SELECT id FROM teaches)",
+    "sql_pred": "SELECT name FROM instructor WHERE ID NOT IN (SELECT ID FROM teaches)",
+    "similarity": 0.9930611848831177
+  },
+  {
+    "query": "Show the distinct venues of debates",
+    "sql_truth": "SELECT DISTINCT Venue FROM debate",
+    "sql_pred": "SELECT DISTINCT Venue FROM debate",
+    "similarity": 0.9999960660934448
+  },
+  {
+    "query": "Which customer made the largest amount of claim in a single claim? Return the customer details.",
+    "sql_truth": "SELECT t3.customer_details FROM claim_headers AS t1 JOIN policies AS t2 ON t1.policy_id  =  t2.policy_id JOIN customers AS t3 ON t2.customer_id  =  t3.customer_id WHERE t1.amount_claimed  =  (SELECT max(amount_claimed) FROM claim_headers)",
+    "sql_pred": "SELECT c.Customer_Details  FROM Customers c  JOIN Policies p ON c.Customer_ID = p.Customer_ID  JOIN Claim_Headers ch ON p.Policy_ID = ch.Policy_ID  WHERE ch.Amount_Claimed = (SELECT MAX(Amount_Claimed) FROM Claim_Headers)",
+    "similarity": 0.9514836668968201
+  },
+  {
+    "query": "Which customer have the most policies? Give me the customer details.",
+    "sql_truth": "SELECT t2.customer_details FROM policies AS t1 JOIN customers AS t2 ON t1.customer_id  =  t2.customer_id GROUP BY t2.customer_details ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT c.Customer_Details FROM Customers c JOIN Policies p ON c.Customer_ID = p.Customer_ID GROUP BY c.Customer_ID ORDER BY COUNT(p.Policy_ID) DESC LIMIT 1",
+    "similarity": 0.9423351287841797
+  },
+  {
+    "query": "Count the number of financial transactions that correspond to each account id.",
+    "sql_truth": "SELECT count(*) ,  account_id FROM Financial_transactions",
+    "sql_pred": "SELECT account_id , COUNT(transaction_id) AS transaction_count FROM Financial_Transactions GROUP BY account_id",
+    "similarity": 0.9491368532180786
+  },
+  {
+    "query": "How many transactions correspond to each invoice number?",
+    "sql_truth": "SELECT invoice_number ,  count(*) FROM Financial_transactions GROUP BY invoice_number",
+    "sql_pred": "SELECT f.invoice_number, COUNT(f.transaction_id) AS transaction_count  FROM financial_transactions f  GROUP BY f.invoice_number;",
+    "similarity": 0.9531607031822205
+  },
+  {
+    "query": "Show the pair of male and female names in all weddings after year 2014",
+    "sql_truth": "SELECT T2.name ,  T3.name FROM wedding AS T1 JOIN people AS T2 ON T1.male_id  =  T2.people_id JOIN people AS T3 ON T1.female_id  =  T3.people_id WHERE T1.year  >  2014",
+    "sql_pred": "SELECT p1.Name AS Male_Name, p2.Name AS Female_Name  FROM wedding w  JOIN people p1 ON w.Male_ID = p1.People_ID  JOIN people p2 ON w.Female_ID = p2.People_ID  WHERE w.Year > 2014",
+    "similarity": 0.9346559643745422
+  },
+  {
+    "query": "Return the average and minimum ages across artists from the United States.",
+    "sql_truth": "SELECT avg(age) ,  min(age) FROM artist WHERE country  =  'United States'",
+    "sql_pred": "SELECT AVG(Age) AS Average_Age , MIN(Age) AS Minimum_Age FROM artist WHERE Country = 'United States'",
+    "similarity": 0.9670678973197937
+  },
+  {
+    "query": "Return the themes, dates, and attendance for exhibitions that happened in 2004.",
+    "sql_truth": "SELECT T2.theme ,  T1.date ,  T1.attendance FROM exhibition_record AS T1 JOIN exhibition AS T2 ON T1.exhibition_id  =  T2.exhibition_id WHERE T2.year  =  2004",
+    "sql_pred": "SELECT exhibition.theme , exhibition_record.date , exhibition_record.attendance FROM exhibition INNER JOIN exhibition_record ON exhibition.exhibition_id = exhibition_record.exhibition_id WHERE exhibition.year = 2004",
+    "similarity": 0.954261302947998
+  },
+  {
+    "query": "Find the titles of items whose rating is higher than the average review rating of all items.",
+    "sql_truth": "SELECT T1.title FROM item AS T1 JOIN review AS T2 ON T1.i_id  =  T2.i_id WHERE T2.rating  >  (SELECT avg(rating) FROM review)",
+    "sql_pred": "SELECT title FROM item WHERE i_id IN (SELECT i_id FROM review GROUP BY i_id HAVING AVG(rating) > (SELECT AVG(rating) FROM review))",
+    "similarity": 0.943865954875946
+  },
+  {
+    "query": "List the names of players in ascending order of votes.",
+    "sql_truth": "SELECT Player_name FROM player ORDER BY Votes ASC",
+    "sql_pred": "SELECT Player_name FROM player ORDER BY Votes ASC",
+    "similarity": 0.9999982118606567
+  },
+  {
+    "query": "List the total points of gymnasts in descending order of floor exercise points.",
+    "sql_truth": "SELECT Total_Points FROM gymnast ORDER BY Floor_Exercise_Points DESC",
+    "sql_pred": "SELECT Total_Points FROM gymnast ORDER BY Floor_Exercise_Points DESC",
+    "similarity": 0.9999980926513672
+  },
+  {
+    "query": "What are the hometowns of gymnasts and the corresponding number of gymnasts?",
+    "sql_truth": "SELECT T2.Hometown ,  COUNT(*) FROM gymnast AS T1 JOIN people AS T2 ON T1.Gymnast_ID  =  T2.People_ID GROUP BY T2.Hometown",
+    "sql_pred": "SELECT p.hometown , COUNT(g.gymnast_id) AS number_of_gymnasts FROM people p JOIN gymnast g ON p.people_id = g.gymnast_id GROUP BY p.hometown;",
+    "similarity": 0.9440065026283264
+  },
+  {
+    "query": "What is the total checking balance in all accounts?",
+    "sql_truth": "SELECT sum(balance) FROM checking",
+    "sql_pred": "SELECT SUM(balance) AS total_checking_balance FROM CHECKING",
+    "similarity": 0.967443585395813
+  },
+  {
+    "query": "Find the names and total checking and savings balances of accounts whose savings balance is higher than the average savings balance.",
+    "sql_truth": "SELECT T1.name ,  T2.balance + T3.balance FROM accounts AS T1 JOIN checking AS T2 ON T1.custid  =  T2.custid JOIN savings AS T3 ON T1.custid  =  T3.custid WHERE T3.balance  >  (SELECT avg(balance) FROM savings)",
+    "sql_pred": "SELECT a.name , (COALESCE(s.balance , 0) + COALESCE(c.balance , 0)) AS total_balance  FROM accounts a  JOIN savings s ON a.custid = s.custid  JOIN checking c ON a.custid = c.custid  WHERE s.balance > (SELECT AVG(balance) FROM savings)",
+    "similarity": 0.9536318182945251
+  },
+  {
+    "query": "Find the name of accounts whose checking balance is higher than corresponding saving balance.",
+    "sql_truth": "SELECT T1.name FROM accounts AS T1 JOIN checking AS T2 ON T1.custid  =  T2.custid JOIN savings AS T3 ON T1.custid  =  T3.custid WHERE T2.balance  >  T3.balance",
+    "sql_pred": "SELECT a.name FROM accounts a JOIN checking c ON a.custid = c.custid JOIN savings s ON a.custid = s.custid WHERE c.balance > s.balance",
+    "similarity": 0.9651995897293091
+  },
+  {
+    "query": "Show the accelerator names and supporting operating systems that are not compatible with the browser named 'Opera'.",
+    "sql_truth": "SELECT name ,  operating_system FROM web_client_accelerator EXCEPT SELECT T1.name ,  T1.operating_system FROM web_client_accelerator AS T1 JOIN accelerator_compatible_browser AS T2 ON T2.accelerator_id  =  T1.id JOIN browser AS T3 ON T2.browser_id  =  T3.id WHERE T3.name  =  'Opera'",
+    "sql_pred": "SELECT wca.name, wca.Operating_system  FROM Web_client_accelerator wca  WHERE wca.id NOT IN (SELECT acb.accelerator_id                       FROM accelerator_compatible_browser acb                       JOIN browser b ON acb.browser_id = b.id                       WHERE b.name = 'Opera')",
+    "similarity": 0.9424958825111389
+  },
+  {
+    "query": "List the time of elimination of the wrestlers with largest days held.",
+    "sql_truth": "SELECT T1.Time FROM elimination AS T1 JOIN wrestler AS T2 ON T1.Wrestler_ID  =  T2.Wrestler_ID ORDER BY T2.Days_held DESC LIMIT 1",
+    "sql_pred": "SELECT e.time FROM elimination e JOIN wrestler w ON e.wrestler_id = w.wrestler_id WHERE w.days_held = (SELECT MAX(days_held) FROM wrestler)",
+    "similarity": 0.938164234161377
+  },
+  {
+    "query": "What is the number of distinct teams that suffer elimination?",
+    "sql_truth": "SELECT COUNT (DISTINCT team) FROM elimination",
+    "sql_pred": "SELECT COUNT(DISTINCT Team) AS distinct_teams FROM Elimination;",
+    "similarity": 0.9604810476303101
+  },
+  {
+    "query": "How many budgets are above 3000 in year 2001 or before?",
+    "sql_truth": "SELECT count(*) FROM budget WHERE budgeted  >  3000 AND YEAR  <=  2001",
+    "sql_pred": "SELECT COUNT(*) FROM budget WHERE budgeted > 3000 AND year <= 2001",
+    "similarity": 0.9856710433959961
+  },
+  {
+    "query": "Show the name of buildings that do not have any institution.",
+    "sql_truth": "SELECT name FROM building WHERE building_id NOT IN (SELECT building_id FROM institution)",
+    "sql_pred": "SELECT b.Name FROM building b LEFT JOIN Institution i ON b.building_id = i.building_id WHERE i.building_id IS NULL",
+    "similarity": 0.9160988330841064
+  },
+  {
+    "query": "Show the average, minimum, and maximum capacity for all the cinemas opened in year 2011 or later.",
+    "sql_truth": "SELECT avg(capacity) ,  min(capacity) ,  max(capacity) FROM cinema WHERE openning_year  >=  2011",
+    "sql_pred": "SELECT AVG(Capacity) AS Average_Capacity, MIN(Capacity) AS Minimum_Capacity, MAX(Capacity) AS Maximum_Capacity FROM cinema WHERE Openning_year >= 2011",
+    "similarity": 0.9700865149497986
+  },
+  {
+    "query": "Are the customers holding coupons with amount 500 bad or good?",
+    "sql_truth": "SELECT T1.good_or_bad_customer FROM customers AS T1 JOIN discount_coupons AS T2 ON T1.coupon_id  =  T2.coupon_id WHERE T2.coupon_amount  =  500",
+    "sql_pred": "SELECT c.good_or_bad_customer  FROM Customers c  JOIN Discount_Coupons d ON c.coupon_id = d.coupon_id  WHERE d.coupon_amount = 500;",
+    "similarity": 0.9555031061172485
+  },
+  {
+    "query": "What are the memories and carriers of phones?",
+    "sql_truth": "SELECT Memory_in_G ,  Carrier FROM phone",
+    "sql_pred": "SELECT Memory_in_G , Carrier FROM phone",
+    "similarity": 0.9950551986694336
+  },
+  {
+    "query": "Return the name of the party with the most members.",
+    "sql_truth": "SELECT T2.party_name FROM Member AS T1 JOIN party AS T2 ON T1.party_id  =  T2.party_id GROUP BY T1.party_id ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT p.party_name FROM party p JOIN member m ON p.party_id = m.party_id GROUP BY p.party_id ORDER BY COUNT(m.member_id) DESC LIMIT 1",
+    "similarity": 0.9510234594345093
+  },
+  {
+    "query": "Which event names were used more than twice for party events?",
+    "sql_truth": "SELECT event_name FROM party_events GROUP BY event_name HAVING count(*)  >  2",
+    "sql_pred": "SELECT event_name  FROM party_events  GROUP BY event_name  HAVING COUNT(event_name) > 2",
+    "similarity": 0.9865975379943848
+  },
+  {
+    "query": "What is the mail date of the document with id 7?",
+    "sql_truth": "SELECT mailing_date FROM Documents_Mailed WHERE document_id = 7;",
+    "sql_pred": "SELECT mailing_date FROM Documents_Mailed WHERE document_id = 7",
+    "similarity": 0.9879158735275269
+  },
+  {
+    "query": "How many events have each participants attended? List the participant id, type and the number.",
+    "sql_truth": "SELECT T1.Participant_ID ,  T1.Participant_Type_Code ,  count(*) FROM Participants AS T1 JOIN Participants_in_Events AS T2 ON T1.Participant_ID  =  T2.Participant_ID GROUP BY T1.Participant_ID",
+    "sql_pred": "SELECT p.Participant_ID, p.Participant_Type_Code, COUNT(pie.Event_ID) AS Event_Count  FROM Participants p  LEFT JOIN Participants_in_Events pie ON p.Participant_ID = pie.Participant_ID  GROUP BY p.Participant_ID, p.Participant_Type_Code",
+    "similarity": 0.9476987719535828
+  },
+  {
+    "query": "What are the unique names of all race held between 2014 and 2017?",
+    "sql_truth": "SELECT DISTINCT name FROM races WHERE YEAR BETWEEN 2014 AND 2017",
+    "sql_pred": "SELECT DISTINCT name FROM races WHERE year BETWEEN 2014 AND 2017;",
+    "similarity": 0.9822480082511902
+  },
+  {
+    "query": "What is the id and first name of all the drivers who participated in the Australian Grand Prix and the Chinese Grand Prix?",
+    "sql_truth": "SELECT T2.driverid ,  T3.forename FROM races AS T1 JOIN results AS T2 ON T1.raceid = T2.raceid JOIN drivers AS T3 ON T2.driverid  =  T3.driverid WHERE T1.name = "Australian Grand Prix" INTERSECT SELECT T2.driverid ,  T3.forename FROM races AS T1 JOIN results AS T2 ON T1.raceid = T2.raceid JOIN drivers AS T3 ON T2.driverid  =  T3.driverid WHERE T1.name = "Chinese Grand Prix"",
+    "sql_pred": "SELECT d.driverId, d.forename FROM drivers d  JOIN results r ON d.driverId = r.driverId  JOIN races ra ON r.raceId = ra.raceId  WHERE ra.name IN ('Australian Grand Prix', 'Chinese Grand Prix')  GROUP BY d.driverId, d.forename  HAVING COUNT(DISTINCT ra.name) = 2;",
+    "similarity": 0.9265762567520142
+  },
+  {
+    "query": "What are the first names of all the different drivers in alphabetical order?",
+    "sql_truth": "SELECT DISTINCT forename FROM drivers ORDER BY forename ASC",
+    "sql_pred": "SELECT DISTINCT forename FROM drivers ORDER BY forename ASC",
+    "similarity": 0.9990282654762268
+  },
+  {
+    "query": "What is the average fastest lap speed for the Monaco Grand Prix in 2008?",
+    "sql_truth": "SELECT avg(T2.fastestlapspeed) FROM races AS T1 JOIN results AS T2 ON T1.raceid = T2.raceid WHERE T1.year = 2008 AND T1.name = "Monaco Grand Prix"",
+    "sql_pred": "SELECT AVG(fastestLapSpeed) AS average_fastest_lap_speed  FROM results  JOIN races ON results.raceId = races.raceId  WHERE races.name = 'Monaco Grand Prix' AND races.year = 2008;",
+    "similarity": 0.9439067244529724
+  },
+  {
+    "query": "What is the name of the technician whose team is not 'NYY'?",
+    "sql_truth": "SELECT Name FROM technician WHERE Team != "NYY"",
+    "sql_pred": "SELECT name FROM technician WHERE team <> 'NYY'",
+    "similarity": 0.9867868423461914
+  },
+  {
+    "query": "What are the names of the technicians that have not been assigned to repair machines?",
+    "sql_truth": "SELECT Name FROM technician WHERE technician_id NOT IN (SELECT technician_id FROM repair_assignment)",
+    "sql_pred": "SELECT name FROM technician WHERE technician_id NOT IN (SELECT technician_id FROM repair_assignment)",
+    "similarity": 0.9964548349380493
+  },
+  {
+    "query": "Return the name of the heaviest entrepreneur.",
+    "sql_truth": "SELECT T2.Name FROM entrepreneur AS T1 JOIN people AS T2 ON T1.People_ID  =  T2.People_ID ORDER BY T2.Weight DESC LIMIT 1",
+    "sql_pred": "SELECT p.name FROM entrepreneur e JOIN people p ON e.people_id = p.people_id ORDER BY p.weight DESC LIMIT 1",
+    "similarity": 0.9517667889595032
+  },
+  {
+    "query": "Show the countries that have both perpetrators with injures more than 50 and perpetrators with injures smaller than 20.",
+    "sql_truth": "SELECT Country FROM perpetrator WHERE Injured  >  50 INTERSECT SELECT Country FROM perpetrator WHERE Injured  <  20",
+    "sql_pred": "SELECT DISTINCT p1.Country FROM perpetrator p1  JOIN perpetrator p2 ON p1.Country = p2.Country  WHERE p1.Injured > 50 AND p2.Injured < 20;",
+    "similarity": 0.9441126585006714
+  },
+  {
+    "query": "Find the count of universities whose campus fee is greater than the average campus fee.",
+    "sql_truth": "SELECT count(*) FROM csu_fees WHERE campusfee  >  (SELECT avg(campusfee) FROM csu_fees)",
+    "sql_pred": "SELECT COUNT(*)  FROM campuses c  JOIN csu_fees f ON c.id = f.campus  WHERE f.campusfee > (SELECT AVG(campusfee) FROM csu_fees)",
+    "similarity": 0.9611895084381104
+  },
+  {
+    "query": "Find the names of the campus which has more faculties in 2002 than every campus in Orange county.",
+    "sql_truth": "SELECT T1.campus FROM campuses AS T1 JOIN faculty AS T2 ON T1.id  =  T2.campus WHERE T2.year  =  2002 AND faculty  >  (SELECT max(faculty) FROM campuses AS T1 JOIN faculty AS T2 ON T1.id  =  T2.campus WHERE T2.year  =  2002 AND T1.county  =  "Orange")",
+    "sql_pred": "SELECT c.Campus  FROM Campuses c  JOIN faculty f ON c.Id = f.Campus  WHERE f.Year = 2002  GROUP BY c.Campus  HAVING COUNT(f.Faculty) > (SELECT COUNT(f2.Faculty)                              FROM Campuses c2                              JOIN faculty f2 ON c2.Id = f2.Campus                              WHERE c2.County = 'Orange' AND f2.Year = 2002                              GROUP BY c2.Campus);",
+    "similarity": 0.9388841986656189
+  },
+  {
+    "query": "How many faculty lines are there in the university that conferred the most number of degrees in year 2002?",
+    "sql_truth": "SELECT T2.faculty FROM campuses AS T1 JOIN faculty AS T2 ON T1.id  =  t2.campus JOIN degrees AS T3 ON T1.id  =  t3.campus AND t2.year  =  t3.year WHERE t2.year  =  2002 ORDER BY t3.degrees DESC LIMIT 1",
+    "sql_pred": "SELECT f.Campus, f.Faculty  FROM faculty f  JOIN degrees d ON f.Campus = d.Campus  WHERE d.Year = 2002  AND d.Degrees = (SELECT MAX(Degrees) FROM degrees WHERE Year = 2002);",
+    "similarity": 0.9385600686073303
+  },
+  {
+    "query": "Find the id of the candidate who got the lowest oppose rate.",
+    "sql_truth": "SELECT Candidate_ID FROM candidate ORDER BY oppose_rate LIMIT 1",
+    "sql_pred": "SELECT candidate_id FROM candidate ORDER BY oppose_rate ASC LIMIT 1",
+    "similarity": 0.9884301424026489
+  },
+  {
+    "query": "what are the names of people who did not participate in the candidate election.",
+    "sql_truth": "SELECT name FROM people WHERE people_id NOT IN (SELECT people_id FROM candidate)",
+    "sql_pred": "SELECT name FROM people WHERE people_id NOT IN (SELECT people_id FROM candidate)",
+    "similarity": 0.9999988079071045
+  },
+  {
+    "query": "Find the names of all reviewers who have ratings with a NULL value for the date.",
+    "sql_truth": "SELECT DISTINCT name FROM Reviewer AS T1 JOIN Rating AS T2 ON T1.rID  =  T2.rID WHERE ratingDate  =  "null"",
+    "sql_pred": "SELECT r.name FROM Reviewer r JOIN Rating ra ON r.rID = ra.rID WHERE ra.ratingDate IS NULL",
+    "similarity": 0.9389200210571289
+  },
+  {
+    "query": "For any rating where the name of reviewer is the same as the director of the movie, return the reviewer name, movie title, and number of stars.",
+    "sql_truth": "SELECT DISTINCT T3.name ,  T2.title ,  T1.stars FROM Rating AS T1 JOIN Movie AS T2 ON T1.mID  =  T2.mID JOIN Reviewer AS T3 ON T1.rID  =  T3.rID WHERE T2.director  =  T3.name",
+    "sql_pred": "SELECT r.name, m.title, ra.stars FROM Reviewer r JOIN Rating ra ON r.rID = ra.rID JOIN Movie m ON ra.mID = m.mID WHERE r.name = m.director",
+    "similarity": 0.9338237643241882
+  },
+  {
+    "query": "find the ids of reviewers who did not give 4 star.",
+    "sql_truth": "SELECT rID FROM Rating EXCEPT SELECT rID FROM Rating WHERE stars  =  4",
+    "sql_pred": "SELECT rID FROM Reviewer WHERE rID NOT IN (SELECT rID FROM Rating WHERE stars = 4)",
+    "similarity": 0.9370169043540955
+  },
+  {
+    "query": "Show the crime rates of counties in ascending order of number of police officers.",
+    "sql_truth": "SELECT Crime_rate FROM county_public_safety ORDER BY Police_officers ASC",
+    "sql_pred": "SELECT County_ID, Name, Crime_rate FROM county_public_safety ORDER BY Police_officers ASC",
+    "similarity": 0.9722774624824524
+  },
+  {
+    "query": "Please show the police forces and the number of counties with each police force.",
+    "sql_truth": "SELECT Police_force ,  COUNT(*) FROM county_public_safety GROUP BY Police_force",
+    "sql_pred": "SELECT police_force , COUNT(*) AS county_count FROM county_public_safety GROUP BY police_force;",
+    "similarity": 0.9735996723175049
+  },
+  {
+    "query": "How many times does ROY SWEAZY has reserved a room.",
+    "sql_truth": "SELECT count(*) FROM Reservations WHERE FirstName = "ROY" AND LastName  =  "SWEAZY";",
+    "sql_pred": "SELECT COUNT(*) FROM reservations WHERE lastname = 'SWEAZY' AND firstname = 'ROY'",
+    "similarity": 0.9610877633094788
+  },
+  {
+    "query": "Find the average and minimum price of the rooms in different decor.",
+    "sql_truth": "SELECT decor , avg(basePrice) ,  min(basePrice) FROM Rooms GROUP BY decor;",
+    "sql_pred": "SELECT decor , AVG(basePrice) AS averagePrice , MIN(basePrice) AS minimumPrice FROM Rooms GROUP BY decor",
+    "similarity": 0.9761271476745605
+  },
+  {
+    "query": "Find the names of rooms that have been reserved for more than 60 times.",
+    "sql_truth": "SELECT T2.roomName FROM Reservations AS T1 JOIN Rooms AS T2 ON T1.Room  =  T2.RoomId GROUP BY T1.Room HAVING count(*)  >  60",
+    "sql_pred": "SELECT r.roomName FROM Rooms r JOIN Reservations res ON r.RoomId = res.Room GROUP BY r.roomName HAVING COUNT(res.Code) > 60",
+    "similarity": 0.967244029045105
+  },
+  {
+    "query": "Show the locations of parties and the names of the party hosts in ascending order of the age of the host.",
+    "sql_truth": "SELECT T3.Location ,  T2.Name FROM party_host AS T1 JOIN HOST AS T2 ON T1.Host_ID  =  T2.Host_ID JOIN party AS T3 ON T1.Party_ID  =  T3.Party_ID ORDER BY T2.Age",
+    "sql_pred": "SELECT p.Location , h.Name FROM party AS p JOIN party_host AS ph ON p.Party_ID = ph.Party_ID JOIN host AS h ON ph.Host_ID = h.Host_ID ORDER BY h.Age ASC",
+    "similarity": 0.9494043588638306
+  },
+  {
+    "query": "List name, dates active, and number of deaths for all storms with at least 1 death.",
+    "sql_truth": "SELECT name ,  dates_active ,  number_deaths FROM storm WHERE number_deaths  >=  1",
+    "sql_pred": "SELECT Name , Dates_active , Number_Deaths FROM storm WHERE Number_Deaths >= 1",
+    "similarity": 0.9780550003051758
+  },
+  {
+    "query": "Show storm name with at least two regions and 10 cities affected.",
+    "sql_truth": "SELECT T1.name FROM storm AS T1 JOIN affected_region AS T2 ON T1.storm_id  =  T2.storm_id GROUP BY T1.storm_id HAVING count(*)  >=  2 INTERSECT SELECT T1.name FROM storm AS T1 JOIN affected_region AS T2 ON T1.storm_id  =  T2.storm_id GROUP BY T1.storm_id HAVING sum(T2.number_city_affected)  >=  10",
+    "sql_pred": "SELECT s.Name FROM storm s  JOIN affected_region ar ON s.Storm_ID = ar.Storm_ID  GROUP BY s.Storm_ID, s.Name  HAVING COUNT(DISTINCT ar.Region_id) >= 2 AND SUM(ar.Number_city_affected) >= 10",
+    "similarity": 0.9599152207374573
+  },
+  {
+    "query": "Return the maximum and minimum population among all counties.",
+    "sql_truth": "SELECT max(Population) ,  min(Population) FROM county",
+    "sql_pred": "SELECT MAX(Population) AS Max_Population , MIN(Population) AS Min_Population FROM county",
+    "similarity": 0.9763926863670349
+  },
+  {
+    "query": "Which delegates are from counties with population smaller than 100000?",
+    "sql_truth": "SELECT T2.Delegate FROM county AS T1 JOIN election AS T2 ON T1.County_id  =  T2.District WHERE T1.Population  <  100000",
+    "sql_pred": "SELECT e.delegate FROM election e JOIN county c ON e.counties_represented = c.county_id WHERE c.population < 100000",
+    "similarity": 0.9290657639503479
+  },
+  {
+    "query": "Return the names of all counties sorted by county name in descending alphabetical order.",
+    "sql_truth": "SELECT County_name FROM county ORDER BY County_name DESC",
+    "sql_pred": "SELECT County_name FROM county ORDER BY County_name DESC",
+    "similarity": 0.9999971985816956
+  },
+  {
+    "query": "Which committees have delegates from both democratic party and liberal party?",
+    "sql_truth": "SELECT T1.Committee FROM election AS T1 JOIN party AS T2 ON T1.Party  =  T2.Party_ID WHERE T2.Party  =  "Democratic" INTERSECT SELECT T1.Committee FROM election AS T1 JOIN party AS T2 ON T1.Party  =  T2.Party_ID WHERE T2.Party  =  "Liberal"",
+    "sql_pred": "SELECT DISTINCT e1.committee  FROM election e1  JOIN election e2 ON e1.committee = e2.committee  WHERE e1.party = 'Democratic' AND e2.party = 'Liberal';",
+    "similarity": 0.9430102705955505
+  },
+  {
+    "query": "Show me all the restaurants.",
+    "sql_truth": "SELECT ResName FROM Restaurant;",
+    "sql_pred": "SELECT ResID, ResName, Address, Rating FROM Restaurant",
+    "similarity": 0.9069778323173523
+  },
+  {
+    "query": "At which restaurant did the students spend the least amount of time? List restaurant and the time students spent on in total.",
+    "sql_truth": "SELECT Restaurant.ResName ,  sum(Visits_Restaurant.Spent) FROM Visits_Restaurant JOIN Restaurant ON Visits_Restaurant.ResID = Restaurant.ResID GROUP BY Restaurant.ResID ORDER BY sum(Visits_Restaurant.Spent) ASC LIMIT 1;",
+    "sql_pred": "SELECT r.ResName, SUM(v.Spent) AS Total_Spent  FROM Visits_Restaurant v  JOIN Restaurant r ON v.ResID = r.ResID  GROUP BY r.ResName  ORDER BY Total_Spent ASC  LIMIT 1;",
+    "similarity": 0.967295229434967
+  },
+  {
+    "query": "How many institutions are there?",
+    "sql_truth": "SELECT count(*) FROM inst",
+    "sql_pred": "SELECT COUNT(*) FROM Inst;",
+    "similarity": 0.9599552750587463
+  },
+  {
+    "query": "Find the first and last name of the author(s) who wrote the paper "Nameless, Painless".",
+    "sql_truth": "SELECT t1.fname ,  t1.lname FROM authors AS t1 JOIN authorship AS t2 ON t1.authid  =  t2.authid JOIN papers AS t3 ON t2.paperid  =  t3.paperid WHERE t3.title  =  "Nameless ,  Painless"",
+    "sql_pred": "SELECT a.fname , a.lname FROM authors a JOIN authorship au ON a.authID = au.authID JOIN papers p ON au.paperID = p.paperID WHERE p.title = 'Nameless, Painless'",
+    "similarity": 0.9686583280563354
+  },
+  {
+    "query": "Retrieve all the last names of authors in alphabetical order.",
+    "sql_truth": "SELECT lname FROM authors ORDER BY lname",
+    "sql_pred": "SELECT lname FROM Authors ORDER BY lname;",
+    "similarity": 0.9860330820083618
+  },
+  {
+    "query": "What is the largest payment amount?",
+    "sql_truth": "SELECT amount FROM payment ORDER BY amount DESC LIMIT 1",
+    "sql_pred": "SELECT MAX(amount) AS largest_payment FROM payment",
+    "similarity": 0.9371436834335327
+  },
+  {
+    "query": "List the name of all customers sorted by their account balance in ascending order.",
+    "sql_truth": "SELECT cust_name FROM customer ORDER BY acc_bal",
+    "sql_pred": "SELECT cust_name FROM customer ORDER BY acc_bal ASC",
+    "similarity": 0.9908058643341064
+  },
+  {
+    "query": "Find the name of customers who do not have a loan with a type of Mortgages.",
+    "sql_truth": "SELECT cust_name FROM customer EXCEPT SELECT T1.cust_name FROM customer AS T1 JOIN loan AS T2 ON T1.cust_id  =  T2.cust_id WHERE T2.loan_type  =  'Mortgages'",
+    "sql_pred": "SELECT cust_name FROM customer WHERE cust_ID NOT IN (SELECT cust_ID FROM loan WHERE loan_type = 'Mortgages')",
+    "similarity": 0.9406472444534302
+  },
+  {
+    "query": "Find the total amount of loans offered by each bank branch.",
+    "sql_truth": "SELECT sum(amount) ,  T1.bname FROM bank AS T1 JOIN loan AS T2 ON T1.branch_id  =  T2.branch_id GROUP BY T1.bname",
+    "sql_pred": "SELECT b.bname, SUM(l.amount) AS total_loan_amount FROM bank b JOIN loan l ON b.branch_ID = l.branch_ID GROUP BY b.bname",
+    "similarity": 0.9602543115615845
+  },
+  {
+    "query": "Find the total amount of loans provided by bank branches in the state of New York.",
+    "sql_truth": "SELECT sum(T2.amount) FROM bank AS T1 JOIN loan AS T2 ON T1.branch_id  =  T2.branch_id WHERE T1.state  =  'New York'",
+    "sql_pred": "SELECT SUM(l.amount) AS total_loans FROM loan l JOIN bank b ON l.branch_ID = b.branch_ID WHERE b.state = 'New York'",
+    "similarity": 0.945762038230896
+  },
+  {
+    "query": "List all information about the assessment notes sorted by date in ascending order.",
+    "sql_truth": "SELECT * FROM Assessment_Notes ORDER BY date_of_notes ASC",
+    "sql_pred": "SELECT * FROM Assessment_Notes ORDER BY date_of_notes ASC",
+    "similarity": 0.9999982714653015
+  },
+  {
+    "query": "What are the line 1 and average monthly rentals of all student addresses?",
+    "sql_truth": "SELECT T1.line_1 ,  avg(T2.monthly_rental) FROM Addresses AS T1 JOIN Student_Addresses AS T2 ON T1.address_id  =  T2.address_id GROUP BY T2.address_id",
+    "sql_pred": "SELECT a.line_1 , AVG(sa.monthly_rental) AS average_monthly_rental FROM Addresses a JOIN Student_Addresses sa ON a.address_id = sa.address_id GROUP BY a.line_1",
+    "similarity": 0.958597719669342
+  },
+  {
+    "query": "Which engineers have never visited to maintain the assets? List the engineer first name and last name.",
+    "sql_truth": "SELECT first_name ,  last_name FROM Maintenance_Engineers WHERE engineer_id NOT IN (SELECT engineer_id FROM Engineer_Visits)",
+    "sql_pred": "SELECT e.first_name, e.last_name  FROM Maintenance_Engineers e  LEFT JOIN Engineer_Visits v ON e.engineer_id = v.engineer_id  WHERE v.engineer_visit_id IS NULL;",
+    "similarity": 0.933736264705658
+  },
+  {
+    "query": "How many trains have 'Express' in their names?",
+    "sql_truth": "SELECT count(*) FROM train WHERE name LIKE "%Express%"",
+    "sql_pred": "SELECT COUNT(*) FROM train WHERE name LIKE '%Express%'",
+    "similarity": 0.9928724765777588
+  },
+  {
+    "query": "What are the first names of all employees that are professors ordered by date of birth?",
+    "sql_truth": "SELECT emp_fname FROM employee WHERE emp_jobcode  =  'PROF' ORDER BY emp_dob",
+    "sql_pred": "SELECT e.EMP_FNAME FROM EMPLOYEE e JOIN PROFESSOR p ON e.EMP_NUM = p.EMP_NUM ORDER BY e.EMP_DOB",
+    "similarity": 0.9172939658164978
+  },
+  {
+    "query": "What is the name of the department and office location for the professor with the last name of Heffington?",
+    "sql_truth": "SELECT T3.dept_name  ,  T2.prof_office FROM employee AS T1 JOIN professor AS T2 ON T1.emp_num  =  T2.emp_num JOIN department AS T3 ON T2.dept_code  =  T3.dept_code WHERE T1.emp_lname  =  'Heffington'",
+    "sql_pred": "SELECT d.dept_name, p.prof_office FROM professor p JOIN department d ON p.dept_code = d.dept_code JOIN employee e ON p.emp_num = e.emp_num WHERE e.emp_lname = 'Heffington'",
+    "similarity": 0.9557062983512878
+  },
+  {
+    "query": "What are the different regions of clubs in ascending alphabetical order?",
+    "sql_truth": "SELECT DISTINCT Region FROM club ORDER BY Region ASC",
+    "sql_pred": "SELECT DISTINCT Region FROM club ORDER BY Region ASC",
+    "similarity": 0.999997615814209
+  },
+  {
+    "query": "What is the average number of points for players from the "AIB" club?",
+    "sql_truth": "SELECT avg(T2.Points) FROM club AS T1 JOIN player AS T2 ON T1.Club_ID  =  T2.Club_ID WHERE T1.name  =  "AIB"",
+    "sql_pred": "SELECT AVG(Points) AS average_points FROM player WHERE Club_ID = (SELECT Club_ID FROM club WHERE name = 'AIB')",
+    "similarity": 0.941760778427124
+  },
+  {
+    "query": "What are the names of all players that got more than the average number of points?",
+    "sql_truth": "SELECT name FROM player WHERE points  >  (SELECT avg(points) FROM player)",
+    "sql_pred": "SELECT name FROM player WHERE Points > (SELECT AVG(Points) FROM player)",
+    "similarity": 0.981315553188324
+  },
+  {
+    "query": "Find the id and number of shops for the company that produces the most expensive furniture.",
+    "sql_truth": "SELECT t1.manufacturer_id ,  t1.num_of_shops FROM manufacturer AS t1 JOIN furniture_manufacte AS t2 ON t1.manufacturer_id  =  t2.manufacturer_id ORDER BY t2.Price_in_Dollar DESC LIMIT 1",
+    "sql_pred": "SELECT m.Manufacturer_ID, m.Num_of_Shops FROM manufacturer m JOIN furniture_manufacte fm ON m.Manufacturer_ID = fm.Manufacturer_ID WHERE fm.Price_in_Dollar = (SELECT MAX(Price_in_Dollar) FROM furniture_manufacte)",
+    "similarity": 0.9425327777862549
+  },
+  {
+    "query": "What are the full name, hire data, salary and department id for employees without the letter M in their first name, ordered by ascending department id?",
+    "sql_truth": "SELECT first_name ,  last_name ,  hire_date ,  salary ,  department_id FROM employees WHERE first_name NOT LIKE '%M%' ORDER BY department_id",
+    "sql_pred": "SELECT FIRST_NAME || ' ' || LAST_NAME AS FULL_NAME, HIRE_DATE, SALARY, DEPARTMENT_ID FROM EMPLOYEES WHERE FIRST_NAME NOT LIKE '%M%' ORDER BY DEPARTMENT_ID ASC",
+    "similarity": 0.9567192792892456
+  },
+  {
+    "query": "What are the employee ids for employees who have held two or more jobs?",
+    "sql_truth": "SELECT employee_id FROM job_history GROUP BY employee_id HAVING COUNT(*)  >= 2",
+    "sql_pred": "SELECT EMPLOYEE_ID FROM job_history GROUP BY EMPLOYEE_ID HAVING COUNT(JOB_ID) >= 2",
+    "similarity": 0.9824879765510559
+  },
+  {
+    "query": "What are the full names and hire dates for employees in the same department as someone with the first name Clara?",
+    "sql_truth": "SELECT first_name ,  last_name ,  hire_date FROM employees WHERE department_id  =  (SELECT department_id FROM employees WHERE first_name  =  "Clara")",
+    "sql_pred": "SELECT e.FIRST_NAME || ' ' || e.LAST_NAME AS FULL_NAME, e.HIRE_DATE  FROM employees e  WHERE e.DEPARTMENT_ID = (SELECT d.DEPARTMENT_ID                            FROM employees e2                            JOIN departments d ON e2.DEPARTMENT_ID = d.DEPARTMENT_ID                            WHERE e2.FIRST_NAME = 'Clara')",
+    "similarity": 0.9340929985046387
+  },
+  {
+    "query": "What are the file sizes and formats for all songs with a resolution lower than 800?",
+    "sql_truth": "SELECT DISTINCT T1.file_size ,  T1.formats FROM files AS T1 JOIN song AS T2 ON T1.f_id  =  T2.f_id WHERE T2.resolution  <  800",
+    "sql_pred": "SELECT f.file_size , f.formats FROM song s JOIN files f ON s.f_id = f.f_id WHERE s.resolution < 800",
+    "similarity": 0.9557842016220093
+  },
+  {
+    "query": "What is the average song duration for the songs that are in mp3 format and whose resolution below 800?",
+    "sql_truth": "SELECT avg(T1.duration) FROM files AS T1 JOIN song AS T2 ON T1.f_id  =  T2.f_id WHERE T1.formats  =  "mp3" AND T2.resolution   <  800",
+    "sql_pred": "SELECT AVG(f.duration) AS average_duration FROM files f JOIN song s ON f.f_id = s.f_id WHERE f.formats LIKE '%mp3%' AND s.resolution < 800",
+    "similarity": 0.9515602588653564
+  },
+  {
+    "query": "What are the names of all songs that are ordered by their resolution numbers?",
+    "sql_truth": "SELECT song_name FROM song ORDER BY resolution",
+    "sql_pred": "SELECT song_name FROM song ORDER BY resolution",
+    "similarity": 0.9999984502792358
+  },
+  {
+    "query": "What is the maximum and minimum resolution of all songs that are approximately 3 minutes long?",
+    "sql_truth": "SELECT max(T2.resolution) ,  min(T2.resolution) FROM files AS T1 JOIN song AS T2 ON T1.f_id  =  T2.f_id WHERE T1.duration LIKE "3:%"",
+    "sql_pred": "SELECT MAX(resolution) AS max_resolution , MIN(resolution) AS min_resolution FROM song WHERE duration BETWEEN 170 AND 190",
+    "similarity": 0.8876828551292419
+  },
+  {
+    "query": "For each year, return the year and the average number of attendance at home games.",
+    "sql_truth": "SELECT YEAR ,  avg(attendance) FROM home_game GROUP BY YEAR;",
+    "sql_pred": "SELECT year, AVG(attendance) AS average_attendance FROM home_game GROUP BY year",
+    "similarity": 0.9707825779914856
+  },
+  {
+    "query": "Which team offers the lowest average salary? Give me the name and id of the team.",
+    "sql_truth": "SELECT T1.name ,  T1.team_id FROM team AS T1 JOIN salary AS T2 ON T1.team_id = T2.team_id GROUP BY T1.team_id ORDER BY avg(T2.salary) ASC LIMIT 1;",
+    "sql_pred": "SELECT team.team_id , team.name FROM team JOIN salary ON team.team_id = salary.team_id GROUP BY team.team_id , team.name ORDER BY AVG(salary.salary) ASC LIMIT 1",
+    "similarity": 0.9663426876068115
+  },
+  {
+    "query": "How many players did Boston Red Stockings have in 2000?",
+    "sql_truth": "SELECT count(*) FROM salary AS T1 JOIN team AS T2 ON T1.team_id  =  T2.team_id_br WHERE T2.name  = 'Boston Red Stockings' AND T1.year  =  2000",
+    "sql_pred": "SELECT COUNT(DISTINCT a.player_id)  FROM appearances a  JOIN team t ON a.team_id = t.team_id  WHERE t.name = 'Boston Red Stockings' AND a.year = 2000;",
+    "similarity": 0.9224494695663452
+  },
+  {
+    "query": "Count the total number of games the team Boston Red Stockings attended from 1990 to 2000.",
+    "sql_truth": "SELECT sum(T1.games) FROM home_game AS T1 JOIN team AS T2 ON T1.team_id = T2.team_id_br WHERE T2.name = 'Boston Red Stockings' AND T1.year BETWEEN 1990 AND 2000;",
+    "sql_pred": "SELECT SUM(hg.games) AS total_games FROM home_game hg JOIN team t ON hg.team_id = t.team_id WHERE t.name = 'Boston Red Stockings' AND hg.year BETWEEN 1990 AND 2000;",
+    "similarity": 0.9717993140220642
+  },
+  {
+    "query": "What are the names of photos taken with the lens brand 'Sigma' or 'Olympus'?",
+    "sql_truth": "SELECT T1.name FROM camera_lens AS T1 JOIN photos AS T2 ON T2.camera_lens_id  =  T1.id WHERE T1.brand  =  'Sigma' OR T1.brand  =  'Olympus'",
+    "sql_pred": "SELECT photos.name FROM photos JOIN camera_lens ON photos.camera_lens_id = camera_lens.id WHERE camera_lens.brand IN ('Sigma', 'Olympus')",
+    "similarity": 0.9505521059036255
+  },
+  {
+    "query": "find the name of the program that was launched most recently.",
+    "sql_truth": "SELECT name FROM program ORDER BY launch DESC LIMIT 1",
+    "sql_pred": "SELECT Name FROM program ORDER BY Launch DESC LIMIT 1",
+    "similarity": 0.9892736673355103
+  },
+  {
+    "query": "find the names of programs whose origin is not in Beijing.",
+    "sql_truth": "SELECT name FROM program WHERE origin != 'Beijing'",
+    "sql_pred": "SELECT Name FROM program WHERE Origin <> 'Beijing'",
+    "similarity": 0.9843240976333618
+  },
+  {
+    "query": "How many distinct students are enrolled in courses?",
+    "sql_truth": "SELECT count(DISTINCT student_id) FROM Student_Course_Enrolment",
+    "sql_pred": "SELECT COUNT(DISTINCT student_id) FROM Student_Course_Enrolment;",
+    "similarity": 0.9779931306838989
+  },
+  {
+    "query": "List each test result and its count in descending order of count.",
+    "sql_truth": "SELECT test_result ,  COUNT(*) FROM Student_Tests_Taken GROUP BY test_result ORDER BY COUNT(*) DESC",
+    "sql_pred": "SELECT test_result , COUNT(*) AS result_count FROM Student_Tests_Taken GROUP BY test_result ORDER BY result_count DESC",
+    "similarity": 0.9946174621582031
+  },
+  {
+    "query": "What is the name of the course that has the most student enrollment?",
+    "sql_truth": "SELECT T1.course_name FROM Courses AS T1 JOIN Student_Course_Enrolment AS T2 ON T1.course_id  =  T2.course_id GROUP BY T1.course_name ORDER BY COUNT(*) DESC LIMIT 1",
+    "sql_pred": "SELECT c.course_name FROM Courses c JOIN Student_Course_Enrolment sce ON c.course_id = sce.course_id GROUP BY c.course_id ORDER BY COUNT(sce.registration_id) DESC LIMIT 1",
+    "similarity": 0.9674575924873352
+  },
+  {
+    "query": "Among all the claims, which claims have a claimed amount larger than the average? List the date the claim was made and the date it was settled.",
+    "sql_truth": "SELECT Date_Claim_Made ,  Date_Claim_Settled FROM Claims WHERE Amount_Claimed  >  ( SELECT avg(Amount_Claimed) FROM Claims )",
+    "sql_pred": "SELECT Date_Claim_Made , Date_Claim_Settled  FROM Claims  WHERE Amount_Claimed > (SELECT AVG(Amount_Claimed) FROM Claims)",
+    "similarity": 0.9922389984130859
+  },
+  {
+    "query": "With which kind of payment method were the least number of payments processed?",
+    "sql_truth": "SELECT Payment_Method_Code FROM Payments GROUP BY Payment_Method_Code ORDER BY count(*) ASC LIMIT 1",
+    "sql_pred": "SELECT payment_method_code, COUNT(payment_id) AS payment_count FROM payments GROUP BY payment_method_code ORDER BY payment_count ASC LIMIT 1",
+    "similarity": 0.9514952301979065
+  },
+  {
+    "query": "How many patients' prescriptions are made by physician John Dorian?",
+    "sql_truth": "SELECT count(T1.SSN) FROM patient AS T1 JOIN prescribes AS T2 ON T1.SSN  =  T2.patient JOIN physician AS T3 ON T2.physician  =  T3.employeeid WHERE T3.name = "John Dorian"",
+    "sql_pred": "SELECT COUNT(*)  FROM Prescribes p  JOIN Physician phy ON p.Physician = phy.EmployeeID  JOIN Patient pat ON p.Patient = pat.SSN  WHERE phy.Name = 'John Dorian';",
+    "similarity": 0.9482276439666748
+  },
+  {
+    "query": "What is the names of the physicians who prescribe medication Thesisin?",
+    "sql_truth": "SELECT DISTINCT T1.name FROM physician AS T1 JOIN prescribes AS T2 ON T1.employeeid = T2.physician JOIN medication AS T3 ON T3.code = T2.medication WHERE T3.name  =  "Thesisin"",
+    "sql_pred": "SELECT Physician.Name FROM Physician  JOIN Prescribes ON Physician.EmployeeID = Prescribes.Physician  JOIN Medication ON Prescribes.Medication = Medication.Code  WHERE Medication.Name = 'Thesisin'",
+    "similarity": 0.9607465863227844
+  },
+  {
+    "query": "List the physicians' employee ids together with their primary affiliation departments' ids.",
+    "sql_truth": "SELECT physician ,  department FROM affiliated_with WHERE primaryaffiliation  =  1",
+    "sql_pred": "SELECT a.physician, a.department FROM affiliated_with a",
+    "similarity": 0.9171857833862305
+  },
+  {
+    "query": "Find all procedures which cost more than 1000 or which physician John Wen was trained in.",
+    "sql_truth": "SELECT name FROM procedures WHERE cost  >  1000 UNION SELECT T3.name FROM physician AS T1 JOIN trained_in AS T2 ON T1.employeeid  =  T2.physician JOIN procedures AS T3 ON T3.code  =  T2.treatment WHERE T1.name  =  "John Wen"",
+    "sql_pred": "SELECT DISTINCT p."Name"  FROM "Procedures" p  WHERE p."Cost" > 1000  OR p."Code" IN (SELECT ti."Treatment"                  FROM "Trained_In" ti                  JOIN "Physician" ph ON ti."Physician" = ph."EmployeeID"                  WHERE ph."Name" = 'John Wen')",
+    "similarity": 0.9405112862586975
+  },
+  {
+    "query": "List the name of ships in ascending order of tonnage.",
+    "sql_truth": "SELECT Name FROM ship ORDER BY Tonnage ASC",
+    "sql_pred": "SELECT Name FROM ship ORDER BY Tonnage ASC",
+    "similarity": 0.9999985694885254
+  },
+  {
+    "query": "Show names of ships involved in a mission launched after 1928.",
+    "sql_truth": "SELECT T2.Name FROM mission AS T1 JOIN ship AS T2 ON T1.Ship_ID  =  T2.Ship_ID WHERE T1.Launched_Year  >  1928",
+    "sql_pred": "SELECT ship.name FROM mission JOIN ship ON mission.ship_id = ship.ship_id WHERE mission.launched_year > 1928",
+    "similarity": 0.9545482397079468
+  },
+  {
+    "query": "Find all students taught by MARROTTE KIRK. Output first and last names of students.",
+    "sql_truth": "SELECT T1.firstname ,  T1.lastname FROM list AS T1 JOIN teachers AS T2 ON T1.classroom  =  T2.classroom WHERE T2.firstname  =  "MARROTTE" AND T2.lastname  =  "KIRK"",
+    "sql_pred": "SELECT list.FirstName, list.LastName FROM list JOIN teachers ON list.Classroom = teachers.Classroom WHERE teachers.LastName = 'MARROTTE' AND teachers.FirstName = 'KIRK'",
+    "similarity": 0.9596853852272034
+  },
+  {
+    "query": "For each grade, report the grade, the number of classrooms in which it is taught and the total number of students in the grade.",
+    "sql_truth": "SELECT grade ,  count(DISTINCT classroom) ,  count(*) FROM list GROUP BY grade",
+    "sql_pred": "SELECT Grade, COUNT(DISTINCT Classroom) AS NumberOfClassrooms, COUNT(*) AS TotalStudents FROM list GROUP BY Grade",
+    "similarity": 0.955791711807251
+  },
+  {
+    "query": "What is the maximum and minimum market value of companies?",
+    "sql_truth": "SELECT max(Market_Value_in_Billion) ,  min(Market_Value_in_Billion) FROM company",
+    "sql_pred": "SELECT MAX(Market_Value_in_Billion) AS Max_Market_Value , MIN(Market_Value_in_Billion) AS Min_Market_Value FROM company",
+    "similarity": 0.9750611186027527
+  },
+  {
+    "query": "What are the types of film market estimations in year 1995?",
+    "sql_truth": "SELECT TYPE FROM film_market_estimation WHERE YEAR  =  1995",
+    "sql_pred": "SELECT DISTINCT Type FROM film_market_estimation WHERE Year = 1995",
+    "similarity": 0.9642184376716614
+  },
+  {
+    "query": "List the studios of each film and the number of films produced by that studio.",
+    "sql_truth": "SELECT Studio ,  COUNT(*) FROM film GROUP BY Studio",
+    "sql_pred": "SELECT studio , COUNT(film_id) AS number_of_films FROM film GROUP BY studio",
+    "similarity": 0.9649926424026489
+  },
+  {
+    "query": "How many calendar items do we have?",
+    "sql_truth": "SELECT count(*) FROM Ref_calendar",
+    "sql_pred": "SELECT COUNT(*) FROM Ref_Calendar",
+    "similarity": 0.9830021858215332
+  },
+  {
+    "query": "Show the location name for document "Robin CV".",
+    "sql_truth": "SELECT T3.location_name FROM All_documents AS T1 JOIN Document_locations AS T2 ON T1.document_id  =  T2.document_id JOIN Ref_locations AS T3 ON T2.location_code  =  T3.location_code WHERE T1.document_name  =  "Robin CV"",
+    "sql_pred": "SELECT rl.Location_Name FROM All_Documents ad JOIN Document_Locations dl ON ad.Document_ID = dl.Document_ID JOIN Ref_Locations rl ON dl.Location_Code = rl.Location_Code WHERE ad.Document_Name = 'Robin CV'",
+    "similarity": 0.938473105430603
+  },
+  {
+    "query": "What is the description of the club named "Tennis Club"?",
+    "sql_truth": "SELECT clubdesc FROM club WHERE clubname  =  "Tennis Club"",
+    "sql_pred": "SELECT ClubDesc FROM Club WHERE ClubName = 'Tennis Club'",
+    "similarity": 0.9723829030990601
+  },
+  {
+    "query": "What are the distinct grant amount for the grants where the documents were sent before '1986-08-26 20:49:27' and grant were ended after '1989-03-16 18:27:16'?",
+    "sql_truth": "SELECT T1.grant_amount FROM Grants AS T1 JOIN Documents AS T2 ON T1.grant_id  =  T2.grant_id WHERE T2.sent_date  <  '1986-08-26 20:49:27' INTERSECT SELECT grant_amount FROM grants WHERE grant_end_date  >  '1989-03-16 18:27:16'",
+    "sql_pred": "SELECT DISTINCT g.grant_amount  FROM Grants g  JOIN Documents d ON g.grant_id = d.grant_id  WHERE d.sent_date < '1986-08-26 20:49:27'  AND g.grant_end_date > '1989-03-16 18:27:16'",
+    "similarity": 0.9530669450759888
+  },
+  {
+    "query": "What are the task details, task id and project id for the projects which are detailed as 'omnis' or  have more than 2 outcomes?",
+    "sql_truth": "SELECT T1.task_details ,  T1.task_id ,  T2.project_id FROM Tasks AS T1 JOIN Projects AS T2 ON T1.project_id  =  T2.project_id WHERE T2.project_details  =  'omnis' UNION SELECT T1.task_details ,  T1.task_id ,  T2.project_id FROM Tasks AS T1 JOIN Projects AS T2 ON T1.project_id  =  T2.project_id JOIN Project_outcomes AS T3 ON T2.project_id  =  T3.project_id GROUP BY T2.project_id HAVING count(*)  >  2",
+    "sql_pred": "SELECT t.task_id, t.task_details, t.project_id  FROM tasks t  JOIN projects p ON t.project_id = p.project_id  WHERE p.project_details = 'omnis'  OR (SELECT COUNT(*) FROM project_outcomes po WHERE po.project_id = p.project_id) > 2;",
+    "similarity": 0.9520881772041321
+  },
+  {
+    "query": "Which organisation hired the most number of research staff? List the organisation id, type and detail.",
+    "sql_truth": "SELECT T1.organisation_id ,  T1.organisation_type ,  T1.organisation_details FROM Organisations AS T1 JOIN Research_Staff AS T2 ON T1.organisation_id  =  T2.employer_organisation_id GROUP BY T1.organisation_id ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT o.organisation_id, ot.organisation_type, o.organisation_details  FROM Research_Staff rs  JOIN Organisations o ON rs.employer_organisation_id = o.organisation_id  JOIN Organisation_Types ot ON o.organisation_type = ot.organisation_type  GROUP BY o.organisation_id, ot.organisation_type, o.organisation_details  ORDER BY COUNT(rs.staff_id) DESC  LIMIT 1;",
+    "similarity": 0.9519603252410889
+  },
+  {
+    "query": "What are the result description of the project whose detail is 'sint'?",
+    "sql_truth": "SELECT T1.outcome_description FROM Research_outcomes AS T1 JOIN Project_outcomes AS T2 ON T1.outcome_code  =  T2.outcome_code JOIN Projects AS T3 ON T2.project_id  =  T3.project_id WHERE T3.project_details  =  'sint'",
+    "sql_pred": "SELECT ro.outcome_description FROM Projects p JOIN Project_Outcomes po ON p.project_id = po.project_id JOIN Research_Outcomes ro ON po.outcome_code = ro.outcome_code WHERE p.project_details = 'sint'",
+    "similarity": 0.9466906785964966
+  },
+  {
+    "query": "Find the name and age of the person who is a friend of both Dan and Alice.",
+    "sql_truth": "SELECT T1.name ,  T1.age FROM Person AS T1 JOIN PersonFriend AS T2 ON T1.name  =  T2.name WHERE T2.friend  =  'Dan' INTERSECT SELECT T1.name ,   T1.age FROM Person AS T1 JOIN PersonFriend AS T2 ON T1.name  =  T2.name WHERE T2.friend  =  'Alice'",
+    "sql_pred": "SELECT p.name , p.age FROM Person p JOIN PersonFriend pf1 ON p.name = pf1.name JOIN PersonFriend pf2 ON p.name = pf2.name WHERE pf1.friend = 'Dan' AND pf2.friend = 'Alice'",
+    "similarity": 0.9331951141357422
+  },
+  {
+    "query": "What are the names of all the documents, as well as the access counts of each, ordered alphabetically?",
+    "sql_truth": "SELECT document_name ,  access_count FROM documents ORDER BY document_name",
+    "sql_pred": "SELECT document_name , access_count FROM Documents ORDER BY document_name ASC",
+    "similarity": 0.9820101261138916
+  },
+  {
+    "query": "What are the names of documents that do not have any sections?",
+    "sql_truth": "SELECT document_name FROM documents WHERE document_code NOT IN (SELECT document_code FROM document_sections)",
+    "sql_pred": "SELECT d.document_name FROM Documents d LEFT JOIN Document_Sections ds ON d.document_code = ds.document_code WHERE ds.section_id IS NULL",
+    "similarity": 0.8883556127548218
+  },
+  {
+    "query": "What are the different role codes for users, and how many users have each?",
+    "sql_truth": "SELECT count(*) ,  role_code FROM users GROUP BY role_code",
+    "sql_pred": "SELECT u.role_code, COUNT(u.user_id) AS user_count FROM Users u GROUP BY u.role_code",
+    "similarity": 0.9496326446533203
+  },
+  {
+    "query": "What is the stories of highest building?",
+    "sql_truth": "SELECT Stories FROM buildings ORDER BY Height DESC LIMIT 1",
+    "sql_pred": "SELECT stories FROM buildings WHERE height = (SELECT MAX(height) FROM buildings)",
+    "similarity": 0.9430598020553589
+  },
+  {
+    "query": "How many companies are in either "Banking" industry or "Conglomerate" industry?",
+    "sql_truth": "SELECT count(*) FROM Companies WHERE Industry  =  "Banking" OR Industry  =  "Conglomerate"",
+    "sql_pred": "SELECT COUNT(*) FROM Companies WHERE Industry IN ('Banking', 'Conglomerate')",
+    "similarity": 0.9521050453186035
+  },
+  {
+    "query": "List the name of artworks whose type is not "Program Talent Show".",
+    "sql_truth": "SELECT Name FROM artwork WHERE TYPE != "Program Talent Show"",
+    "sql_pred": "SELECT Name FROM artwork WHERE Type <> 'Program Talent Show'",
+    "similarity": 0.9899619221687317
+  },
+  {
+    "query": "How many premises are there?",
+    "sql_truth": "SELECT count(*) FROM premises",
+    "sql_pred": "SELECT COUNT(*) FROM Premises;",
+    "similarity": 0.9617898464202881
+  },
+  {
+    "query": "What are the names of courses with 1 credit?",
+    "sql_truth": "SELECT CName FROM COURSE WHERE Credits  =  1",
+    "sql_pred": "SELECT cname FROM course WHERE credits = 1",
+    "similarity": 0.9560827016830444
+  },
+  {
+    "query": "What is all the information about courses, ordered by credits ascending?",
+    "sql_truth": "SELECT * FROM COURSE ORDER BY Credits",
+    "sql_pred": "SELECT * FROM Course ORDER BY Credits ASC",
+    "similarity": 0.9849274754524231
+  },
+  {
+    "query": "What are the ids and names of department stores with both marketing and managing departments?",
+    "sql_truth": "SELECT T2.dept_store_id ,  T2.store_name FROM departments AS T1 JOIN department_stores AS T2 ON T1.dept_store_id  =  T2.dept_store_id WHERE T1.department_name  =  "marketing" INTERSECT SELECT T2.dept_store_id ,  T2.store_name FROM departments AS T1 JOIN department_stores AS T2 ON T1.dept_store_id  =  T2.dept_store_id WHERE T1.department_name  =  "managing"",
+    "sql_pred": "SELECT ds.dept_store_id, ds.store_name  FROM Department_Stores ds  JOIN Departments d1 ON ds.dept_store_id = d1.dept_store_id  JOIN Departments d2 ON ds.dept_store_id = d2.dept_store_id  WHERE d1.department_name = 'Marketing' AND d2.department_name = 'Managing';",
+    "similarity": 0.9447249174118042
+  },
+  {
+    "query": "What are the names and genders of staff who were assigned in 2016?",
+    "sql_truth": "SELECT T1.staff_name ,  T1.staff_gender FROM staff AS T1 JOIN staff_department_assignments AS T2 ON T1.staff_id  =  T2.staff_id WHERE T2.date_assigned_from LIKE "2016%"",
+    "sql_pred": "SELECT s.staff_name, s.staff_gender FROM Staff s JOIN Staff_Department_Assignments sda ON s.staff_id = sda.staff_id WHERE sda.date_assigned_from >= '2016-01-01' AND sda.date_assigned_to <= '2016-12-31'",
+    "similarity": 0.9428896903991699
+  },
+  {
+    "query": "What are the distinct names and phone numbers for suppliers who have red jeans?",
+    "sql_truth": "SELECT DISTINCT T1.supplier_name ,  T1.supplier_phone FROM suppliers AS T1 JOIN product_suppliers AS T2 ON T1.supplier_id  =  T2.supplier_id JOIN products AS T3 ON T2.product_id  =  T3.product_id WHERE T3.product_name  =  "red jeans"",
+    "sql_pred": "SELECT DISTINCT s.supplier_name , s.supplier_phone  FROM Suppliers s  JOIN Product_Suppliers ps ON s.supplier_id = ps.supplier_id  JOIN Products p ON ps.product_id = p.product_id  WHERE p.product_name LIKE '%red jeans%'",
+    "similarity": 0.9654852151870728
+  },
+  {
+    "query": "What are the descriptions for the aircrafts?",
+    "sql_truth": "SELECT Description FROM aircraft",
+    "sql_pred": "SELECT description FROM aircraft",
+    "similarity": 0.9853529930114746
+  },
+  {
+    "query": "What is the average total number of passengers for all airports that the aircraft "Robinson R-22" visits?",
+    "sql_truth": "SELECT avg(T3.Total_Passengers) FROM aircraft AS T1 JOIN airport_aircraft AS T2 ON T1.Aircraft_ID  =  T2.Aircraft_ID JOIN airport AS T3 ON T2.Airport_ID  =  T3.Airport_ID WHERE T1.Aircraft  =  "Robinson R-22"",
+    "sql_pred": "SELECT AVG(a.Total_Passengers) AS Average_Total_Passengers  FROM airport a  JOIN airport_aircraft aa ON a.Airport_ID = aa.Airport_ID  JOIN aircraft ac ON aa.Aircraft_ID = ac.Aircraft_ID  WHERE ac.Aircraft = 'Robinson R-22';",
+    "similarity": 0.9536430239677429
+  },
+  {
+    "query": "How old is the youngest winning pilot and what is their name?",
+    "sql_truth": "SELECT t1.name ,  t1.age FROM pilot AS t1 JOIN MATCH AS t2 ON t1.pilot_id  =  t2.winning_pilot ORDER BY t1.age LIMIT 1",
+    "sql_pred": "SELECT name , age FROM pilot WHERE pilot_id = (SELECT winning_pilot FROM match ORDER BY date DESC LIMIT 1) ORDER BY age ASC LIMIT 1",
+    "similarity": 0.9427037835121155
+  },
+  {
+    "query": "How many schools are there?",
+    "sql_truth": "SELECT count(*) FROM school",
+    "sql_pred": "SELECT COUNT(*) FROM school;",
+    "similarity": 0.9710726141929626
+  },
+  {
+    "query": "Show the locations of schools that have more than 1 player.",
+    "sql_truth": "SELECT T2.Location FROM player AS T1 JOIN school AS T2 ON T1.School_ID  =  T2.School_ID GROUP BY T1.School_ID HAVING COUNT(*)  >  1",
+    "sql_pred": "SELECT s.Location FROM school s JOIN player p ON s.School_ID = p.School_ID GROUP BY s.Location HAVING COUNT(p.Player_ID) > 1",
+    "similarity": 0.9671100378036499
+  },
+  {
+    "query": "Find all the distinct district names ordered by city area in descending.",
+    "sql_truth": "SELECT DISTINCT District_name FROM district ORDER BY city_area DESC",
+    "sql_pred": "SELECT DISTINCT District_name FROM district ORDER BY City_Area DESC",
+    "similarity": 0.9916344881057739
+  },
+  {
+    "query": "Find the total population of the districts where the area is bigger than the average city area.",
+    "sql_truth": "SELECT sum(city_population) FROM district WHERE city_area  >  (SELECT avg(city_area) FROM district)",
+    "sql_pred": "SELECT SUM(city_population) AS total_population FROM district WHERE city_area > (SELECT AVG(city_area) FROM district);",
+    "similarity": 0.9723144769668579
+  },
+  {
+    "query": "What are the unique types of player positions in the tryout?",
+    "sql_truth": "SELECT count(DISTINCT pPos) FROM tryout",
+    "sql_pred": "SELECT DISTINCT pPos FROM Tryout;",
+    "similarity": 0.9525741338729858
+  },
+  {
+    "query": "Find the name of players whose card is yes in the descending order of training hours.",
+    "sql_truth": "SELECT pName FROM Player WHERE yCard  =  'yes' ORDER BY HS DESC",
+    "sql_pred": "SELECT pName FROM Player WHERE yCard = 'yes' ORDER BY HS DESC",
+    "similarity": 0.9940226078033447
+  },
+  {
+    "query": "Find the name of all students who were in the tryout sorted in alphabetic order.",
+    "sql_truth": "SELECT T1.pName FROM player AS T1 JOIN tryout AS T2 ON T1.pID  =  T2.pID ORDER BY T1.pName",
+    "sql_pred": "SELECT pName FROM Player WHERE pID IN (SELECT pID FROM Tryout) ORDER BY pName ASC",
+    "similarity": 0.9483590722084045
+  },
+  {
+    "query": "Find the name of the tryout players who are from the college with largest size.",
+    "sql_truth": "SELECT T2.pName FROM  tryout AS T1 JOIN player AS T2 ON T1.pID  =  T2.pID WHERE T1.cName  =  (SELECT cName FROM college ORDER BY enr DESC LIMIT 1)",
+    "sql_pred": "SELECT p.pName FROM Player p JOIN Tryout t ON p.pID = t.pID JOIN College c ON t.cName = c.cName WHERE c.enr = (SELECT MAX(enr) FROM College);",
+    "similarity": 0.9497314691543579
+  },
+  {
+    "query": "Find names of colleges with enrollment greater than that of some (at least one) college in the FL state.",
+    "sql_truth": "SELECT DISTINCT cName FROM college WHERE enr  >  (SELECT min(enr) FROM college WHERE state  =  'FL')",
+    "sql_pred": "SELECT cName FROM College WHERE enr > (SELECT MAX(enr) FROM College WHERE state = 'FL')",
+    "similarity": 0.9658302068710327
+  },
+  {
+    "query": "What are the names and location of the shops in ascending alphabetical order of name.",
+    "sql_truth": "SELECT Shop_Name ,  LOCATION FROM shop ORDER BY Shop_Name ASC",
+    "sql_pred": "SELECT Shop_Name , Location FROM shop ORDER BY Shop_Name ASC",
+    "similarity": 0.9934132099151611
+  },
+  {
+    "query": "List the software platform shared by the greatest number of devices.",
+    "sql_truth": "SELECT Software_Platform FROM device GROUP BY Software_Platform ORDER BY COUNT(*) DESC LIMIT 1",
+    "sql_pred": "SELECT software_platform, COUNT(*) AS device_count FROM device GROUP BY software_platform ORDER BY device_count DESC LIMIT 1",
+    "similarity": 0.9754775166511536
+  },
+  {
+    "query": "Show all the Store_Name of drama workshop groups.",
+    "sql_truth": "SELECT Store_Name FROM Drama_Workshop_Groups",
+    "sql_pred": "SELECT DISTINCT s.Store_Name FROM Drama_Workshop_Groups dwg JOIN Stores s ON dwg.Address_ID = s.Address_ID",
+    "similarity": 0.9204782843589783
+  },
+  {
+    "query": "Which city is the address of the store named "FJA Filming" located in?",
+    "sql_truth": "SELECT T1.City_Town FROM Addresses AS T1 JOIN Stores AS T2 ON T1.Address_ID  =  T2.Address_ID WHERE T2.Store_Name  =  "FJA Filming"",
+    "sql_pred": "SELECT a.City_Town FROM Stores s JOIN Addresses a ON s.Address_ID = a.Address_ID WHERE s.Store_Name = 'FJA Filming';",
+    "similarity": 0.9636437892913818
+  },
+  {
+    "query": "What are the total order quantities of photo products?",
+    "sql_truth": "SELECT sum(T1.Order_Quantity) FROM ORDER_ITEMS AS T1 JOIN Products AS T2 ON T1.Product_ID  =  T2.Product_ID WHERE T2.Product_Name  =  "photo"",
+    "sql_pred": "SELECT SUM(oi.order_quantity) AS total_order_quantity  FROM order_items oi  JOIN products p ON oi.product_id = p.product_id  WHERE LOWER(p.product_name) LIKE '%photo%'",
+    "similarity": 0.93351149559021
+  },
+  {
+    "query": "How many songs are there?",
+    "sql_truth": "SELECT count(*) FROM Songs",
+    "sql_pred": "SELECT COUNT(*) FROM Songs;",
+    "similarity": 0.9659816026687622
+  },
+  {
+    "query": "Which vocal type is the most frequently appearring type?",
+    "sql_truth": "SELECT TYPE FROM vocals GROUP BY TYPE ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT type, COUNT(*) AS frequency FROM vocals GROUP BY type ORDER BY frequency DESC LIMIT 1",
+    "similarity": 0.9642314314842224
+  },
+  {
+    "query": "Which vocal type has the band mate with first name "Marianne" played the most?",
+    "sql_truth": "SELECT TYPE FROM vocals AS T1 JOIN band AS T2 ON T1.bandmate  =  T2.id WHERE firstname  =  "Marianne" GROUP BY TYPE ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT Type, COUNT(*) AS Count FROM Vocals  JOIN Band ON Vocals.Bandmate = Band.Id  WHERE Band.Firstname = 'Marianne'  GROUP BY Type  ORDER BY Count DESC  LIMIT 1;",
+    "similarity": 0.9562908411026001
+  },
+  {
+    "query": "Select the average price of each manufacturer's products, showing only the manufacturer's code.",
+    "sql_truth": "SELECT AVG(Price) ,  Manufacturer FROM Products GROUP BY Manufacturer",
+    "sql_pred": "SELECT p.Manufacturer, AVG(p.Price) AS AveragePrice FROM Products p GROUP BY p.Manufacturer",
+    "similarity": 0.9597960710525513
+  },
+  {
+    "query": "List the first and last names of all distinct staff members who are assigned to the problem whose id is 1.",
+    "sql_truth": "SELECT DISTINCT staff_first_name ,  staff_last_name FROM staff AS T1 JOIN problem_log AS T2 ON T1.staff_id = T2.assigned_to_staff_id WHERE T2.problem_id = 1",
+    "sql_pred": "SELECT DISTINCT s.staff_first_name, s.staff_last_name FROM Staff s JOIN Problem_Log pl ON s.staff_id = pl.assigned_to_staff_id WHERE pl.problem_id = 1",
+    "similarity": 0.9652949571609497
+  },
+  {
+    "query": "How many branches where have more than average number of memberships are there?",
+    "sql_truth": "SELECT count(*) FROM branch WHERE membership_amount  >  (SELECT avg(membership_amount) FROM branch)",
+    "sql_pred": "SELECT COUNT(*) AS branch_count FROM branch WHERE Branch_ID IN (SELECT Branch_ID FROM membership_register_branch GROUP BY Branch_ID HAVING COUNT(Member_ID) > (SELECT AVG(membership_count) FROM (SELECT COUNT(Member_ID) AS membership_count FROM membership_register_branch GROUP BY Branch_ID) AS avg_memberships));",
+    "similarity": 0.93264240026474
+  },
+  {
+    "query": "Show all member names and registered branch names sorted by register year.",
+    "sql_truth": "SELECT T3.name ,  T2.name FROM membership_register_branch AS T1 JOIN branch AS T2 ON T1.branch_id  =  T2.branch_id JOIN member AS T3 ON T1.member_id  =  T3.member_id ORDER BY T1.register_year",
+    "sql_pred": "SELECT member.name , branch.name FROM member JOIN membership_register_branch ON member.member_id = membership_register_branch.member_id JOIN branch ON membership_register_branch.branch_id = branch.branch_id ORDER BY membership_register_branch.register_year",
+    "similarity": 0.9620529413223267
+  },
+  {
+    "query": "Find the name of branches where have some members whose hometown is in Louisville, Kentucky and some in Hiram, Georgia.",
+    "sql_truth": "SELECT T2.name FROM membership_register_branch AS T1 JOIN branch AS T2 ON T1.branch_id  =  T2.branch_id JOIN member AS T3 ON T1.member_id  =  T3.member_id WHERE T3.Hometown  =  'Louisville ,  Kentucky' INTERSECT SELECT T2.name FROM membership_register_branch AS T1 JOIN branch AS T2 ON T1.branch_id  =  T2.branch_id JOIN member AS T3 ON T1.member_id  =  T3.member_id WHERE T3.Hometown  =  'Hiram ,  Georgia'",
+    "sql_pred": "SELECT b.name FROM branch b  JOIN membership_register_branch mrb ON b.branch_id = mrb.branch_id  JOIN member m ON mrb.member_id = m.member_id  WHERE m.hometown = 'Louisville, Kentucky'  AND m.member_id IN (SELECT member_id FROM member WHERE hometown = 'Hiram, Georgia')  GROUP BY b.name;",
+    "similarity": 0.9481992721557617
+  },
+  {
+    "query": "Find the distinct majors of students who have treasurer votes.",
+    "sql_truth": "SELECT DISTINCT T1.Major FROM STUDENT AS T1 JOIN VOTING_RECORD AS T2 ON T1.StuID  =  T2.Treasurer_Vote",
+    "sql_pred": "SELECT DISTINCT Major FROM Student WHERE StuID IN (SELECT StuID FROM Voting_record WHERE Treasurer_Vote IS NOT NULL)",
+    "similarity": 0.9469668865203857
+  },
+  {
+    "query": "How many characteristics are there?",
+    "sql_truth": "SELECT count(*) FROM CHARACTERISTICS",
+    "sql_pred": "SELECT COUNT(*) FROM characteristics",
+    "similarity": 0.9613440036773682
+  },
+  {
+    "query": "List all the characteristic names and data types of product "cumin".",
+    "sql_truth": "SELECT t3.characteristic_name ,  t3.characteristic_data_type FROM products AS t1 JOIN product_characteristics AS t2 ON t1.product_id  =  t2.product_id JOIN CHARACTERISTICS AS t3 ON t2.characteristic_id  =  t3.characteristic_id WHERE t1.product_name  =  "cumin"",
+    "sql_pred": "SELECT c.characteristic_name, c.characteristic_data_type  FROM Products p  JOIN Product_Characteristics pc ON p.product_id = pc.product_id  JOIN Characteristics c ON pc.characteristic_id = c.characteristic_id  WHERE p.product_name = 'cumin'",
+    "similarity": 0.9672449231147766
+  },
+  {
+    "query": "Find the product category description of the product category with code "Spices".",
+    "sql_truth": "SELECT product_category_description FROM ref_product_categories WHERE product_category_code  =  "Spices"",
+    "sql_pred": "SELECT product_category_description FROM Ref_Product_Categories WHERE product_category_code = 'Spices'",
+    "similarity": 0.9889669418334961
+  },
+  {
+    "query": "How many colors are never used by any product?",
+    "sql_truth": "SELECT count(*) FROM Ref_colors WHERE color_code NOT IN ( SELECT color_code FROM products )",
+    "sql_pred": "SELECT COUNT(*) AS unused_color_count  FROM Ref_Colors  WHERE color_code NOT IN (SELECT DISTINCT color_code FROM Products);",
+    "similarity": 0.9542657732963562
+  },
+  {
+    "query": "What is the name of the stadium which held the most events?",
+    "sql_truth": "SELECT t1.name FROM stadium AS t1 JOIN event AS t2 ON t1.id  =  t2.stadium_id GROUP BY t2.stadium_id ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT s.name FROM stadium s JOIN event e ON s.ID = e.Stadium_ID GROUP BY s.ID ORDER BY COUNT(e.ID) DESC LIMIT 1",
+    "similarity": 0.9556543827056885
+  },
+  {
+    "query": "Show the names of trains and locations of railways they are in.",
+    "sql_truth": "SELECT T2.Name ,  T1.Location FROM railway AS T1 JOIN train AS T2 ON T1.Railway_ID  =  T2.Railway_ID",
+    "sql_pred": "SELECT train.name, railway.location FROM train JOIN railway ON train.railway_id = railway.railway_id",
+    "similarity": 0.9289851188659668
+  },
+  {
+    "query": "Show the name, phone, and payment method code for all customers in descending order of customer number.",
+    "sql_truth": "SELECT customer_name ,  customer_phone ,  payment_method_code FROM customers ORDER BY customer_number DESC",
+    "sql_pred": "SELECT customer_name , customer_phone , payment_method_code FROM Customers ORDER BY customer_number DESC",
+    "similarity": 0.9960801601409912
+  },
+  {
+    "query": "Find the number of distinct amenities.",
+    "sql_truth": "SELECT count(*) FROM dorm_amenity",
+    "sql_pred": "SELECT COUNT(DISTINCT amenity_name) AS distinct_amenities FROM Dorm_amenity",
+    "similarity": 0.9389227628707886
+  },
+  {
+    "query": "Find the number of dorms and total capacity for each gender.",
+    "sql_truth": "SELECT count(*) ,  sum(student_capacity) ,  gender FROM dorm GROUP BY gender",
+    "sql_pred": "SELECT gender , COUNT(dormid) AS number_of_dorms , SUM(student_capacity) AS total_capacity FROM Dorm GROUP BY gender",
+    "similarity": 0.9705075025558472
+  },
+  {
+    "query": "Find the number of students who is older than 20 in each dorm.",
+    "sql_truth": "SELECT count(*) ,  T3.dorm_name FROM student AS T1 JOIN lives_in AS T2 ON T1.stuid  =  T2.stuid JOIN dorm AS T3 ON T3.dormid  =  T2.dormid WHERE T1.age  >  20 GROUP BY T3.dorm_name",
+    "sql_pred": "SELECT d.dorm_name, COUNT(l.stuid) AS num_students  FROM dorm d  JOIN lives_in l ON d.dormid = l.dormid  JOIN student s ON l.stuid = s.stuid  WHERE s.age > 20  GROUP BY d.dorm_name;",
+    "similarity": 0.9546129703521729
+  },
+  {
+    "query": "Find the name of dorms that do not have amenity TV Lounge.",
+    "sql_truth": "SELECT dorm_name FROM dorm EXCEPT SELECT T1.dorm_name FROM dorm AS T1 JOIN has_amenity AS T2 ON T1.dormid  =  T2.dormid JOIN dorm_amenity AS T3 ON T2.amenid  =  T3.amenid WHERE T3.amenity_name  =  'TV Lounge'",
+    "sql_pred": "SELECT d.dorm_name  FROM Dorm d  WHERE d.dormid NOT IN (SELECT ha.dormid FROM Has_amenity ha JOIN Dorm_amenity da ON ha.amenid = da.amenid WHERE da.amenity_name = 'TV Lounge')",
+    "similarity": 0.9549046754837036
+  },
+  {
+    "query": "What is the phone number of the customer who has filed the most recent complaint?",
+    "sql_truth": "SELECT t1.phone_number FROM customers AS t1 JOIN complaints AS t2 ON t1.customer_id  =  t2.customer_id ORDER BY t2.date_complaint_raised DESC LIMIT 1",
+    "sql_pred": "SELECT c.phone_number FROM complaints co JOIN customers c ON co.customer_id = c.customer_id ORDER BY co.date_complaint_raised DESC LIMIT 1",
+    "similarity": 0.9642202854156494
+  },
+  {
+    "query": "Show the date and venue of each workshop in ascending alphabetical order of the venue.",
+    "sql_truth": "SELECT Date ,  Venue FROM workshop ORDER BY Venue",
+    "sql_pred": "SELECT Date, Venue FROM workshop ORDER BY Venue ASC",
+    "similarity": 0.9875193238258362
+  },
+  {
+    "query": "Return the lot details and investor ids.",
+    "sql_truth": "SELECT lot_details ,  investor_id FROM LOTS",
+    "sql_pred": "SELECT l.lot_details , l.investor_id FROM Lots l",
+    "similarity": 0.9577372074127197
+  },
+  {
+    "query": "Show the ids of the investors who have at least two transactions.",
+    "sql_truth": "SELECT T2.investor_id FROM INVESTORS AS T1 JOIN TRANSACTIONS AS T2 ON T1.investor_id  =  T2.investor_id GROUP BY T2.investor_id HAVING COUNT(*)  >=  2",
+    "sql_pred": "SELECT investor_id FROM Transactions GROUP BY investor_id HAVING COUNT(transaction_id) >= 2",
+    "similarity": 0.9564777612686157
+  },
+  {
+    "query": "Find the names and descriptions of the photos taken at the tourist attraction called "film festival".",
+    "sql_truth": "SELECT T1.Name ,  T1.Description FROM PHOTOS AS T1 JOIN TOURIST_ATTRACTIONS AS T2 ON T1.Tourist_Attraction_ID  =  T2.Tourist_Attraction_ID WHERE T2.Name  =  "film festival"",
+    "sql_pred": "SELECT p.name , p.description FROM photos p JOIN tourist_attractions ta ON p.tourist_attraction_id = ta.tourist_attraction_id WHERE ta.name = 'film festival'",
+    "similarity": 0.9500001668930054
+  },
+  {
+    "query": "Find the id and star rating of each hotel and sort them in increasing order of price.",
+    "sql_truth": "SELECT hotel_id ,  star_rating_code FROM HOTELS ORDER BY price_range ASC",
+    "sql_pred": "SELECT h.hotel_id, r.star_rating_description  FROM hotels h  JOIN ref_hotel_star_ratings r ON h.star_rating_code = r.star_rating_code  ORDER BY h.price_range ASC",
+    "similarity": 0.9371894001960754
+  },
+  {
+    "query": "Find the tourist attractions that have parking or shopping as their feature details. What are the names of the attractions?",
+    "sql_truth": "SELECT T1.Name FROM Tourist_Attractions AS T1 JOIN Tourist_Attraction_Features AS T2 ON T1.tourist_attraction_id  =  T2.tourist_attraction_id JOIN Features AS T3 ON T2.Feature_ID  =  T3.Feature_ID WHERE T3.feature_Details  =  'park' UNION SELECT T1.Name FROM Tourist_Attractions AS T1 JOIN Tourist_Attraction_Features AS T2 ON T1.tourist_attraction_id  =  T2.tourist_attraction_id JOIN Features AS T3 ON T2.Feature_ID  =  T3.Feature_ID WHERE T3.feature_Details  =  'shopping'",
+    "sql_pred": "SELECT ta.name  FROM Tourist_Attractions ta  JOIN Tourist_Attraction_Features taf ON ta.Tourist_Attraction_ID = taf.Tourist_Attraction_ID  JOIN Features f ON taf.Feature_ID = f.Feature_ID  WHERE LOWER(f.Feature_Details) IN ('parking', 'shopping');",
+    "similarity": 0.9336722493171692
+  },
+  {
+    "query": "What type of game is Call of Destiny?",
+    "sql_truth": "SELECT gtype FROM Video_games WHERE gname  =  "Call of Destiny"",
+    "sql_pred": "SELECT GType FROM Video_Games WHERE GName = 'Call of Destiny'",
+    "similarity": 0.960247278213501
+  },
+  {
+    "query": "How many different types of sports do we offer?",
+    "sql_truth": "SELECT count(DISTINCT sportname) FROM Sportsinfo",
+    "sql_pred": "SELECT COUNT(DISTINCT SportName) FROM SportsInfo",
+    "similarity": 0.9705012440681458
+  },
+  {
+    "query": "What is the sport with the most scholarship students?",
+    "sql_truth": "SELECT sportname FROM Sportsinfo WHERE onscholarship  =  'Y' GROUP BY sportname ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT SportName FROM SportsInfo WHERE OnScholarship = 'Yes' GROUP BY SportName ORDER BY COUNT(StuID) DESC LIMIT 1",
+    "similarity": 0.9635967016220093
+  },
+  {
+    "query": "What are ids and total number of hours played for each game?",
+    "sql_truth": "SELECT gameid ,  sum(hours_played) FROM Plays_games GROUP BY gameid",
+    "sql_pred": "SELECT GameID , SUM(Hours_Played) AS Total_Hours_Played FROM Plays_Games GROUP BY GameID",
+    "similarity": 0.9655926823616028
+  },
+  {
+    "query": "Return the the "active to date" of the latest contact channel used by the customer named "Tillman Ernser".",
+    "sql_truth": "SELECT max(t2.active_to_date) FROM customers AS t1 JOIN customer_contact_channels AS t2 ON t1.customer_id  =  t2.customer_id WHERE t1.customer_name  =  "Tillman Ernser"",
+    "sql_pred": "SELECT ccc.active_to_date FROM Customer_Contact_Channels ccc JOIN Customers c ON ccc.customer_id = c.customer_id WHERE c.customer_name = 'Tillman Ernser' ORDER BY ccc.active_to_date DESC LIMIT 1",
+    "similarity": 0.9428460001945496
+  },
+  {
+    "query": "Give the songs included in volumes that have more than 1 week on top.",
+    "sql_truth": "SELECT Song FROM volume WHERE Weeks_on_Top  >  1",
+    "sql_pred": "SELECT song FROM volume WHERE weeks_on_top > 1",
+    "similarity": 0.9732399582862854
+  },
+  {
+    "query": "Return the famous release date for the oldest artist.",
+    "sql_truth": "SELECT Famous_Release_date FROM artist ORDER BY Age DESC LIMIT 1",
+    "sql_pred": "SELECT famous_release_date FROM artist WHERE age = (SELECT MIN(age) FROM artist)",
+    "similarity": 0.9309197664260864
+  },
+  {
+    "query": "How many music festivals have had each kind of result, ordered descending by count?",
+    "sql_truth": "SELECT RESULT ,  COUNT(*) FROM music_festival GROUP BY RESULT ORDER BY COUNT(*) DESC",
+    "sql_pred": "SELECT Result, COUNT(*) AS Festival_Count FROM music_festival GROUP BY Result ORDER BY Festival_Count DESC",
+    "similarity": 0.9689545631408691
+  },
+  {
+    "query": "How many different captain ranks are there?",
+    "sql_truth": "SELECT count(DISTINCT rank) FROM captain",
+    "sql_pred": "SELECT COUNT(DISTINCT Rank) AS Different_Captain_Ranks FROM captain",
+    "similarity": 0.9664124846458435
+  },
+  {
+    "query": "Find the captain rank that has no captain in Third-rate ship of the line class.",
+    "sql_truth": "SELECT rank FROM captain EXCEPT SELECT rank FROM captain WHERE CLASS  =  'Third-rate ship of the line'",
+    "sql_pred": "SELECT DISTINCT c.rank  FROM captain c  LEFT JOIN ship s ON c.ship_id = s.ship_id  WHERE s.class = 'Third-rate ship of the line' AND c.captain_id IS NULL;",
+    "similarity": 0.9124536514282227
+  },
+  {
+    "query": "what are the names and classes of the ships that do not have any captain yet?",
+    "sql_truth": "SELECT name ,  CLASS FROM ship WHERE ship_id NOT IN (SELECT ship_id FROM captain)",
+    "sql_pred": "SELECT s.Name, s.Class FROM Ship s LEFT JOIN captain c ON s.Ship_ID = c.Ship_ID WHERE c.Captain_ID IS NULL",
+    "similarity": 0.9072303175926208
+  },
+  {
+    "query": "What is the host year of city "Taizhou ( Zhejiang )"?",
+    "sql_truth": "SELECT T2.year FROM city AS T1 JOIN hosting_city AS T2 ON T1.city_id  =  T2.host_city WHERE T1.city  =  "Taizhou ( Zhejiang )"",
+    "sql_pred": "SELECT h.year FROM hosting_city h JOIN city c ON h.host_city = c.city_id WHERE c.city = 'Taizhou ( Zhejiang )'",
+    "similarity": 0.9618096947669983
+  },
+  {
+    "query": "Find the name of the youngest organization.",
+    "sql_truth": "SELECT organization_name FROM organizations ORDER BY date_formed DESC LIMIT 1",
+    "sql_pred": "SELECT organization_name FROM Organizations ORDER BY date_formed DESC LIMIT 1",
+    "similarity": 0.9962425827980042
+  },
+  {
+    "query": "Which is the email of the party that has used the services the most number of times?",
+    "sql_truth": "SELECT t1.party_email FROM parties AS t1 JOIN party_services AS t2 ON t1.party_id  =  t2.customer_id GROUP BY t1.party_email ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT p.party_email  FROM Parties p  JOIN Party_Services ps ON p.party_id = ps.customer_id  GROUP BY p.party_id, p.party_email  ORDER BY COUNT(ps.service_id) DESC  LIMIT 1",
+    "similarity": 0.9616106748580933
+  },
+  {
+    "query": "What is the maximum, minimum and average years spent working on a school bus?",
+    "sql_truth": "SELECT max(years_working) ,  min(years_working) ,  avg(years_working) FROM school_bus",
+    "sql_pred": "SELECT MAX(Years_Working) AS max_years, MIN(Years_Working) AS min_years, AVG(Years_Working) AS avg_years FROM school_bus",
+    "similarity": 0.9751791954040527
+  },
+  {
+    "query": "Count the number of budget codes.",
+    "sql_truth": "SELECT count(*) FROM Ref_budget_codes",
+    "sql_pred": "SELECT COUNT(*) FROM Ref_Budget_Codes;",
+    "similarity": 0.9519860148429871
+  },
+  {
+    "query": "What are the ids of documents with the type code CV that do not have expenses.",
+    "sql_truth": "SELECT document_id FROM Documents WHERE document_type_code  =  "CV" EXCEPT SELECT document_id FROM Documents_with_expenses",
+    "sql_pred": "SELECT d.document_id  FROM documents d  LEFT JOIN documents_with_expenses de ON d.document_id = de.document_id  WHERE d.document_type_code = 'CV' AND de.document_id IS NULL",
+    "similarity": 0.9149302840232849
+  },
+  {
+    "query": "What is the name of the project with the most hours?",
+    "sql_truth": "SELECT name FROM projects ORDER BY hours DESC LIMIT 1",
+    "sql_pred": "SELECT name FROM projects ORDER BY hours DESC LIMIT 1",
+    "similarity": 0.999997615814209
+  },
+  {
+    "query": "What are the names of the scientists, and how many projects are each of them working on?",
+    "sql_truth": "SELECT count(*) ,  T1.name FROM scientists AS T1 JOIN assignedto AS T2 ON T1.ssn  =  T2.scientist GROUP BY T1.name",
+    "sql_pred": "SELECT s.Name , COUNT(at.Project) AS ProjectCount FROM Scientists s LEFT JOIN AssignedTo at ON s.SSN = at.Scientist GROUP BY s.Name",
+    "similarity": 0.9178490042686462
+  },
+  {
+    "query": "What is the winery at which the wine with the highest score was made?",
+    "sql_truth": "SELECT Winery FROM WINE ORDER BY SCORE LIMIT 1",
+    "sql_pred": "SELECT Winery FROM wine WHERE Score = (SELECT MAX(Score) FROM wine) LIMIT 1",
+    "similarity": 0.9655320048332214
+  },
+  {
+    "query": "Count the number of appelations in Napa County.",
+    "sql_truth": "SELECT count(*) FROM APPELLATIONS WHERE County  =  "Napa"",
+    "sql_pred": "SELECT COUNT(*) FROM appellations WHERE County = 'Napa County'",
+    "similarity": 0.9798791408538818
+  },
+  {
+    "query": "What are the names of wines, sorted in alphabetical order?",
+    "sql_truth": "SELECT DISTINCT Name FROM WINE ORDER BY Name",
+    "sql_pred": "SELECT Name FROM wine ORDER BY Name ASC",
+    "similarity": 0.9668869972229004
+  },
+  {
+    "query": "Which wineries produce at least four wines?",
+    "sql_truth": "SELECT Winery FROM WINE GROUP BY Winery HAVING count(*)  >=  4",
+    "sql_pred": "SELECT winery, COUNT(*) AS wine_count FROM wine GROUP BY winery HAVING COUNT(*) >= 4",
+    "similarity": 0.9701933264732361
+  },
+  {
+    "query": "Show the name, location, and number of platforms for all stations.",
+    "sql_truth": "SELECT name ,  LOCATION ,  number_of_platforms FROM station",
+    "sql_pred": "SELECT Name , Location , Number_of_Platforms FROM station",
+    "similarity": 0.9799803495407104
+  },
+  {
+    "query": "List email address and birthday of customer whose first name as Carole.",
+    "sql_truth": "SELECT email_address ,  date_of_birth FROM Customers WHERE first_name = "Carole"",
+    "sql_pred": "SELECT email_address , date_of_birth FROM Customers WHERE first_name = 'Carole'",
+    "similarity": 0.9969603419303894
+  },
+  {
+    "query": "List the first name and last name of customers have the amount of outstanding between 1000 and 3000.",
+    "sql_truth": "SELECT first_name ,  last_name FROM Customers WHERE amount_outstanding BETWEEN 1000 AND 3000;",
+    "sql_pred": "SELECT first_name, last_name FROM Customers WHERE amount_outstanding BETWEEN 1000 AND 3000",
+    "similarity": 0.9865601658821106
+  },
+  {
+    "query": "List lesson id of all lessons taught by staff with first name as Janessa, last name as Sawayn and nickname containing letter 's'.",
+    "sql_truth": "SELECT T1.lesson_id FROM Lessons AS T1 JOIN Staff AS T2 ON T1.staff_id = T2.staff_id WHERE T2.first_name = "Janessa" AND T2.last_name = "Sawayn" AND nickname LIKE "%s%";",
+    "sql_pred": "SELECT lesson_id FROM Lessons WHERE staff_id IN (SELECT staff_id FROM Staff WHERE first_name = 'Janessa' AND last_name = 'Sawayn' AND nickname LIKE '%s%')",
+    "similarity": 0.9614509344100952
+  },
+  {
+    "query": "What is the first and last name of the faculty members who participated in at least one activity? For each of them, also show the number of activities they participated in.",
+    "sql_truth": "SELECT  T1.fname ,  T1.lname ,  count(*) ,  T1.FacID FROM Faculty AS T1 JOIN Faculty_participates_in AS T2 ON T1.facID  =  T2.facID GROUP BY T1.FacID",
+    "sql_pred": "SELECT f.fname, f.lname, COUNT(fa.actid) AS activity_count  FROM faculty f  JOIN faculty_participates_in fa ON f.facid = fa.facid  GROUP BY f.fname, f.lname  HAVING COUNT(fa.actid) > 0",
+    "similarity": 0.918979823589325
+  },
+  {
+    "query": "What are the first names of the faculty members playing both Canoeing and Kayaking?",
+    "sql_truth": "SELECT T1.lname FROM Faculty AS T1 JOIN Faculty_participates_in AS T2 ON T1.facID  =  T2.facID JOIN activity AS T3 ON T2.actid  =  T2.actid WHERE T3.activity_name  =  'Canoeing' INTERSECT SELECT T1.lname FROM Faculty AS T1 JOIN Faculty_participates_in AS T2 ON T1.facID  =  T2.facID JOIN activity AS T3 ON T2.actid  =  T2.actid WHERE T3.activity_name  =  'Kayaking'",
+    "sql_pred": "SELECT f.fname  FROM Faculty f  JOIN Faculty_Participates_in fpi ON f.FacID = fpi.FacID  JOIN Activity a ON fpi.actid = a.actid  WHERE a.activity_name IN ('Canoeing', 'Kayaking')  GROUP BY f.fname  HAVING COUNT(DISTINCT a.activity_name) = 2;",
+    "similarity": 0.9319011569023132
+  },
+  {
+    "query": "What is the country of the airport with the highest elevation?",
+    "sql_truth": "SELECT country FROM airports ORDER BY elevation DESC LIMIT 1",
+    "sql_pred": "SELECT country FROM airports WHERE elevation = (SELECT MAX(elevation) FROM airports)",
+    "similarity": 0.9469961524009705
+  },
+  {
+    "query": "What is the number of different different airports that are destinations for American Airlines?",
+    "sql_truth": "SELECT count(DISTINCT dst_apid) FROM airlines AS T1 JOIN routes AS T2 ON T1.alid  =  T2.alid WHERE T1.name  =  'American Airlines'",
+    "sql_pred": "SELECT COUNT(DISTINCT a.apid) AS num_dest_airports FROM routes r JOIN airlines al ON r.alid = al.alid JOIN airports a ON r.dst_apid = a.apid WHERE al.name = 'American Airlines'",
+    "similarity": 0.9409831762313843
+  },
+  {
+    "query": "For each airport name, how many routes start at that airport?",
+    "sql_truth": "SELECT count(*) ,  T1.name FROM airports AS T1 JOIN routes AS T2 ON T1.apid  =  T2.src_apid GROUP BY T1.name",
+    "sql_pred": "SELECT a.name , COUNT(r.rid) AS route_count FROM airports a LEFT JOIN routes r ON a.apid = r.src_apid GROUP BY a.name",
+    "similarity": 0.9415299892425537
+  },
+  {
+    "query": "What is the name of the airline with the most routes?",
+    "sql_truth": "SELECT T1.name FROM airlines AS T1 JOIN routes AS T2 ON T1.alid  =  T2.alid GROUP BY T1.name ORDER BY count(*) DESC LIMIT 1",
+    "sql_pred": "SELECT a.name FROM airlines a JOIN routes r ON a.alid = r.alid GROUP BY a.name ORDER BY COUNT(r.rid) DESC LIMIT 1",
+    "similarity": 0.965596079826355
+  },
+  {
+    "query": "What are the names of the customers who have made two or less orders?",
+    "sql_truth": "SELECT T2.customer_name FROM orders AS T1 JOIN customers AS T2 ON T1.customer_id = T2.customer_id GROUP BY T2.customer_id HAVING count(*)  <=  2",
+    "sql_pred": "SELECT c.customer_name FROM Customers c LEFT JOIN Orders o ON c.customer_id = o.customer_id GROUP BY c.customer_id HAVING COUNT(o.order_id) <= 2;",
+    "similarity": 0.9500892162322998
+  },
+  {
+    "query": "How many architects haven't built a mill before year 1850?",
+    "sql_truth": "SELECT count(*) FROM architect WHERE id NOT IN ( SELECT architect_id FROM mill WHERE built_year  <  1850 );",
+    "sql_pred": "SELECT COUNT(*)  FROM architect a  WHERE NOT EXISTS (SELECT 1                    FROM mill m                    WHERE m.architect_id = a.id                    AND m.built_year < 1850);",
+    "similarity": 0.9616575837135315
+  }
+]
+
+
+
+
+DATABASE : (IN ORDER WITH ABOVE QUESTION - QUERY PAIRS)
+
+
+['department_management',
+ 'farm',
+ 'farm',
+ 'student_assessment',
+ 'bike_1',
+ 'bike_1',
+ 'bike_1',
+ 'bike_1',
+ 'bike_1',
+ 'book_2',
+ 'musical',
+ 'musical',
+ 'twitter_1',
+ 'twitter_1',
+ 'product_catalog',
+ 'product_catalog',
+ 'flight_1',
+ 'flight_1',
+ 'flight_1',
+ 'allergy_1',
+ 'allergy_1',
+ 'store_1',
+ 'store_1',
+ 'journal_committee',
+ 'customers_card_transactions',
+ 'customers_card_transactions',
+ 'customers_card_transactions',
+ 'race_track',
+ 'race_track',
+ 'coffee_shop',
+ 'insurance_fnol',
+ 'medicine_enzyme_interaction',
+ 'medicine_enzyme_interaction',
+ 'university_basketball',
+ 'phone_1',
+ 'climbing',
+ 'climbing',
+ 'body_builder',
+ 'election_representative',
+ 'apartment_rentals',
+ 'apartment_rentals',
+ 'apartment_rentals',
+ 'apartment_rentals',
+ 'game_injury',
+ 'soccer_1',
+ 'performance_attendance',
+ 'college_2',
+ 'college_2',
+ 'college_2',
+ 'college_2',
+ 'college_2',
+ 'debate',
+ 'insurance_and_eClaims',
+ 'insurance_and_eClaims',
+ 'customers_and_invoices',
+ 'customers_and_invoices',
+ 'wedding',
+ 'theme_gallery',
+ 'theme_gallery',
+ 'epinions_1',
+ 'riding_club',
+ 'gymnast',
+ 'gymnast',
+ 'small_bank_1',
+ 'small_bank_1',
+ 'small_bank_1',
+ 'browser_web',
+ 'wrestler',
+ 'wrestler',
+ 'school_finance',
+ 'protein_institute',
+ 'cinema',
+ 'products_for_hire',
+ 'phone_market',
+ 'party_people',
+ 'party_people',
+ 'cre_Doc_Control_Systems',
+ 'local_govt_in_alabama',
+ 'formula_1',
+ 'formula_1',
+ 'formula_1',
+ 'formula_1',
+ 'machine_repair',
+ 'machine_repair',
+ 'entrepreneur',
+ 'perpetrator',
+ 'csu_1',
+ 'csu_1',
+ 'csu_1',
+ 'candidate_poll',
+ 'candidate_poll',
+ 'movie_1',
+ 'movie_1',
+ 'movie_1',
+ 'county_public_safety',
+ 'county_public_safety',
+ 'inn_1',
+ 'inn_1',
+ 'inn_1',
+ 'party_host',
+ 'storm_record',
+ 'storm_record',
+ 'election',
+ 'election',
+ 'election',
+ 'election',
+ 'restaurant_1',
+ 'restaurant_1',
+ 'icfp_1',
+ 'icfp_1',
+ 'icfp_1',
+ 'sakila_1',
+ 'loan_1',
+ 'loan_1',
+ 'loan_1',
+ 'loan_1',
+ 'behavior_monitoring',
+ 'behavior_monitoring',
+ 'assets_maintenance',
+ 'station_weather',
+ 'college_1',
+ 'college_1',
+ 'sports_competition',
+ 'sports_competition',
+ 'sports_competition',
+ 'manufacturer',
+ 'hr_1',
+ 'hr_1',
+ 'hr_1',
+ 'music_1',
+ 'music_1',
+ 'music_1',
+ 'music_1',
+ 'baseball_1',
+ 'baseball_1',
+ 'baseball_1',
+ 'baseball_1',
+ 'mountain_photos',
+ 'program_share',
+ 'program_share',
+ 'e_learning',
+ 'e_learning',
+ 'e_learning',
+ 'insurance_policies',
+ 'insurance_policies',
+ 'hospital_1',
+ 'hospital_1',
+ 'hospital_1',
+ 'hospital_1',
+ 'ship_mission',
+ 'ship_mission',
+ 'student_1',
+ 'student_1',
+ 'company_employee',
+ 'film_rank',
+ 'film_rank',
+ 'cre_Doc_Tracking_DB',
+ 'cre_Doc_Tracking_DB',
+ 'club_1',
+ 'tracking_grants_for_research',
+ 'tracking_grants_for_research',
+ 'tracking_grants_for_research',
+ 'tracking_grants_for_research',
+ 'network_2',
+ 'document_management',
+ 'document_management',
+ 'document_management',
+ 'company_office',
+ 'company_office',
+ 'entertainment_awards',
+ 'customers_campaigns_ecommerce',
+ 'college_3',
+ 'college_3',
+ 'department_store',
+ 'department_store',
+ 'department_store',
+ 'aircraft',
+ 'aircraft',
+ 'aircraft',
+ 'school_player',
+ 'school_player',
+ 'store_product',
+ 'store_product',
+ 'soccer_2',
+ 'soccer_2',
+ 'soccer_2',
+ 'soccer_2',
+ 'soccer_2',
+ 'device',
+ 'device',
+ 'cre_Drama_Workshop_Groups',
+ 'cre_Drama_Workshop_Groups',
+ 'cre_Drama_Workshop_Groups',
+ 'music_2',
+ 'music_2',
+ 'music_2',
+ 'manufactory_1',
+ 'tracking_software_problems',
+ 'shop_membership',
+ 'shop_membership',
+ 'shop_membership',
+ 'voter_2',
+ 'products_gen_characteristics',
+ 'products_gen_characteristics',
+ 'products_gen_characteristics',
+ 'products_gen_characteristics',
+ 'swimming',
+ 'railway',
+ 'customers_and_products_contacts',
+ 'dorm_1',
+ 'dorm_1',
+ 'dorm_1',
+ 'dorm_1',
+ 'customer_complaints',
+ 'workshop_paper',
+ 'tracking_share_transactions',
+ 'tracking_share_transactions',
+ 'cre_Theme_park',
+ 'cre_Theme_park',
+ 'cre_Theme_park',
+ 'game_1',
+ 'game_1',
+ 'game_1',
+ 'game_1',
+ 'customers_and_addresses',
+ 'music_4',
+ 'music_4',
+ 'music_4',
+ 'ship_1',
+ 'ship_1',
+ 'ship_1',
+ 'city_record',
+ 'e_government',
+ 'e_government',
+ 'school_bus',
+ 'cre_Docs_and_Epenses',
+ 'cre_Docs_and_Epenses',
+ 'scientist_1',
+ 'scientist_1',
+ 'wine_1',
+ 'wine_1',
+ 'wine_1',
+ 'wine_1',
+ 'train_station',
+ 'driving_school',
+ 'driving_school',
+ 'driving_school',
+ 'activity_1',
+ 'activity_1',
+ 'flight_4',
+ 'flight_4',
+ 'flight_4',
+ 'flight_4',
+ 'tracking_orders',
+ 'architecture']
