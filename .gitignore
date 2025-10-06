@@ -5,3 +5,8 @@ __pycache__/
 .env
 /models/ # these will be large and can be generated locally for now
 /capstone*
+/web_app/node_modules/.bin
+/web_app
+/docs/proposal/Cedrus
+/docs/proposal/Cedrus
+docs/proposal/Cedrus/method_proposal (1).md
