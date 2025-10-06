@@ -1,3 +1,0 @@
->**NOTE FOR WANG**: This version is not include your work and my yet, this is just a set up skeleton of the app for Github repo, so it won't break Github and all environments installation won't be missed (Mostly in Python packages). Later version in this week will merge your work and my in. If you want to do it yourself, please go ahead. But please write a note in dev_notes.md file as I may not check the github commit history often and may not know you already did it.
->
-> Also, I think .bat is not good for cross-platform, as some may use Mac, so maybe just let people follow the instruction in Readme.md to set up the environment is better. If you think .bat is still good, please let me know.

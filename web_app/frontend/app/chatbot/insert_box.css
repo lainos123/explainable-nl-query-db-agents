@@ -1,3 +1,33 @@
+.running-cursor,
+.running-cursor:hover {
+  cursor: progress !important;
+}
+@keyframes blink-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.animate-blink-green {
+  animation: blink-green 1s infinite;
+}
+
+@keyframes neon-border {
+  0% { box-shadow: 0 0 8px #a78bfa, 0 0 16px #38bdf8, 0 0 24px #ec4899; }
+  50% { box-shadow: 0 0 16px #a78bfa, 0 0 32px #38bdf8, 0 0 48px #ec4899; }
+  100% { box-shadow: 0 0 8px #a78bfa, 0 0 16px #38bdf8, 0 0 24px #ec4899; }
+}
+.border-neon-animated {
+  border-color: #a78bfa #38bdf8 #ec4899 #a78bfa;
+  animation: neon-border 1.2s infinite;
+}
+
+@keyframes pulse-in {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-in {
+  animation: pulse-in 1.2s infinite;
+}
 /* Minimal style for insert box row, using existing global chat styles */
  .chatbot-input-row {
   display: flex;
