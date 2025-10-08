@@ -21,8 +21,12 @@ This project is designed to be run entirely using Docker. No manual Python or Co
     or use the direct link: [Google Drive Download](https://drive.google.com/file/d/1403EGqzIDoHMdQF4c9Bkyl7dZLZ5Wt6J/view)
   - Download the ZIP file to your computer.
 
-- **Extract and Place the Dataset:**
+- **Extract and Place the Dataset for default databases feature:**
+
+  - This is can be skipped if you want to use your own databases only, but `Add All Spider` feature will be disabled if you do so.
   - Unzip the file. The folder should be named `spider_data`.
+  - Inside `spider_data`, there is a subfolder named `test_database` containing 200+ SQLite databases, which is the whole dataset. 
+  - Delete all unnecessary files especially the `database` folder as it is a duplicate train dataset of `test_database` and only left with `test_database` as the tree structure shown below.
   - Move or copy this folder into the `data` directory at the root of this project, so you have: `data/spider_data`
 
   Your directory should look like:
@@ -43,7 +47,6 @@ This project is designed to be run entirely using Docker. No manual Python or Co
   ```
 
   > **Note:** The Spider databases are not included in this repository due to size. Each user must download and place them manually.
-
 
 ### 2. Install Docker
 
@@ -73,7 +76,7 @@ This project is designed to be run entirely using Docker. No manual Python or Co
 
 ### 5. Login Credentials
 
-- **Django Admin Login (optional):**
+- **Django Admin Login (For controlling the backend server):**
   - Visit [http://localhost:8000/admin](http://localhost:8000/admin)
   - Login 
       - **Username:** `admin`
@@ -83,14 +86,13 @@ This project is designed to be run entirely using Docker. No manual Python or Co
   - Log in at [http://localhost:3001](http://localhost:3001)
   - Use the same credentials (`admin` / `admin123`)
 
-
 ### 6. Add Your OpenAI API Key
 
 - After logging in, click the **"API Key Settings"** button in the menu.
 - Enter your OpenAI API key (get one from [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)).
 - Click **Save**.
 
-  > **Note:** Each user must enter their own OpenAI API key. The `.env` file API key is only for development/testing.
+  > **Note:** Each user must enter their own OpenAI API key. The `.env` file API key is only for development/testing, currently not in use.
 
 ### 7. Add the Spider Databases
 
