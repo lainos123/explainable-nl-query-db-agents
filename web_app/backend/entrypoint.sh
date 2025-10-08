@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -33,5 +33,3 @@ fi
 
 # Start server
 exec python manage.py runserver 0.0.0.0:8000
-
- 
