@@ -10,7 +10,28 @@ For CITS5553 - Data Science Capstone Project | Semester 2, 2025
 
 ---
 
+<<<<<<< Updated upstream
 ## Setup Guide
+=======
+## I. Project Overview
+
+This project implements an explainable natural language query interface for relational databases using a multi-agent system. It allows users to interact with databases by asking questions in natural language, and the system generates SQL queries to retrieve the relevant data. The key features include:
+
+- **Multi-Agent System:** Utilizes multiple AI agents to handle different aspects of the query process, including understanding the question, generating SQL, executing the query, and explaining the results.
+- **Explainability:** Provides explanations for the generated SQL queries and the results, enhancing user trust and understanding.
+- **Database Support:** Supports multiple SQLite databases, including the Spider dataset, allowing users to query various database schemas.
+- **User-Friendly Interface:** A web-based frontend built with Next.js for easy interaction.
+- **Backend:** A Django REST API backend to manage database interactions and agent coordination.
+- **Dockerized Deployment:** The entire application can be run using Docker, simplifying setup and deployment.
+
+**The architecture of the system is illustrated below:**
+
+
+![alt text](<Diagram 01.jpg>)
+
+
+## II. Setup Guide
+>>>>>>> Stashed changes
 
 This project is designed to be run entirely using Docker. No manual Python or Conda environment setup is required.
 
@@ -38,6 +59,7 @@ git config --global core.autocrlf input
   Your directory should look like:
   ```
   data/
+<<<<<<< Updated upstream
   └── spider_data/
       └── test_database/
           ├── academic/
@@ -126,3 +148,6 @@ However, it also prevents non-local app deployment. So, if you want to build web
 **Troubleshooting:**
 If you encounter issues, ensure Docker is running and the `data/spider_data` directory exists (if using the Spider dataset).
 For further help, consult your team.
+=======
+  bb
+>>>>>>> Stashed changes
