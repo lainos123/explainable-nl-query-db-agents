@@ -55,4 +55,91 @@ git config --global core.autocrlf input
   Your directory should look like:
   ```
   data/
-  bb
+  └── spider_data/
+      └── test_database/
+          ├── academic/
+          │   ├── academic.sqlite
+          │   └── schema.sql
+          ├── flight_1/
+          │   ├── flight_1.sqlite
+          │   └── schema.sql
+          ├── car_1/
+          │   ├── car_1.sqlite
+          │   └── schema.sql
+          └── ... (200+ more databases)
+  ```
+
+  > **Note:** The Spider databases are not included in this repository due to size. Each user must download and place them manually.
+
+### 2. Install Docker
+
+- Download Docker Desktop: [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+- Install for your OS (Windows, macOS, or Linux).
+- **Start Docker Desktop** and wait until it is running.
+
+### 3. Start the Application
+
+- Open a terminal and navigate to the web application directory:
+  ```bash
+  cd web_app
+  ```
+- Start the application with Docker Compose:
+  ```bash
+  docker-compose up --build
+  ```
+  > The first run may take a few minutes as Docker builds the images.
+
+- The Docker setup automatically mounts the `../data` directory, so your Spider databases (if present) will be accessible to the backend.
+
+### 4. Access the Application
+
+- **Frontend:** [http://localhost:3001](http://localhost:3001)
+- **Backend API:** [http://localhost:8000](http://localhost:8000)
+- **Django Admin:** [http://localhost:8000/admin](http://localhost:8000/admin)
+
+### 5. Login Credentials
+
+- **Django Admin Login (For controlling the backend server):**
+  - Visit [http://localhost:8000/admin](http://localhost:8000/admin)
+  - Login 
+      - **Username:** `admin`
+      - **Password:** `admin123`
+
+- **Web Application Login:**
+  - Log in at [http://localhost:3001](http://localhost:3001)
+  - Use the same credentials (`admin` / `admin123`)
+
+### 6. Add Your OpenAI API Key
+
+- After logging in, click the **"API Key Settings"** button in the menu.
+- Enter your OpenAI API key (get one from [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)).
+- Click **Save**.
+
+  > **Note:** Each user must enter their own OpenAI API key. The `.env` file API key is only for development/testing, currently not in use.
+
+### 7. Add the Spider Databases or Your Own Databases
+
+- Go to "View/Import/Delete Databases" in the menu.
+- Click the purple **"Add All Spider"** button to upload all Spider databases and generate their schemas.
+- Alternatively, you can upload your own SQLite databases using the **"Add"** button. The application accepts `.sqlite` files that up to version 6 (currently .sqlite3). You can zip multiple files and upload them together or upload them one by one. Ensure no duplicate database names, and no _MACOSX folders inside the zip file.
+- After uploading, the databases will appear in the list and further manipulation is possible (view schema, delete, etc.).
+
+### 8. Test the Agents
+
+- Go to the chatbot and ask questions about your databases.
+**Example question:**
+> Find the name of all students who were in the tryout sorted in alphabetic order
+- The AI agents will use your API key to generate SQL queries and provide explanations.
+- Play with Agent Parameters
+
+### 9. Web Servers Development
+
+As this is a Data Science Project Application, the backend is connected with an external `data` folder so it can be readable and convenient for local usage.
+
+However, it also prevents non-local app deployment. So, if you want to build web servers, by using docker or not, you will need to change the path of the default `spider` data to inside the `media` folder of the backend instead of the current `data` folder, which is outside of the `web_app` folder as it is now.
+
+---
+
+**Troubleshooting:**
+If you encounter issues, ensure Docker is running and the `data/spider_data` directory exists (if using the Spider dataset).
+For further help, consult your team.
