@@ -14,7 +14,11 @@ For CITS5553 - Data Science Capstone Project | Semester 2, 2025
 
 This project is designed to be run entirely using Docker. No manual Python or Conda environment setup is required.
 
-Before starting, if you use Winsdows, ensure that you have run 'git config --global core.autocrlf input' in your terminal to avoid line ending issues (CRLF bug of Wins).
+Before starting, if you use Windows, ensure that you have run the code below in your terminal to avoid line ending issues (CRLF bug of Windows).
+
+```bash
+git config --global core.autocrlf input
+```
 
 ### 1. Download and Prepare the Spider Dataset
 
