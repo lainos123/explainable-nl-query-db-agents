@@ -1,4 +1,4 @@
-# Installation Instructions
+# Guide For Setting Up the Web Application Without Docker for Development Phase (Not Recommended)
 
 You will need npm and python installed on your machine
 
@@ -9,13 +9,6 @@ Please make sure you are in the root directory of this app, not the whole projec
 ```
 cd Web_app
 ```
-
-## 0. Insert your OpenAI key and URL in .env file
-
-- Rename the file named `.env.example` to `.env`
-- Open the `.env` file and replace `OPEN_AI_KEY` with your actual OpenAI key
-- Replace `URL` with your actual URL (e.g., `http://localhost:8000`)
-- Save the `.env` file
 
 ## 1. How to install npm and its packages
 
@@ -133,8 +126,3 @@ python manage.py createsuperuser
 ## 9. How to use Nextjs after starting the server
 
 - Go to {URL} (e.g., http://localhost:3001)
-
-## 10. Fast start for development (Windows only)
-
-- Use start_all.bat, start_fe.bat, start_be.bat to start both frontend and backend, only frontend, only backend respectively
-- Make sure you have already set up the environment by following the above steps or it will not work

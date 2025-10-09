@@ -16,8 +16,6 @@ services:
       - ./backend:/app
       - backend_media:/app/media
       - ../data:/data
-    depends_on:
-      - db
 
   # Next.js Frontend
   frontend:
@@ -34,18 +32,5 @@ services:
     depends_on:
       - backend
 
-  # SQLite Database (optional - you can use external DB)
-  db:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=nl2sql
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
 volumes:
   backend_media:
-  postgres_data:
