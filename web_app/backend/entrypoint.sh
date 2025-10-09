@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
-# Apply database migrations
 python manage.py migrate --noinput
-# Create default superuser if it does not exist
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
   python - <<'PYCODE'
 import os
@@ -23,5 +21,4 @@ PYCODE
 else
   echo "DJANGO_SUPERUSER_* env vars not all set; skipping superuser creation"
 fi
-# Start server
 exec python manage.py runserver 0.0.0.0:8000
