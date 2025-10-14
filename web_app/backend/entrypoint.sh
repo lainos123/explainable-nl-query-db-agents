@@ -19,6 +19,6 @@ else:
   print(f"Superuser '{username}' already exists")
 PYCODE
 else
-echo "DJANGO_SUPERUSER_* env vars not all set; skipping superuser creation"
+  echo "DJANGO_SUPERUSER_* env vars not all set; skipping superuser creation"
 fi
 exec python manage.py runserver 0.0.0.0:8000
