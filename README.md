@@ -46,10 +46,13 @@ git config --global core.autocrlf input
 
 - **Extract and Place the Dataset for default databases feature:**
 
-  - This is can be skipped if you want to use your own databases only, but `Add All Spider` feature will be disabled if you do so.
+  - This can be skipped if you want to use your own databases only, but the `Add All Spider` feature will be disabled if you do so.
   - Unzip the file. The folder should be named `spider_data`.
   - Inside `spider_data`, there is a subfolder named `test_database` containing 200+ SQLite databases, which is the whole dataset. 
-  - Delete all unnecessary files especially the `database` folder as it is a duplicate train dataset of `test_database` and only left with `test_database` as the tree structure shown below.
+  - Delete all unnecessary files, especially the __MACOSX folder in the root, as this will prevent the zip file from being read by the server, which is Debian.
+  - The `database` folder can be merged into `test_database` by copy-paste if you want to have the non-duplicate databases, then remove the old, only leave `test_database` as the tree structure shown below.
+  - Please do not let duplicated .sqlite files in a zip file for web import, or in the data folder, as it will add a weird name as `._name.sqlite` to the schema and files.
+  - Only do that if you really want, but the AI will also confuse you because the name is very similar, especially in Retriver of RAG.
   - Move or copy this folder into the `data` directory at the root of this project, so you have: `data/spider_data`
 
   Your directory should look like:
