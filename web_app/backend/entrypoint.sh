@@ -13,12 +13,12 @@ username = os.environ["DJANGO_SUPERUSER_USERNAME"]
 email = os.environ["DJANGO_SUPERUSER_EMAIL"]
 password = os.environ["DJANGO_SUPERUSER_PASSWORD"]
 if not User.objects.filter(username=username).exists():
-User.objects.create_superuser(username=username, email=email, password=password)
-print(f"Created superuser '{username}'")
+    User.objects.create_superuser(username=username, email=email, password=password)
+    print(f"Created superuser '{username}'")
 else:
-  print(f"Superuser '{username}' already exists")
+    print(f"Superuser '{username}' already exists")
 PYCODE
 else
-  echo "DJANGO_SUPERUSER_* env vars not all set; skipping superuser creation"
+    echo "DJANGO_SUPERUSER_* env vars not all set; skipping superuser creation"
 fi
 exec python manage.py runserver 0.0.0.0:8000
